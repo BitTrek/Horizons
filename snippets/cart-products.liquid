@@ -14,9 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
       // Find the product image element
       const mediaCell = row.querySelector('.cart-items__media');
       if (mediaCell) {
-        // Remove all existing images in the media cell
-        mediaCell.querySelectorAll('img').forEach(img => img.remove());
-        // Create and insert the screenshot image
+        // Replace the entire contents with just the screenshot image
+        mediaCell.innerHTML = '';
         const img = document.createElement('img');
         img.src = dataUrl;
         img.alt = 'Custom Mockup Screenshot';
