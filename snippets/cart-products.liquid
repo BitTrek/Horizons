@@ -224,14 +224,14 @@ document.addEventListener('DOMContentLoaded', function() {
                               {%- if property.first == 'Uploaded Design' and property.last contains '.png' or property.last contains '.jpg' or property.last contains '.jpeg' or property.last contains '.webp' -%}
                                 <dd>
                                   <a href="{{ property.last }}" target="_blank">
-                                    Uploaded Design
+                                    Download Design
                                   </a>
                                 </dd>
                               {%- elsif property.first == 'Mockup Screenshot URL' and property.last contains 'mockup-screenshot' -%}
                                 {%- assign screenshot_filename = property.last | split: '/' | last -%}
                                 <dd>
                                   <a href="https://artshop.lv/download.php?file={{ screenshot_filename }}" target="_blank">
-                                    View Screenshot
+                                    Download Screenshot
                                   </a>
                                 </dd>
                               {%- else -%}
