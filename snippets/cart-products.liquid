@@ -221,16 +221,24 @@ document.addEventListener('DOMContentLoaded', function() {
                           {%- assign property_first_char = property.first | slice: 0 -%}
                           {%- if property.last != blank and property_first_char != '_' -%}
                             <div class="cart-items__properties">
-                              <dt>{{ property.first }}</dt>
-                              <dd>
-                                {%- if property.first == 'Uploaded Design' and property.last contains '.png' or property.last contains '.jpg' or property.last contains '.jpeg' or property.last contains '.webp' -%}
-                                  <a href="/uploads/uploads/{{ property.last }}" target="_blank">{{ property.last }}</a>
-                                {%- elsif property.first == 'Mockup Screenshot URL' and property.last contains 'mockup-screenshot' -%}
-                                  <a href="{{ property.last }}" target="_blank">Mockup Screenshot</a>
-                                {%- else -%}
-                                  {{ property.last }}
-                                {%- endif -%}
-                              </dd>
+                              {%- if property.first == 'Uploaded Design' and property.last contains '.png' or property.last contains '.jpg' or property.last contains '.jpeg' or property.last contains '.webp' -%}
+                                <dt>Uploaded Design</dt>
+                                <dd>
+                                  <a href="{{ property.last }}" target="_blank">
+                                    {{ property.last | split: '/' | last }}
+                                  </a>
+                                </dd>
+                              {%- elsif property.first == 'Mockup Screenshot URL' and property.last contains 'mockup-screenshot' -%}
+                                <dt>Mockup Screenshot</dt>
+                                <dd>
+                                  <a href="{{ property.last }}" target="_blank">
+                                    View Screenshot
+                                  </a>
+                                </dd>
+                              {%- else -%}
+                                <dt>{{ property.first }}</dt>
+                                <dd>{{ property.last }}</dd>
+                              {%- endif -%}
                             </div>
                           {%- endif -%}
                         {%- endfor -%}
