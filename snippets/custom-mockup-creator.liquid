@@ -148,14 +148,8 @@
         html2canvas(mockup, { useCORS: true, scale: 2 }).then(canvasScreenshot => {
           canvas.getObjects().forEach(obj => { obj.hasControls = true });
           canvas.renderAll();
-          // Create a very small thumbnail canvas for Shopify property limit
-          const thumbCanvas = document.createElement('canvas');
-          thumbCanvas.width = 20; // Try 20x20, can adjust lower if needed
-          thumbCanvas.height = 20;
-          const ctx = thumbCanvas.getContext('2d');
-          ctx.drawImage(canvasScreenshot, 0, 0, thumbCanvas.width, thumbCanvas.height);
-          // Use JPEG for more compression
-          const dataUrl = thumbCanvas.toDataURL('image/jpeg', 0.5);
+          // Store the screenshot at full resolution
+          const dataUrl = canvasScreenshot.toDataURL('image/png');
           console.log(`[PPT DEBUG] Screenshot base64 size: ${dataUrl.length} characters`);
           // Store screenshot in localStorage for cart/checkout UI (session only)
           const variantId = document.querySelector('[name="id"]').value;
