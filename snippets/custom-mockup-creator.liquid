@@ -129,6 +129,7 @@
       document.body.addEventListener('click', function (e) {
         const button = e.target.closest('button[name="add"]');
         if (!button) return;
+        console.log('[PPT DEBUG] Add to cart button clicked');
         const designInput = document.getElementById('upload-input');
         if (!designInput.files.length) {
           e.preventDefault();
@@ -138,13 +139,15 @@
         e.preventDefault();
         const form = button.closest('form');
         const mockup = document.getElementById('mockup-wrapper');
-        if (!mockup || !form) return;
+        if (!mockup || !form) {
+          console.log('[PPT DEBUG] Mockup or form not found', { mockup, form });
+          return;
+        }
         canvas.getObjects().forEach(obj => { obj.hasControls = false });
         canvas.renderAll();
         html2canvas(mockup, { useCORS: true, scale: 2 }).then(canvasScreenshot => {
           canvas.getObjects().forEach(obj => { obj.hasControls = true });
           canvas.renderAll();
-          // Store screenshot as base64 data URL in a hidden input
           const dataUrl = canvasScreenshot.toDataURL('image/png');
           let hiddenInput = document.getElementById('mockup-screenshot-dataurl');
           if (!hiddenInput) {
@@ -155,6 +158,16 @@
             form.appendChild(hiddenInput);
           }
           hiddenInput.value = dataUrl;
+          console.log('[PPT DEBUG] Hidden input for screenshot set', hiddenInput);
+          // Log all form data
+          const formData = new FormData(form);
+          for (let [key, value] of formData.entries()) {
+            if (typeof value === 'string' && value.length > 100) {
+              console.log(`[PPT DEBUG] FormData: ${key} = (large string, length ${value.length})`);
+            } else {
+              console.log(`[PPT DEBUG] FormData: ${key} =`, value);
+            }
+          }
           submitViaAjax(form);
         });
       });
@@ -168,19 +181,26 @@
         spinner.classList.remove('hidden');
         originalText.textContent = 'Adding...';
         const formData = new FormData(form);
+        console.log('[PPT DEBUG] Sending AJAX request to /cart/add.js');
         fetch('/cart/add.js', {
           method: 'POST',
           body: formData,
           headers: { 'Accept': 'application/json' }
-        }).then(response => response.json()).then(data => {
+        }).then(response => {
+          console.log('[PPT DEBUG] /cart/add.js response', response);
+          return response.json();
+        }).then(data => {
+          console.log('[PPT DEBUG] /cart/add.js response data', data);
           fetch(`/cart?sections=cart-products,cart-bubble&key=${data.key}`).then(res => res.json()).then(sectionData => {
+            console.log('[PPT DEBUG] Cart sections response', sectionData);
             document.querySelector('cart-drawer-component')?.renderContents({ key: data.key, sections: sectionData });
             submitButton.disabled = false;
             submitButton.classList.remove('loading');
             spinner.classList.add('hidden');
             originalText.textContent = 'Add to cart';
           });
-        }).catch(() => {
+        }).catch((err) => {
+          console.log('[PPT DEBUG] Error in add to cart AJAX', err);
           submitButton.disabled = false;
           submitButton.classList.remove('loading');
           spinner.classList.add('hidden');
