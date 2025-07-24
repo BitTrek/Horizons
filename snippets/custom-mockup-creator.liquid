@@ -154,11 +154,13 @@
           const size = origHeight; // Use height as the square size
           const sx = 0; // Always start from the left
           const sy = 0; // Always start from the top
+          // Create a 250x250 canvas for upload (or suggest 150x150 or 100x100 for optimization)
+          const targetSize = 250; // Suggest 150 or 100 for smaller file size
           const squareCanvas = document.createElement('canvas');
-          squareCanvas.width = size;
-          squareCanvas.height = size;
+          squareCanvas.width = targetSize;
+          squareCanvas.height = targetSize;
           const ctx = squareCanvas.getContext('2d');
-          ctx.drawImage(canvasScreenshot, sx, sy, size, size, 0, 0, size, size);
+          ctx.drawImage(canvasScreenshot, sx, sy, size, size, 0, 0, targetSize, targetSize);
           squareCanvas.toBlob(function(blob) {
             const formDataUpload = new FormData();
             formDataUpload.append('file', blob, 'mockup-screenshot.png');

@@ -152,33 +152,17 @@ document.addEventListener('DOMContentLoaded', function() {
                   role="cell"
                   headers="productImage"
                 >
-                  {% if item.properties['Mockup Screenshot'] %}
+                  {%- assign mockup_url = item.properties['Mockup Screenshot URL'] -%}
+                  <a href="{{ item.url }}" class="cart-items__media-container" style="--ratio:0.8;">
                     <img
-                      src="{{ item.properties['Mockup Screenshot'] }}"
+                      src="{% if mockup_url %}{{ mockup_url }}{% else %}{{ item.image | image_url: width: 250 }}{% endif %}"
+                      alt="{% if mockup_url %}Custom Mockup Screenshot{% else %}{{ item.image.alt | escape }}{% endif %}"
+                      width="250"
+                      height="250"
                       class="cart-items__media-image border-style"
-                      alt="Custom Mockup Screenshot"
-                      style="max-width: 100px; max-height: 100px; object-fit: contain;"
+                      style="--border-width: 1px; --border-style: none; --border-color: rgb(var(--color-border-rgb) / 0.5); --border-radius: 0px;"
                     >
-                  {% elsif item.image -%}
-                    {% liquid
-                      assign ratio = 1
-                      assign border_opacity = settings.cart_thumbnail_border_opacity | divided_by: 100.0
-                      assign border_override = '--border-width: [cart_thumbnail_border_width]px; --border-style: [cart_thumbnail_border_style]; --border-color: rgb(var(--color-border-rgb) / [cart_thumbnail_border_opacity]); --border-radius: [cart_thumbnail_border_radius]px;' | replace: '[cart_thumbnail_border_width]', settings.cart_thumbnail_border_width | replace: '[cart_thumbnail_border_style]', settings.cart_thumbnail_border | replace: '[cart_thumbnail_border_opacity]', border_opacity | replace: '[cart_thumbnail_border_radius]', settings.cart_thumbnail_border_radius
-                      if settings.cart_thumbnail_border_radius > 0
-                        assign border_override = border_override | append: ' overflow: hidden;'
-                      endif
-                      if block.settings.image_ratio == 'portrait'
-                        assign ratio = 0.8
-                      elsif block.settings.image_ratio == 'adapt'
-                        assign ratio = item.image.aspect_ratio
-                      endif
-                    %}
-                    <a href="{{ item.url }}" class="cart-items__media-container" style="--ratio:{{ ratio }};">
-                      {%- liquid
-                        echo item.image | image_url: width: 250 | image_tag: class: 'cart-items__media-image border-style', style: border_override
-                      -%}
-                    </a>
-                  {%- endif %}
+                  </a>
                 </td>
                 <td
                   class="cart-items__details cart-primary-typography"
