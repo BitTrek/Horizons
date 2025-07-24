@@ -76,7 +76,7 @@
         reader.readAsDataURL(file);
       });
 
-      document.addEventListener('change', function () {
+      document.addEventListener('variant:update', function () {
         const selectedVariantId = document.querySelector('[name="id"]')?.value;
         const selectedVariant = productData.variants.find(v => v.id == selectedVariantId);
         if (selectedVariant?.featured_image?.src) {
