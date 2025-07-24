@@ -148,13 +148,24 @@
         html2canvas(mockup, { useCORS: true, scale: 2 }).then(canvasScreenshot => {
           canvas.getObjects().forEach(obj => { obj.hasControls = true });
           canvas.renderAll();
-          // Crop the screenshot to a square: use height as width, starting from left
-          const size = canvasScreenshot.height;
+          // Crop the screenshot to a square from the horizontal center
+          const origWidth = canvasScreenshot.width;
+          const origHeight = canvasScreenshot.height;
+          const size = origHeight; // Use height as the square size
+          let sx = 0;
+          let sy = 0;
+          if (origWidth > origHeight) {
+            // Center horizontally
+            sx = Math.floor((origWidth - origHeight) / 2);
+          } else if (origHeight > origWidth) {
+            // Optionally center vertically (not needed if always using height)
+            sy = Math.floor((origHeight - origWidth) / 2);
+          }
           const squareCanvas = document.createElement('canvas');
           squareCanvas.width = size;
           squareCanvas.height = size;
           const ctx = squareCanvas.getContext('2d');
-          ctx.drawImage(canvasScreenshot, 0, 0, size, size, 0, 0, size, size);
+          ctx.drawImage(canvasScreenshot, sx, sy, size, size, 0, 0, size, size);
           squareCanvas.toBlob(function(blob) {
             const formDataUpload = new FormData();
             formDataUpload.append('file', blob, 'mockup-screenshot.png');
@@ -165,7 +176,6 @@
             .then(res => res.json())
             .then(data => {
               if (data.url) {
-                // Fix the returned URL to use /uploads/uploads/ instead of /uploads/
                 let fixedUrl = data.url.replace('/uploads/mockup_', '/uploads/uploads/mockup_');
                 let hiddenInput = document.getElementById('mockup-screenshot-url');
                 if (!hiddenInput) {
