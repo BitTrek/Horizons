@@ -63,6 +63,11 @@
           ref="variantId"
           value="{{ product.selected_or_first_available_variant.id }}"
         >
+        {% if template contains 'ppt-' %}
+          <label id="message" class="form__label">Minimum recommended size: 1000 × 1000px</label>
+          <input type="file" name="properties[Uploaded Design]" accept="image/*" id="upload-input" />
+          <input type="file" name="properties[Mockup Screenshot]" accept="image/*" id="screenshot-upload" hidden>
+        {% endif %}
         <div
           class="product-form-buttons spacing-style{% if block.settings.stacking %} product-form-buttons--stacked{% endif %}"
           style="{% render 'spacing-style', settings: block.settings %}"

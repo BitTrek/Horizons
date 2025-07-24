@@ -55,17 +55,24 @@
     class="{{ product_grid_class }}"
     data-product-grid-content
   >
+    {% if template contains 'ppt-' %}
+      {% render 'custom-mockup-creator' %}
+    {% endif %}
     {% assign render_order_array = render_order | split: ',' %}
     {% capture media %}
       <div
         class="product-information__media"
         data-testid="product-information-media"
       >
-        {%- content_for 'block',
-          type: '_product-media-gallery',
-          id: 'media-gallery',
-          closest.product: closest.product
-        -%}
+        {% if template contains 'ppt-' %}
+          {% render 'custom-product-media-gallery' %}
+        {% else %}
+          {%- content_for 'block',
+            type: '_product-media-gallery',
+            id: 'media-gallery',
+            closest.product: closest.product
+          -%}
+        {% endif %}
       </div>
     {% endcapture %}
 
