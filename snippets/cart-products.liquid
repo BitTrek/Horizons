@@ -216,32 +216,28 @@ document.addEventListener('DOMContentLoaded', function() {
                         {%- endfor -%}
                       {%- endif -%}
 
-                      {% if item.properties['Mockup Screenshot'] == blank %}
+                      {%- assign design_link -%}
                         {%- for property in item.properties -%}
-                          {%- assign property_first_char = property.first | slice: 0 -%}
-                          {%- if property.last != blank and property_first_char != '_' -%}
-                            <div class="cart-items__properties">
-                              {%- if property.first == 'Uploaded Design' and property.last contains '.png' or property.last contains '.jpg' or property.last contains '.jpeg' or property.last contains '.webp' -%}
-                                <dd>
-                                  <a href="{{ property.last }}" target="_blank">
-                                    Design
-                                  </a>
-                                </dd>
-                              {%- elsif property.first == 'Mockup Screenshot URL' and property.last contains 'mockup-screenshot' -%}
-                                {%- assign screenshot_filename = property.last | split: '/' | last -%}
-                                <dd>
-                                  <a href="https://artshop.lv/download.php?file={{ screenshot_filename }}" target="_blank">
-                                    Mockup
-                                  </a>
-                                </dd>
-                              {%- else -%}
-                                <dt>{{ property.first }}</dt>
-                                <dd>{{ property.last }}</dd>
-                              {%- endif -%}
-                            </div>
+                          {%- if property.first == 'Uploaded Design' and property.last contains '.png' or property.last contains '.jpg' or property.last contains '.jpeg' or property.last contains '.webp' -%}
+                            <a href="{{ property.last }}" target="_blank">Design</a>
                           {%- endif -%}
                         {%- endfor -%}
-                      {% endif %}
+                      {%- endassign -%}
+                      {%- assign mockup_link -%}
+                        {%- for property in item.properties -%}
+                          {%- if property.first == 'Mockup Screenshot URL' and property.last contains 'mockup-screenshot' -%}
+                            {%- assign screenshot_filename = property.last | split: '/' | last -%}
+                            <a href="https://artshop.lv/download.php?file={{ screenshot_filename }}" target="_blank">Mockup</a>
+                          {%- endif -%}
+                        {%- endfor -%}
+                      {%- endassign -%}
+                      {%- if design_link or mockup_link -%}
+                        <div class="cart-items__properties">
+                          <dd>
+                            {{ design_link | strip }}{%- if design_link and mockup_link -%} <span style="color:#000;">/</span> {%- endif -%}{{ mockup_link | strip }}
+                          </dd>
+                        </div>
+                      {%- endif -%}
                     </dl>
 
                     {% if item.selling_plan_allocation %}
