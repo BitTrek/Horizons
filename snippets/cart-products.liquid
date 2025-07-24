@@ -4,6 +4,26 @@
   fetchpriority="low"
 ></script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // For each cart item row, try to inject the screenshot
+  document.querySelectorAll('[data-variant-id]').forEach(function(row) {
+    const variantId = row.getAttribute('data-variant-id');
+    const dataUrl = localStorage.getItem('ppt_screenshot_' + variantId);
+    if (dataUrl) {
+      // Create and insert the image
+      const img = document.createElement('img');
+      img.src = dataUrl;
+      img.alt = 'Custom Mockup Screenshot';
+      img.style.maxWidth = '100px';
+      img.style.maxHeight = '100px';
+      // Insert the image (customize selector as needed)
+      row.querySelector('.cart-items__media')?.appendChild(img);
+    }
+  });
+});
+</script>
+
 <div
   {{ block.shopify_attributes }}
   class="cart-items__wrapper"
@@ -99,6 +119,7 @@
                 role="row"
                 class="cart-items__table-row{% if item.parent_relationship.parent != null %} cart-items__nested-line{% endif %}"
                 ref="cartItemRows[]"
+                data-variant-id="{{ item.variant.id }}"
               >
                 <td
                   class="cart-items__media"

@@ -157,19 +157,10 @@
           // Use JPEG for more compression
           const dataUrl = thumbCanvas.toDataURL('image/jpeg', 0.5);
           console.log(`[PPT DEBUG] Screenshot base64 size: ${dataUrl.length} characters`);
-          if (dataUrl.length > 255) {
-            alert('Screenshot is too large to be saved in Shopify. Please use a smaller image or area.');
-            return;
-          }
-          let hiddenInput = document.getElementById('mockup-screenshot-dataurl');
-          if (!hiddenInput) {
-            hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'properties[Mockup Screenshot]';
-            hiddenInput.id = 'mockup-screenshot-dataurl';
-            form.appendChild(hiddenInput);
-          }
-          hiddenInput.value = dataUrl;
+          // Store screenshot in localStorage for cart/checkout UI (session only)
+          const variantId = document.querySelector('[name="id"]').value;
+          localStorage.setItem('ppt_screenshot_' + variantId, dataUrl);
+          // No longer set as a Shopify property
           // Log all form data
           const formData = new FormData(form);
           for (let [key, value] of formData.entries()) {
