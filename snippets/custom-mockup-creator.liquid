@@ -148,11 +148,16 @@
         html2canvas(mockup, { useCORS: true, scale: 2 }).then(canvasScreenshot => {
           canvas.getObjects().forEach(obj => { obj.hasControls = true });
           canvas.renderAll();
-          // Convert canvas to Blob and upload to remote server
-          canvasScreenshot.toBlob(function(blob) {
+          // Crop the screenshot to a square: use height as width, starting from left
+          const size = canvasScreenshot.height;
+          const squareCanvas = document.createElement('canvas');
+          squareCanvas.width = size;
+          squareCanvas.height = size;
+          const ctx = squareCanvas.getContext('2d');
+          ctx.drawImage(canvasScreenshot, 0, 0, size, size, 0, 0, size, size);
+          squareCanvas.toBlob(function(blob) {
             const formDataUpload = new FormData();
             formDataUpload.append('file', blob, 'mockup-screenshot.png');
-            // Upload to your server
             fetch('https://artshop.lv/uploads/upload.php', {
               method: 'POST',
               body: formDataUpload
@@ -160,7 +165,8 @@
             .then(res => res.json())
             .then(data => {
               if (data.url) {
-                // Store the returned URL as a Shopify property
+                // Fix the returned URL to use /uploads/uploads/ instead of /uploads/
+                let fixedUrl = data.url.replace('/uploads/mockup_', '/uploads/uploads/mockup_');
                 let hiddenInput = document.getElementById('mockup-screenshot-url');
                 if (!hiddenInput) {
                   hiddenInput = document.createElement('input');
@@ -169,19 +175,15 @@
                   hiddenInput.id = 'mockup-screenshot-url';
                   form.appendChild(hiddenInput);
                 }
-                hiddenInput.value = data.url;
-                // Log for debugging
-                console.log('[PPT DEBUG] Uploaded screenshot URL:', data.url);
-                // Now submit the form as usual
+                hiddenInput.value = fixedUrl;
+                console.log('[PPT DEBUG] Uploaded screenshot URL:', fixedUrl);
                 submitViaAjax(form);
               } else {
                 alert('Screenshot upload failed. Please try again.');
-                // Optionally reset button state here
               }
             })
             .catch(() => {
               alert('Screenshot upload failed. Please try again.');
-              // Optionally reset button state here
             });
           }, 'image/png');
         });
