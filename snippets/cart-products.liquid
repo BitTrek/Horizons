@@ -14,14 +14,36 @@ document.addEventListener('DOMContentLoaded', function() {
       // Find the product image element
       const mediaCell = row.querySelector('.cart-items__media');
       if (mediaCell) {
-        // Replace the entire contents with just the screenshot image
+        // Replace the entire contents with the same structure as the default product image
+        // Get the original <a> for href and style
+        const originalLink = mediaCell.querySelector('a.cart-items__media-container');
+        let href = '#';
+        let style = '';
+        if (originalLink) {
+          href = originalLink.getAttribute('href') || '#';
+          style = originalLink.getAttribute('style') || '';
+        }
         mediaCell.innerHTML = '';
+        const a = document.createElement('a');
+        a.href = href;
+        a.className = 'cart-items__media-container';
+        a.setAttribute('style', style);
+        // Create the screenshot image
         const img = document.createElement('img');
         img.src = dataUrl;
         img.alt = 'Custom Mockup Screenshot';
-        img.style.maxWidth = '100px';
-        img.style.maxHeight = '100px';
-        mediaCell.appendChild(img);
+        img.width = 250;
+        img.height = 250;
+        img.className = 'cart-items__media-image border-style';
+        // Copy border style from original image if present
+        const originalImg = mediaCell.querySelector('img');
+        if (originalImg) {
+          img.setAttribute('style', originalImg.getAttribute('style') || '');
+        } else {
+          img.setAttribute('style', '--border-width: 1px; --border-style: none; --border-color: rgb(var(--color-border-rgb) / 0.5); --border-radius: 0px;');
+        }
+        a.appendChild(img);
+        mediaCell.appendChild(a);
       }
     }
   });
