@@ -222,14 +222,12 @@ document.addEventListener('DOMContentLoaded', function() {
                           {%- if property.last != blank and property_first_char != '_' -%}
                             <div class="cart-items__properties">
                               {%- if property.first == 'Uploaded Design' and property.last contains '.png' or property.last contains '.jpg' or property.last contains '.jpeg' or property.last contains '.webp' -%}
-                                <dt>Uploaded Design</dt>
                                 <dd>
                                   <a href="{{ property.last }}" target="_blank">
-                                    {{ property.last | split: '/' | last }}
+                                    Uploaded Design
                                   </a>
                                 </dd>
                               {%- elsif property.first == 'Mockup Screenshot URL' and property.last contains 'mockup-screenshot' -%}
-                                <dt>Mockup Screenshot</dt>
                                 <dd>
                                   <a href="{{ property.last }}" target="_blank">
                                     View Screenshot
