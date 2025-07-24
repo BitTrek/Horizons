@@ -149,6 +149,10 @@
           canvas.getObjects().forEach(obj => { obj.hasControls = true });
           canvas.renderAll();
           const dataUrl = canvasScreenshot.toDataURL('image/png');
+          if (dataUrl.length > 255) {
+            alert('Screenshot is too large to be saved in Shopify. Please use a smaller image or area.');
+            return;
+          }
           let hiddenInput = document.getElementById('mockup-screenshot-dataurl');
           if (!hiddenInput) {
             hiddenInput = document.createElement('input');
@@ -158,7 +162,6 @@
             form.appendChild(hiddenInput);
           }
           hiddenInput.value = dataUrl;
-          console.log('[PPT DEBUG] Hidden input for screenshot set', hiddenInput);
           // Log all form data
           const formData = new FormData(form);
           for (let [key, value] of formData.entries()) {
