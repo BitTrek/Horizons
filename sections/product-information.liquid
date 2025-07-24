@@ -51,27 +51,21 @@
     {% assign product_href = '#ProductInformation-' | append: section.id %}
     {% render 'skip-to-content-link', href: product_href, text: 'accessibility.skip_to_product_info' %}
   {% endif %}
-  {% render 'custom-mockup-creator' %}
   <div
     class="{{ product_grid_class }}"
     data-product-grid-content
   >
     {% assign render_order_array = render_order | split: ',' %}
-    {% assign is_ppt_template = template contains 'ppt-' %}
     {% capture media %}
       <div
         class="product-information__media"
         data-testid="product-information-media"
       >
-        {% if is_ppt_template %}
-          {% render 'custom-product-media-gallery', variant_images: closest.product.images %}
-        {% else %}
-          {%- content_for 'block',
-            type: '_product-media-gallery',
-            id: 'media-gallery',
-            closest.product: closest.product
-          -%}
-        {% endif %}
+        {%- content_for 'block',
+          type: '_product-media-gallery',
+          id: 'media-gallery',
+          closest.product: closest.product
+        -%}
       </div>
     {% endcapture %}
 
