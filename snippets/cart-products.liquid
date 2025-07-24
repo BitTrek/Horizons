@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="cart-items__properties">
                               {%- if property.first == 'Uploaded Design' and property.last contains '.png' or property.last contains '.jpg' or property.last contains '.jpeg' or property.last contains '.webp' -%}
                                 <dd>
-                                  <a href="https://artshop.lv/uploads/download.php?file={{ property.last | split: '/' | last }}" target="_blank">
+                                  <a href="{{ property.last }}" target="_blank">
                                     Uploaded Design
                                   </a>
                                 </dd>
