@@ -154,16 +154,22 @@
           const size = origHeight; // Use height as the square size
           const sx = 0; // Always start from the left
           const sy = 0; // Always start from the top
-          // Create a 250x250 canvas for upload (or suggest 150x150 or 100x100 for optimization)
-          const targetSize = 250; // Suggest 150 or 100 for smaller file size
+          // Create a 250x250 canvas for upload
+          const targetSize = 250;
           const squareCanvas = document.createElement('canvas');
           squareCanvas.width = targetSize;
           squareCanvas.height = targetSize;
           const ctx = squareCanvas.getContext('2d');
           ctx.drawImage(canvasScreenshot, sx, sy, size, size, 0, 0, targetSize, targetSize);
+          // Generate a unique 8-char hash for the filename
+          function getShortHash() {
+            const str = Date.now().toString() + Math.random().toString();
+            return btoa(str).replace(/[^a-zA-Z0-9]/g, '').substring(0, 8);
+          }
+          const mockupScreenshotName = 'mockup-screenshot-' + getShortHash() + '.png';
           squareCanvas.toBlob(function(blob) {
             const formDataUpload = new FormData();
-            formDataUpload.append('file', blob, 'mockup-screenshot.png');
+            formDataUpload.append('file', blob, mockupScreenshotName);
             fetch('https://artshop.lv/uploads/upload.php', {
               method: 'POST',
               body: formDataUpload
