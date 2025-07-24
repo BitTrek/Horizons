@@ -148,7 +148,14 @@
         html2canvas(mockup, { useCORS: true, scale: 2 }).then(canvasScreenshot => {
           canvas.getObjects().forEach(obj => { obj.hasControls = true });
           canvas.renderAll();
-          const dataUrl = canvasScreenshot.toDataURL('image/png');
+          // Create a tiny canvas for Shopify property limit
+          const tinyCanvas = document.createElement('canvas');
+          tinyCanvas.width = 20;
+          tinyCanvas.height = 20;
+          const ctx = tinyCanvas.getContext('2d');
+          ctx.drawImage(canvasScreenshot, 0, 0, tinyCanvas.width, tinyCanvas.height);
+          // Use JPEG for more compression
+          const dataUrl = tinyCanvas.toDataURL('image/jpeg', 0.5);
           if (dataUrl.length > 255) {
             alert('Screenshot is too large to be saved in Shopify. Please use a smaller image or area.');
             return;
