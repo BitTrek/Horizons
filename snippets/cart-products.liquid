@@ -224,13 +224,13 @@ document.addEventListener('DOMContentLoaded', function() {
                               {%- if property.first == 'Uploaded Design' and property.last contains '.png' or property.last contains '.jpg' or property.last contains '.jpeg' or property.last contains '.webp' -%}
                                 <dd>
                                   <a href="{{ property.last }}" target="_blank">
-                                    &#128247; Uploaded Design
+                                    Uploaded Design
                                   </a>
                                 </dd>
                               {%- elsif property.first == 'Mockup Screenshot URL' and property.last contains 'mockup-screenshot' -%}
                                 <dd>
                                   <a href="{{ property.last }}" target="_blank">
-                                    &#128065; View Screenshot
+                                    View Screenshot
                                   </a>
                                 </dd>
                               {%- else -%}
@@ -792,21 +792,3 @@ document.addEventListener('DOMContentLoaded', function() {
     display: inline;
   }
 {% endstylesheet %}
-
-<style>
-.cart-items__properties a {
-  display: inline-block;
-  padding: 2px 8px;
-  background: #f3f4f6;
-  border-radius: 4px;
-  color: #007ace;
-  font-weight: bold;
-  text-decoration: none;
-  border: 1px solid #e0e0e0;
-  transition: background 0.2s, color 0.2s;
-}
-.cart-items__properties a:hover {
-  background: #e0f0ff;
-  color: #005fa3;
-}
-</style>
