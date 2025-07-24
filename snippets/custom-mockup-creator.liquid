@@ -161,42 +161,18 @@
           squareCanvas.height = targetSize;
           const ctx = squareCanvas.getContext('2d');
           ctx.drawImage(canvasScreenshot, sx, sy, size, size, 0, 0, targetSize, targetSize);
-          // Generate a unique 8-char hash for the filename
-          function getShortHash() {
-            const str = Date.now().toString() + Math.random().toString();
-            return btoa(str).replace(/[^a-zA-Z0-9]/g, '').substring(0, 8);
+          // Restore: Save screenshot as base64 PNG in a hidden input as a Shopify property
+          const dataUrl = squareCanvas.toDataURL('image/png');
+          let hiddenInput = document.getElementById('mockup-screenshot-dataurl');
+          if (!hiddenInput) {
+            hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'properties[Mockup Screenshot]';
+            hiddenInput.id = 'mockup-screenshot-dataurl';
+            form.appendChild(hiddenInput);
           }
-          const mockupScreenshotName = 'mockup-screenshot-' + getShortHash() + '.png';
-          squareCanvas.toBlob(function(blob) {
-            const formDataUpload = new FormData();
-            formDataUpload.append('file', blob, 'mockup-screenshot.png');
-            fetch('https://artshop.lv/uploads/upload.php', {
-              method: 'POST',
-              body: formDataUpload
-            })
-            .then(res => res.json())
-            .then(data => {
-              if (data.url) {
-                let fixedUrl = data.url.replace('/uploads/mockup_', '/uploads/uploads/mockup_');
-                let hiddenInput = document.getElementById('mockup-screenshot-url');
-                if (!hiddenInput) {
-                  hiddenInput = document.createElement('input');
-                  hiddenInput.type = 'hidden';
-                  hiddenInput.name = 'properties[Mockup Screenshot URL]';
-                  hiddenInput.id = 'mockup-screenshot-url';
-                  form.appendChild(hiddenInput);
-                }
-                hiddenInput.value = fixedUrl;
-                console.log('[PPT DEBUG] Uploaded screenshot URL:', fixedUrl);
-                submitViaAjax(form);
-              } else {
-                alert('Screenshot upload failed. Please try again.');
-              }
-            })
-            .catch(() => {
-              alert('Screenshot upload failed. Please try again.');
-            });
-          }, 'image/png');
+          hiddenInput.value = dataUrl;
+          submitViaAjax(form);
         });
       });
 
