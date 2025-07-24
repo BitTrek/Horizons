@@ -148,19 +148,12 @@
         html2canvas(mockup, { useCORS: true, scale: 2 }).then(canvasScreenshot => {
           canvas.getObjects().forEach(obj => { obj.hasControls = true });
           canvas.renderAll();
-          // Crop the screenshot to a square from the horizontal center
+          // Crop the screenshot to a square using the left side as base
           const origWidth = canvasScreenshot.width;
           const origHeight = canvasScreenshot.height;
           const size = origHeight; // Use height as the square size
-          let sx = 0;
-          let sy = 0;
-          if (origWidth > origHeight) {
-            // Center horizontally
-            sx = Math.floor((origWidth - origHeight) / 2);
-          } else if (origHeight > origWidth) {
-            // Optionally center vertically (not needed if always using height)
-            sy = Math.floor((origHeight - origWidth) / 2);
-          }
+          const sx = 0; // Always start from the left
+          const sy = 0; // Always start from the top
           const squareCanvas = document.createElement('canvas');
           squareCanvas.width = size;
           squareCanvas.height = size;
