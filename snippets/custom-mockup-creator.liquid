@@ -177,7 +177,8 @@
             .then(res => res.json())
             .then(data => {
               if (data.url) {
-                let fixedUrl = data.url.replace('/uploads/mockup_', '/uploads/uploads/mockup_');
+                // Always use /uploads/uploads/ instead of /uploads/ in the returned URL
+                let fixedUrl = data.url.replace('/uploads/', '/uploads/uploads/');
                 let hiddenInput = document.getElementById('mockup-screenshot-url');
                 if (!hiddenInput) {
                   hiddenInput = document.createElement('input');
