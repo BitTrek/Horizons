@@ -193,7 +193,13 @@
           console.log('[PPT DEBUG] /cart/add.js response data', data);
           fetch(`/cart?sections=cart-products,cart-bubble&key=${data.key}`).then(res => res.json()).then(sectionData => {
             console.log('[PPT DEBUG] Cart sections response', sectionData);
-            document.querySelector('cart-drawer-component')?.renderContents({ key: data.key, sections: sectionData });
+            const cartDrawer = document.querySelector('cart-drawer-component');
+            if (cartDrawer && typeof cartDrawer.renderContents === 'function') {
+              cartDrawer.renderContents({ key: data.key, sections: sectionData });
+            } else {
+              // Fallback: reload the page to update the cart
+              window.location.reload();
+            }
             submitButton.disabled = false;
             submitButton.classList.remove('loading');
             if (spinner) spinner.classList.add('hidden');
