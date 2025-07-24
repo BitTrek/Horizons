@@ -156,6 +156,7 @@
           ctx.drawImage(canvasScreenshot, 0, 0, thumbCanvas.width, thumbCanvas.height);
           // Use JPEG for more compression
           const dataUrl = thumbCanvas.toDataURL('image/jpeg', 0.5);
+          console.log(`[PPT DEBUG] Screenshot base64 size: ${dataUrl.length} characters`);
           if (dataUrl.length > 255) {
             alert('Screenshot is too large to be saved in Shopify. Please use a smaller image or area.');
             return;
