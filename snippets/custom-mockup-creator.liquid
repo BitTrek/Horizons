@@ -178,8 +178,8 @@
         const originalText = submitButton.querySelector('span');
         submitButton.disabled = true;
         submitButton.classList.add('loading');
-        spinner.classList.remove('hidden');
-        originalText.textContent = 'Adding...';
+        if (spinner) spinner.classList.remove('hidden');
+        if (originalText) originalText.textContent = 'Adding...';
         const formData = new FormData(form);
         console.log('[PPT DEBUG] Sending AJAX request to /cart/add.js');
         fetch('/cart/add.js', {
@@ -196,15 +196,15 @@
             document.querySelector('cart-drawer-component')?.renderContents({ key: data.key, sections: sectionData });
             submitButton.disabled = false;
             submitButton.classList.remove('loading');
-            spinner.classList.add('hidden');
-            originalText.textContent = 'Add to cart';
+            if (spinner) spinner.classList.add('hidden');
+            if (originalText) originalText.textContent = 'Add to cart';
           });
         }).catch((err) => {
           console.log('[PPT DEBUG] Error in add to cart AJAX', err);
           submitButton.disabled = false;
           submitButton.classList.remove('loading');
-          spinner.classList.add('hidden');
-          originalText.textContent = 'Add to cart';
+          if (spinner) spinner.classList.add('hidden');
+          if (originalText) originalText.textContent = 'Add to cart';
         });
       }
     }
