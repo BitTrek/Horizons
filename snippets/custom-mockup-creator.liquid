@@ -169,7 +169,7 @@
           const mockupScreenshotName = 'mockup-screenshot-' + getShortHash() + '.png';
           squareCanvas.toBlob(function(blob) {
             const formDataUpload = new FormData();
-            formDataUpload.append('file', blob, mockupScreenshotName);
+            formDataUpload.append('file', blob, 'mockup-screenshot.png');
             fetch('https://artshop.lv/uploads/upload.php', {
               method: 'POST',
               body: formDataUpload
