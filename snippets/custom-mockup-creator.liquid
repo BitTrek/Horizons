@@ -126,7 +126,6 @@
     }
 
     function rebindEvents(canvas) {
-      const fileInput = document.getElementById('screenshot-upload');
       document.body.addEventListener('click', function (e) {
         const button = e.target.closest('button[name="add"]');
         if (!button) return;
@@ -139,19 +138,24 @@
         e.preventDefault();
         const form = button.closest('form');
         const mockup = document.getElementById('mockup-wrapper');
-        if (!mockup || !form || !fileInput) return;
+        if (!mockup || !form) return;
         canvas.getObjects().forEach(obj => { obj.hasControls = false });
         canvas.renderAll();
         html2canvas(mockup, { useCORS: true, scale: 2 }).then(canvasScreenshot => {
           canvas.getObjects().forEach(obj => { obj.hasControls = true });
           canvas.renderAll();
-          canvasScreenshot.toBlob(function (blob) {
-            const file = new File([blob], 'mockup-screenshot.png', { type: 'image/png' });
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
-            fileInput.files = dataTransfer.files;
-            submitViaAjax(form);
-          }, 'image/png');
+          // Store screenshot as base64 data URL in a hidden input
+          const dataUrl = canvasScreenshot.toDataURL('image/png');
+          let hiddenInput = document.getElementById('mockup-screenshot-dataurl');
+          if (!hiddenInput) {
+            hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'properties[Mockup Screenshot]';
+            hiddenInput.id = 'mockup-screenshot-dataurl';
+            form.appendChild(hiddenInput);
+          }
+          hiddenInput.value = dataUrl;
+          submitViaAjax(form);
         });
       });
 
