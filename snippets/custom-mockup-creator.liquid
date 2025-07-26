@@ -688,6 +688,13 @@
           return;
         }
         
+        // Clear any existing screenshot URL before taking new screenshot
+        const existingScreenshotInput = document.getElementById('mockup-screenshot-url');
+        if (existingScreenshotInput) {
+          existingScreenshotInput.remove();
+          console.log('[PPT DEBUG] Cleared existing screenshot URL');
+        }
+        
 
         // Hide all handles and controls before taking screenshot
         const objectsWithControls = [];
@@ -773,16 +780,23 @@
               if (data.url) {
                 // Always use /uploads/uploads/ instead of /uploads/ in the returned URL
                 let fixedUrl = data.url.replace('/uploads/', '/uploads/uploads/');
-                let hiddenInput = document.getElementById('mockup-screenshot-url');
-                if (!hiddenInput) {
-                  hiddenInput = document.createElement('input');
-                  hiddenInput.type = 'hidden';
-                  hiddenInput.name = 'properties[Mockup Screenshot URL]';
-                  hiddenInput.id = 'mockup-screenshot-url';
-                  form.appendChild(hiddenInput);
+                
+                // Only create screenshot input if we have an uploaded design
+                if (uploadedImage) {
+                  let hiddenInput = document.getElementById('mockup-screenshot-url');
+                  if (!hiddenInput) {
+                    hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'properties[Mockup Screenshot URL]';
+                    hiddenInput.id = 'mockup-screenshot-url';
+                    form.appendChild(hiddenInput);
+                  }
+                  hiddenInput.value = fixedUrl;
+                  console.log('[PPT DEBUG] Uploaded screenshot URL:', fixedUrl);
+                } else {
+                  console.log('[PPT DEBUG] No uploaded design, skipping screenshot URL');
                 }
-                hiddenInput.value = fixedUrl;
-                console.log('[PPT DEBUG] Uploaded screenshot URL:', fixedUrl);
+                
                 submitViaAjax(form);
               } else {
                 alert('Screenshot upload failed. Please try again.');
