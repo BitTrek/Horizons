@@ -64,7 +64,9 @@
               fabricImg.set({
                 left: (canvas.getWidth() - fabricImg.getScaledWidth()) / 2,
                 top: (canvas.getHeight() - fabricImg.getScaledHeight()) / 2,
-                hasBorders: true
+                hasBorders: true,
+                hasControls: true,
+                hasRotatingPoint: true
               });
               canvas.add(fabricImg);
               canvas.renderAll();
