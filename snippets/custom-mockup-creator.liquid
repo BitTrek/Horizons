@@ -21,13 +21,72 @@
         function initCanvas() {
       const canvasElement = document.getElementById("canvas");
       const canvas = new fabric.Canvas("canvas");
-      fabric.Object.prototype.setControlsVisibility({ mt: false, mb: false, ml: false, mr: false });
+      
+      // Configure global object properties for better handles
+      fabric.Object.prototype.setControlsVisibility({ 
+        mt: false, 
+        mb: false, 
+        ml: false, 
+        mr: false 
+      });
       fabric.Object.prototype.cornerSize = 30;
       fabric.Object.prototype.cornerStyle = 'circle';
+      fabric.Object.prototype.transparentCorners = false;
+      fabric.Object.prototype.cornerColor = '#b2ccff';
+      fabric.Object.prototype.cornerStrokeColor = '#000';
+      fabric.Object.prototype.borderColor = '#b2ccff';
+      fabric.Object.prototype.borderScaleFactor = 2;
+      fabric.Object.prototype.rotatingPointOffset = 40;
+      
       canvas.setWidth(700);
       canvas.setHeight(700);
       canvasElement.style.width = '100%';
       canvasElement.style.height = '100%';
+      
+      // Enable pinch-to-zoom/resize functionality
+      canvas.on('mouse:down', function(opt) {
+        const evt = opt.e;
+        if (evt.touches && evt.touches.length === 2) {
+          // Two finger touch detected - enable pinch mode
+          canvas.selection = false;
+          canvas.defaultCursor = 'move';
+        }
+      });
+      
+      canvas.on('mouse:move', function(opt) {
+        const evt = opt.e;
+        if (evt.touches && evt.touches.length === 2) {
+          // Handle pinch gesture
+          const touch1 = evt.touches[0];
+          const touch2 = evt.touches[1];
+          
+          const currentDistance = Math.sqrt(
+            Math.pow(touch2.clientX - touch1.clientX, 2) + 
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+          );
+          
+          if (!canvas._pinchStartDistance) {
+            canvas._pinchStartDistance = currentDistance;
+            canvas._pinchStartScale = canvas.getActiveObject() ? canvas.getActiveObject().scaleX : 1;
+          }
+          
+          const scaleFactor = currentDistance / canvas._pinchStartDistance;
+          const newScale = canvas._pinchStartScale * scaleFactor;
+          
+          if (canvas.getActiveObject()) {
+            canvas.getActiveObject().scale(newScale);
+            canvas.renderAll();
+          }
+        }
+      });
+      
+      canvas.on('mouse:up', function(opt) {
+        // Reset pinch state
+        canvas._pinchStartDistance = null;
+        canvas._pinchStartScale = null;
+        canvas.selection = true;
+        canvas.defaultCursor = 'default';
+      });
 
       fabric.Image.fromURL('{{ closest.product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}', function (img) {
         img.scaleToWidth(700);
@@ -56,22 +115,29 @@
             const height = img.naturalHeight;
             const isValid = width >= 1000 && height >= 1000;
             label.innerHTML = `Uploaded size: <span style=\"color:${isValid ? 'green' : 'red'}\">${width} × ${height}px</span>`;
-            fabric.Image.fromURL(event.target.result, function (fabricImg) {
-              if (uploadedImage) canvas.remove(uploadedImage);
-              const maxWidth = canvas.getWidth() * 0.5;
-              const maxHeight = canvas.getHeight() * 0.5;
-              if (fabricImg.width > maxWidth || fabricImg.height > maxHeight) fabricImg.scaleToWidth(maxWidth);
-              fabricImg.set({
-                left: (canvas.getWidth() - fabricImg.getScaledWidth()) / 2,
-                top: (canvas.getHeight() - fabricImg.getScaledHeight()) / 2,
-                hasBorders: true,
-                hasControls: true,
-                hasRotatingPoint: true
-              });
-              canvas.add(fabricImg);
-              canvas.renderAll();
-              uploadedImage = fabricImg;
-            });
+                  fabric.Image.fromURL(event.target.result, function (fabricImg) {
+        if (uploadedImage) canvas.remove(uploadedImage);
+        const maxWidth = canvas.getWidth() * 0.5;
+        const maxHeight = canvas.getHeight() * 0.5;
+        if (fabricImg.width > maxWidth || fabricImg.height > maxHeight) fabricImg.scaleToWidth(maxWidth);
+        fabricImg.set({
+          left: (canvas.getWidth() - fabricImg.getScaledWidth()) / 2,
+          top: (canvas.getHeight() - fabricImg.getScaledHeight()) / 2,
+          hasBorders: true,
+          hasControls: true,
+          hasRotatingPoint: true,
+          transparentCorners: false,
+          cornerColor: '#b2ccff',
+          cornerStrokeColor: '#000',
+          cornerSize: 30,
+          cornerStyle: 'circle',
+          borderColor: '#b2ccff',
+          borderScaleFactor: 2
+        });
+        canvas.add(fabricImg);
+        canvas.renderAll();
+        uploadedImage = fabricImg;
+      });
           };
           img.src = event.target.result;
         };
