@@ -152,16 +152,40 @@
         console.log('[PPT DEBUG] updateCanvasBackground called');
         
         // Try multiple ways to get the current variant ID
-        let selectedVariantId = document.querySelector('[name="id"]')?.value;
-        if (!selectedVariantId) {
-          selectedVariantId = document.querySelector('input[name*="variant"]:checked')?.value;
-        }
-        if (!selectedVariantId) {
-          selectedVariantId = document.querySelector('input[name*="Color"]:checked')?.getAttribute('data-variant-id');
+        let selectedVariantId = null;
+        
+        // Method 1: Check the hidden input with name="id"
+        const hiddenVariantInput = document.querySelector('input[name="id"]');
+        if (hiddenVariantInput) {
+          selectedVariantId = hiddenVariantInput.value;
+          console.log('[PPT DEBUG] Found variant ID from hidden input:', selectedVariantId);
         }
         
-        console.log('[PPT DEBUG] Selected variant ID:', selectedVariantId);
+        // Method 2: Check checked radio inputs with data-variant-id
+        if (!selectedVariantId) {
+          const checkedRadio = document.querySelector('input[type="radio"]:checked[data-variant-id]');
+          if (checkedRadio) {
+            selectedVariantId = checkedRadio.getAttribute('data-variant-id');
+            console.log('[PPT DEBUG] Found variant ID from checked radio:', selectedVariantId);
+          }
+        }
+        
+        // Method 3: Check any radio input with data-variant-id (fallback)
+        if (!selectedVariantId) {
+          const anyRadio = document.querySelector('input[type="radio"][data-variant-id]');
+          if (anyRadio) {
+            selectedVariantId = anyRadio.getAttribute('data-variant-id');
+            console.log('[PPT DEBUG] Found variant ID from any radio (fallback):', selectedVariantId);
+          }
+        }
+        
+        console.log('[PPT DEBUG] Final selected variant ID:', selectedVariantId);
         console.log('[PPT DEBUG] Product data variants:', productData.variants);
+        
+        if (!selectedVariantId) {
+          console.log('[PPT DEBUG] No variant ID found, using first available variant');
+          selectedVariantId = productData.variants[0]?.id;
+        }
         
         const selectedVariant = productData.variants.find(v => v.id == selectedVariantId);
         console.log('[PPT DEBUG] Found variant:', selectedVariant);
@@ -240,6 +264,40 @@
             setTimeout(updateCanvasBackground, 100);
           });
         });
+        
+        // Monitor the hidden variant input for changes
+        const hiddenVariantInput = document.querySelector('input[name="id"]');
+        if (hiddenVariantInput) {
+          console.log('[PPT DEBUG] Setting up MutationObserver for hidden variant input');
+          
+          // Create a MutationObserver to watch for changes to the input's value
+          const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+              if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                console.log('[PPT DEBUG] Hidden variant input value changed to:', hiddenVariantInput.value);
+                setTimeout(updateCanvasBackground, 50);
+              }
+            });
+          });
+          
+          // Start observing
+          observer.observe(hiddenVariantInput, {
+            attributes: true,
+            attributeFilter: ['value']
+          });
+          
+          // Also listen for input events
+          hiddenVariantInput.addEventListener('input', function(e) {
+            console.log('[PPT DEBUG] Hidden variant input input event:', e.target.value);
+            setTimeout(updateCanvasBackground, 50);
+          });
+          
+          // Also listen for change events
+          hiddenVariantInput.addEventListener('change', function(e) {
+            console.log('[PPT DEBUG] Hidden variant input change event:', e.target.value);
+            setTimeout(updateCanvasBackground, 50);
+          });
+        }
       });
 
       const isMobile = window.innerWidth <= 1200;
