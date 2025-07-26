@@ -122,18 +122,20 @@
   /* Mobile styles */
   @media screen and (max-width: 749px) {
     .product-information__grid {
-      grid-template-columns: 1fr;
-      gap: 1rem;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 1rem !important;
     }
 
     .product-information__media {
-      grid-column: 1 / -1;
-      order: 1;
+      order: 1 !important;
+      width: 100% !important;
+      min-width: 100% !important;
     }
 
     .product-details {
-      grid-column: 1 / -1;
-      order: 2;
+      order: 2 !important;
+      width: 100% !important;
     }
   }
 
