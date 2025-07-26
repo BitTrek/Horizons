@@ -44,50 +44,56 @@
       canvasElement.style.width = '100%';
       canvasElement.style.height = '100%';
       
-      // Enable pinch-to-zoom/resize functionality
-      canvas.on('mouse:down', function(opt) {
-        const evt = opt.e;
-        if (evt.touches && evt.touches.length === 2) {
-          // Two finger touch detected - enable pinch mode
-          canvas.selection = false;
-          canvas.defaultCursor = 'move';
+              // Function to setup canvas event listeners
+        function setupCanvasEventListeners() {
+          // Enable pinch-to-zoom/resize functionality
+          canvas.on('mouse:down', function(opt) {
+            const evt = opt.e;
+            if (evt.touches && evt.touches.length === 2) {
+              // Two finger touch detected - enable pinch mode
+              canvas.selection = false;
+              canvas.defaultCursor = 'move';
+            }
+          });
+          
+          canvas.on('mouse:move', function(opt) {
+            const evt = opt.e;
+            if (evt.touches && evt.touches.length === 2) {
+              // Handle pinch gesture
+              const touch1 = evt.touches[0];
+              const touch2 = evt.touches[1];
+              
+              const currentDistance = Math.sqrt(
+                Math.pow(touch2.clientX - touch1.clientX, 2) + 
+                Math.pow(touch2.clientY - touch1.clientY, 2)
+              );
+              
+              if (!canvas._pinchStartDistance) {
+                canvas._pinchStartDistance = currentDistance;
+                canvas._pinchStartScale = canvas.getActiveObject() ? canvas.getActiveObject().scaleX : 1;
+              }
+              
+              const scaleFactor = currentDistance / canvas._pinchStartDistance;
+              const newScale = canvas._pinchStartScale * scaleFactor;
+              
+              if (canvas.getActiveObject()) {
+                canvas.getActiveObject().scale(newScale);
+                canvas.renderAll();
+              }
+            }
+          });
+          
+          canvas.on('mouse:up', function(opt) {
+            // Reset pinch state
+            canvas._pinchStartDistance = null;
+            canvas._pinchStartScale = null;
+            canvas.selection = true;
+            canvas.defaultCursor = 'default';
+          });
         }
-      });
-      
-      canvas.on('mouse:move', function(opt) {
-        const evt = opt.e;
-        if (evt.touches && evt.touches.length === 2) {
-          // Handle pinch gesture
-          const touch1 = evt.touches[0];
-          const touch2 = evt.touches[1];
-          
-          const currentDistance = Math.sqrt(
-            Math.pow(touch2.clientX - touch1.clientX, 2) + 
-            Math.pow(touch2.clientY - touch1.clientY, 2)
-          );
-          
-          if (!canvas._pinchStartDistance) {
-            canvas._pinchStartDistance = currentDistance;
-            canvas._pinchStartScale = canvas.getActiveObject() ? canvas.getActiveObject().scaleX : 1;
-          }
-          
-          const scaleFactor = currentDistance / canvas._pinchStartDistance;
-          const newScale = canvas._pinchStartScale * scaleFactor;
-          
-          if (canvas.getActiveObject()) {
-            canvas.getActiveObject().scale(newScale);
-            canvas.renderAll();
-          }
-        }
-      });
-      
-      canvas.on('mouse:up', function(opt) {
-        // Reset pinch state
-        canvas._pinchStartDistance = null;
-        canvas._pinchStartScale = null;
-        canvas.selection = true;
-        canvas.defaultCursor = 'default';
-      });
+        
+        // Setup initial event listeners
+        setupCanvasEventListeners();
 
       fabric.Image.fromURL('{{ closest.product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}', function (img) {
         img.scaleToWidth(700);
@@ -167,13 +173,85 @@
         });
       }
 
+      // Function to check if canvas needs re-initialization
+      function checkCanvasHealth() {
+        if (!canvas) {
+          console.log('[PPT DEBUG] Canvas is null, needs re-initialization');
+          return false;
+        }
+        
+        try {
+          const canvasElement = canvas.getElement();
+          const width = canvasElement.offsetWidth;
+          const height = canvasElement.offsetHeight;
+          
+          if (width === 0 || height === 0) {
+            console.log('[PPT DEBUG] Canvas element has zero dimensions, needs re-initialization');
+            return false;
+          }
+          
+          return true;
+        } catch (e) {
+          console.log('[PPT DEBUG] Canvas element error, needs re-initialization:', e);
+          return false;
+        }
+      }
+
+      // Function to re-initialize canvas
+      function reinitializeCanvas() {
+        console.log('[PPT DEBUG] Re-initializing canvas');
+        
+        // Find the canvas element
+        const canvasElement = document.getElementById('canvas');
+        if (!canvasElement) {
+          console.error('[PPT DEBUG] Canvas element not found in DOM');
+          return;
+        }
+        
+        // Re-initialize Fabric.js canvas
+        canvas = new fabric.Canvas('canvas', {
+          width: 700,
+          height: 700,
+          selection: true,
+          preserveObjectStacking: true
+        });
+        
+        console.log('[PPT DEBUG] Canvas re-initialized');
+        
+        // Re-apply global settings
+        fabric.Object.prototype.setControlsVisibility({ 
+          mt: false, 
+          mb: false, 
+          ml: false, 
+          mr: false 
+        });
+        fabric.Object.prototype.cornerSize = 60;
+        fabric.Object.prototype.cornerStyle = 'circle';
+        fabric.Object.prototype.transparentCorners = false;
+        fabric.Object.prototype.cornerColor = '#b2ccff';
+        fabric.Object.prototype.cornerStrokeColor = '#000';
+        fabric.Object.prototype.borderColor = '#b2ccff';
+        fabric.Object.prototype.borderScaleFactor = 2;
+        fabric.Object.prototype.rotatingPointOffset = 60;
+        fabric.Object.prototype.padding = 20;
+        
+        // Re-add event listeners
+        setupCanvasEventListeners();
+        
+        // Load the current variant image
+        setTimeout(() => {
+          updateCanvasBackground();
+        }, 100);
+      }
+
       // Function to update canvas background with variant image
       async function updateCanvasBackground() {
         console.log('[PPT DEBUG] updateCanvasBackground called');
         
-        // Check if canvas exists and is properly initialized
-        if (!canvas) {
-          console.error('[PPT DEBUG] Canvas not found');
+        // Check if canvas needs re-initialization
+        if (!checkCanvasHealth()) {
+          console.log('[PPT DEBUG] Canvas unhealthy, re-initializing');
+          reinitializeCanvas();
           return;
         }
         
