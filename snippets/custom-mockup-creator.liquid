@@ -147,8 +147,28 @@
         reader.readAsDataURL(file);
       });
 
+      // Function to ensure canvas is ready
+      function ensureCanvasReady() {
+        return new Promise((resolve) => {
+          if (canvas && canvas.width > 0 && canvas.height > 0) {
+            resolve();
+          } else {
+            console.log('[PPT DEBUG] Canvas not ready, waiting...');
+            setTimeout(() => {
+              if (canvas && canvas.width > 0 && canvas.height > 0) {
+                console.log('[PPT DEBUG] Canvas ready after wait');
+                resolve();
+              } else {
+                console.log('[PPT DEBUG] Canvas still not ready, proceeding anyway');
+                resolve();
+              }
+            }, 100);
+          }
+        });
+      }
+
       // Function to update canvas background with variant image
-      function updateCanvasBackground() {
+      async function updateCanvasBackground() {
         console.log('[PPT DEBUG] updateCanvasBackground called');
         
         // Check if canvas exists and is properly initialized
@@ -157,15 +177,23 @@
           return;
         }
         
-        console.log('[PPT DEBUG] Canvas found, dimensions:', canvas.width, 'x', canvas.height);
-        console.log('[PPT DEBUG] Canvas element visible:', canvas.getElement().offsetWidth, 'x', canvas.getElement().offsetHeight);
+        // Wait for canvas to be ready
+        await ensureCanvasReady();
         
-        // Check if canvas is visible
-        const canvasElement = canvas.getElement();
-        const canvasStyle = window.getComputedStyle(canvasElement);
-        console.log('[PPT DEBUG] Canvas display:', canvasStyle.display);
-        console.log('[PPT DEBUG] Canvas visibility:', canvasStyle.visibility);
-        console.log('[PPT DEBUG] Canvas opacity:', canvasStyle.opacity);
+        console.log('[PPT DEBUG] Canvas found, dimensions:', canvas.width, 'x', canvas.height);
+        
+        try {
+          const canvasElement = canvas.getElement();
+          console.log('[PPT DEBUG] Canvas element visible:', canvasElement.offsetWidth, 'x', canvasElement.offsetHeight);
+          
+          // Check if canvas is visible
+          const canvasStyle = window.getComputedStyle(canvasElement);
+          console.log('[PPT DEBUG] Canvas display:', canvasStyle.display);
+          console.log('[PPT DEBUG] Canvas visibility:', canvasStyle.visibility);
+          console.log('[PPT DEBUG] Canvas opacity:', canvasStyle.opacity);
+        } catch (e) {
+          console.error('[PPT DEBUG] Error checking canvas status:', e);
+        }
         
         // Try multiple ways to get the current variant ID
         let selectedVariantId = null;
@@ -222,6 +250,8 @@
             console.log('[PPT DEBUG] Canvas dimensions:', canvas.width, 'x', canvas.height);
             
             img.scaleToWidth(700);
+            console.log('[PPT DEBUG] Image scaled to width 700, new dimensions:', img.width, 'x', img.height);
+            
             canvas.setBackgroundImage(img, function() {
               console.log('[PPT DEBUG] Background image set successfully');
               canvas.renderAll();
@@ -231,9 +261,17 @@
               const bgImage = canvas.backgroundImage;
               if (bgImage) {
                 console.log('[PPT DEBUG] Background image confirmed:', bgImage.width, 'x', bgImage.height);
+                console.log('[PPT DEBUG] Background image scale:', bgImage.scaleX, 'x', bgImage.scaleY);
+                console.log('[PPT DEBUG] Background image position:', bgImage.left, ',', bgImage.top);
               } else {
                 console.error('[PPT DEBUG] Background image not found after setting');
               }
+              
+              // Force a re-render after a short delay
+              setTimeout(() => {
+                console.log('[PPT DEBUG] Forcing additional render');
+                canvas.renderAll();
+              }, 100);
             });
           }, { 
             crossOrigin: 'anonymous',
@@ -256,6 +294,8 @@
               console.log('[PPT DEBUG] Canvas dimensions:', canvas.width, 'x', canvas.height);
               
               img.scaleToWidth(700);
+              console.log('[PPT DEBUG] Fallback image scaled to width 700, new dimensions:', img.width, 'x', img.height);
+              
               canvas.setBackgroundImage(img, function() {
                 console.log('[PPT DEBUG] Fallback background image set successfully');
                 canvas.renderAll();
@@ -265,9 +305,17 @@
                 const bgImage = canvas.backgroundImage;
                 if (bgImage) {
                   console.log('[PPT DEBUG] Fallback background image confirmed:', bgImage.width, 'x', bgImage.height);
+                  console.log('[PPT DEBUG] Fallback background image scale:', bgImage.scaleX, 'x', bgImage.scaleY);
+                  console.log('[PPT DEBUG] Fallback background image position:', bgImage.left, ',', bgImage.top);
                 } else {
                   console.error('[PPT DEBUG] Fallback background image not found after setting');
                 }
+                
+                // Force a re-render after a short delay
+                setTimeout(() => {
+                  console.log('[PPT DEBUG] Forcing additional render for fallback');
+                  canvas.renderAll();
+                }, 100);
               });
             }, { 
               crossOrigin: 'anonymous',
