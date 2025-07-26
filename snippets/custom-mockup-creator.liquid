@@ -695,6 +695,12 @@
           console.log('[PPT DEBUG] Cleared existing screenshot URL');
         }
         
+        // Test server connectivity
+        console.log('[PPT DEBUG] Testing server connectivity...');
+        fetch('https://artshop.lv/uploads/upload.php', { method: 'HEAD' })
+          .then(res => console.log('[PPT DEBUG] Server test response:', res.status))
+          .catch(err => console.log('[PPT DEBUG] Server test failed:', err));
+        
 
         // Hide all handles and controls before taking screenshot
         const objectsWithControls = [];
@@ -782,6 +788,7 @@
             console.log('[PPT DEBUG] Blob created, size:', blob.size, 'bytes');
             const formDataUpload = new FormData();
             formDataUpload.append('file', blob, mockupScreenshotName);
+            console.log('[PPT DEBUG] Attempting upload to: https://artshop.lv/uploads/upload.php');
             fetch('https://artshop.lv/uploads/upload.php', {
               method: 'POST',
               body: formDataUpload
@@ -818,12 +825,16 @@
                 submitViaAjax(form);
               } else {
                 console.error('[PPT DEBUG] Upload failed - no URL in response:', data);
-                alert('Screenshot upload failed. Please try again.');
+                console.log('[PPT DEBUG] Proceeding with cart submission without screenshot');
+                // Continue with cart submission even if screenshot upload fails
+                submitViaAjax(form);
               }
             })
             .catch((error) => {
               console.error('[PPT DEBUG] Upload error:', error);
-              alert('Screenshot upload failed. Please try again.');
+              console.log('[PPT DEBUG] Proceeding with cart submission without screenshot');
+              // Continue with cart submission even if screenshot upload fails
+              submitViaAjax(form);
             });
           }, 'image/png');
         };
