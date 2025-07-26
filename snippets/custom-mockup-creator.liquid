@@ -5,6 +5,7 @@
     const mockup = document.querySelector(".canvas-wrapper");
     let productData = {{ closest.product | json }};
     let canvas; // Global canvas variable
+    let uploadedImageData = null; // Store uploaded image data for restoration
     
     // Function to setup canvas event listeners
     function setupCanvasEventListeners() {
@@ -134,6 +135,9 @@
             canvas.renderAll();
             uploadedImage = null;
           }
+          // Clear uploaded image data
+          uploadedImageData = null;
+          console.log('[PPT DEBUG] Uploaded image data cleared');
           label.innerHTML = `Minimum recommended size: 1000 × 1000px`;
           return;
         }
@@ -169,6 +173,19 @@
         canvas.add(fabricImg);
         canvas.renderAll();
         uploadedImage = fabricImg;
+        
+        // Save uploaded image data for restoration
+        uploadedImageData = {
+          src: event.target.result,
+          left: fabricImg.left,
+          top: fabricImg.top,
+          scaleX: fabricImg.scaleX,
+          scaleY: fabricImg.scaleY,
+          angle: fabricImg.angle,
+          width: fabricImg.width,
+          height: fabricImg.height
+        };
+        console.log('[PPT DEBUG] Uploaded image data saved for restoration');
       });
           };
           img.src = event.target.result;
@@ -220,6 +237,42 @@
         }
       }
 
+      // Function to restore uploaded image
+      function restoreUploadedImage() {
+        if (!uploadedImageData) {
+          console.log('[PPT DEBUG] No uploaded image data to restore');
+          return;
+        }
+        
+        console.log('[PPT DEBUG] Restoring uploaded image');
+        fabric.Image.fromURL(uploadedImageData.src, function (fabricImg) {
+          fabricImg.set({
+            left: uploadedImageData.left,
+            top: uploadedImageData.top,
+            scaleX: uploadedImageData.scaleX,
+            scaleY: uploadedImageData.scaleY,
+            angle: uploadedImageData.angle,
+            hasBorders: true,
+            hasControls: true,
+            hasRotatingPoint: true,
+            transparentCorners: false,
+            cornerColor: '#b2ccff',
+            cornerStrokeColor: '#000',
+            cornerSize: 60,
+            cornerStyle: 'circle',
+            borderColor: '#b2ccff',
+            borderScaleFactor: 2,
+            padding: 20,
+            rotatingPointOffset: 60
+          });
+          
+          canvas.add(fabricImg);
+          canvas.renderAll();
+          uploadedImage = fabricImg;
+          console.log('[PPT DEBUG] Uploaded image restored successfully');
+        });
+      }
+
       // Function to re-initialize canvas
       function reinitializeCanvas() {
         console.log('[PPT DEBUG] Re-initializing canvas');
@@ -265,9 +318,13 @@
         canvas.setWidth(700);
         canvas.setHeight(700);
         
-        // Load the current variant image
+        // Load the current variant image and restore uploaded image
         setTimeout(() => {
           updateCanvasBackground();
+          // Restore uploaded image after background is loaded
+          setTimeout(() => {
+            restoreUploadedImage();
+          }, 100);
         }, 200);
       }
 
