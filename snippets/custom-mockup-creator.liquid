@@ -736,7 +736,12 @@
         
         // Load the canvas screenshot and draw it properly
         const img = new Image();
+        img.onerror = function() {
+          console.error('[PPT DEBUG] Failed to load canvas screenshot image');
+          alert('Screenshot creation failed. Please try again.');
+        };
         img.onload = function() {
+          console.log('[PPT DEBUG] Canvas screenshot image loaded, dimensions:', img.width, 'x', img.height);
           // Calculate the aspect ratio to maintain proportions
           const aspectRatio = img.width / img.height;
           let drawWidth, drawHeight, offsetX, offsetY;
@@ -769,14 +774,27 @@
           }
           const mockupScreenshotName = 'mockup-screenshot-' + getShortHash() + '.png';
           squareCanvas.toBlob(function(blob) {
+            if (!blob) {
+              console.error('[PPT DEBUG] Failed to create blob from canvas');
+              alert('Screenshot creation failed. Please try again.');
+              return;
+            }
+            console.log('[PPT DEBUG] Blob created, size:', blob.size, 'bytes');
             const formDataUpload = new FormData();
             formDataUpload.append('file', blob, mockupScreenshotName);
             fetch('https://artshop.lv/uploads/upload.php', {
               method: 'POST',
               body: formDataUpload
             })
-            .then(res => res.json())
+            .then(res => {
+              console.log('[PPT DEBUG] Upload response status:', res.status);
+              if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+              }
+              return res.json();
+            })
             .then(data => {
+              console.log('[PPT DEBUG] Upload response data:', data);
               if (data.url) {
                 // Always use /uploads/uploads/ instead of /uploads/ in the returned URL
                 let fixedUrl = data.url.replace('/uploads/', '/uploads/uploads/');
@@ -799,10 +817,12 @@
                 
                 submitViaAjax(form);
               } else {
+                console.error('[PPT DEBUG] Upload failed - no URL in response:', data);
                 alert('Screenshot upload failed. Please try again.');
               }
             })
-            .catch(() => {
+            .catch((error) => {
+              console.error('[PPT DEBUG] Upload error:', error);
               alert('Screenshot upload failed. Please try again.');
             });
           }, 'image/png');
