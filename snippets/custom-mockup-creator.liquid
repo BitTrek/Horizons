@@ -151,6 +151,22 @@
       function updateCanvasBackground() {
         console.log('[PPT DEBUG] updateCanvasBackground called');
         
+        // Check if canvas exists and is properly initialized
+        if (!canvas) {
+          console.error('[PPT DEBUG] Canvas not found');
+          return;
+        }
+        
+        console.log('[PPT DEBUG] Canvas found, dimensions:', canvas.width, 'x', canvas.height);
+        console.log('[PPT DEBUG] Canvas element visible:', canvas.getElement().offsetWidth, 'x', canvas.getElement().offsetHeight);
+        
+        // Check if canvas is visible
+        const canvasElement = canvas.getElement();
+        const canvasStyle = window.getComputedStyle(canvasElement);
+        console.log('[PPT DEBUG] Canvas display:', canvasStyle.display);
+        console.log('[PPT DEBUG] Canvas visibility:', canvasStyle.visibility);
+        console.log('[PPT DEBUG] Canvas opacity:', canvasStyle.opacity);
+        
         // Try multiple ways to get the current variant ID
         let selectedVariantId = null;
         
@@ -199,11 +215,32 @@
             imageUrl = 'https:' + imageUrl;
           }
           
+          console.log('[PPT DEBUG] Final image URL:', imageUrl);
+          
           fabric.Image.fromURL(imageUrl, function (img) {
-            console.log('[PPT DEBUG] Variant image loaded successfully');
+            console.log('[PPT DEBUG] Variant image loaded successfully, dimensions:', img.width, 'x', img.height);
+            console.log('[PPT DEBUG] Canvas dimensions:', canvas.width, 'x', canvas.height);
+            
             img.scaleToWidth(700);
-            canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-          }, { crossOrigin: 'anonymous' });
+            canvas.setBackgroundImage(img, function() {
+              console.log('[PPT DEBUG] Background image set successfully');
+              canvas.renderAll();
+              console.log('[PPT DEBUG] Canvas rendered after background image');
+              
+              // Verify the background image was set
+              const bgImage = canvas.backgroundImage;
+              if (bgImage) {
+                console.log('[PPT DEBUG] Background image confirmed:', bgImage.width, 'x', bgImage.height);
+              } else {
+                console.error('[PPT DEBUG] Background image not found after setting');
+              }
+            });
+          }, { 
+            crossOrigin: 'anonymous',
+            onError: function(err) {
+              console.error('[PPT DEBUG] Error loading variant image:', err);
+            }
+          });
         } else {
           console.log('[PPT DEBUG] No featured image found for variant, trying first available image');
           // Fallback to first available image
@@ -213,11 +250,33 @@
             if (imageUrl.startsWith('//')) {
               imageUrl = 'https:' + imageUrl;
             }
+            console.log('[PPT DEBUG] Loading fallback image URL:', imageUrl);
             fabric.Image.fromURL(imageUrl, function (img) {
-              console.log('[PPT DEBUG] Fallback image loaded successfully');
+              console.log('[PPT DEBUG] Fallback image loaded successfully, dimensions:', img.width, 'x', img.height);
+              console.log('[PPT DEBUG] Canvas dimensions:', canvas.width, 'x', canvas.height);
+              
               img.scaleToWidth(700);
-              canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-            }, { crossOrigin: 'anonymous' });
+              canvas.setBackgroundImage(img, function() {
+                console.log('[PPT DEBUG] Fallback background image set successfully');
+                canvas.renderAll();
+                console.log('[PPT DEBUG] Canvas rendered after fallback background image');
+                
+                // Verify the background image was set
+                const bgImage = canvas.backgroundImage;
+                if (bgImage) {
+                  console.log('[PPT DEBUG] Fallback background image confirmed:', bgImage.width, 'x', bgImage.height);
+                } else {
+                  console.error('[PPT DEBUG] Fallback background image not found after setting');
+                }
+              });
+            }, { 
+              crossOrigin: 'anonymous',
+              onError: function(err) {
+                console.error('[PPT DEBUG] Error loading fallback image:', err);
+              }
+            });
+          } else {
+            console.log('[PPT DEBUG] No images found in any variants');
           }
         }
       }
