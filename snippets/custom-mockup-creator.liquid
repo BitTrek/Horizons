@@ -4,6 +4,56 @@
   document.addEventListener("DOMContentLoaded", function () {
     const mockup = document.querySelector(".canvas-wrapper");
     let productData = {{ closest.product | json }};
+    let canvas; // Global canvas variable
+    
+    // Function to setup canvas event listeners
+    function setupCanvasEventListeners() {
+      // Enable pinch-to-zoom/resize functionality
+      canvas.on('mouse:down', function(opt) {
+        const evt = opt.e;
+        if (evt.touches && evt.touches.length === 2) {
+          // Two finger touch detected - enable pinch mode
+          canvas.selection = false;
+          canvas.defaultCursor = 'move';
+        }
+      });
+      
+      canvas.on('mouse:move', function(opt) {
+        const evt = opt.e;
+        if (evt.touches && evt.touches.length === 2) {
+          // Handle pinch gesture
+          const touch1 = evt.touches[0];
+          const touch2 = evt.touches[1];
+          
+          const currentDistance = Math.sqrt(
+            Math.pow(touch2.clientX - touch1.clientX, 2) + 
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+          );
+          
+          if (!canvas._pinchStartDistance) {
+            canvas._pinchStartDistance = currentDistance;
+            canvas._pinchStartScale = canvas.getActiveObject() ? canvas.getActiveObject().scaleX : 1;
+          }
+          
+          const scaleFactor = currentDistance / canvas._pinchStartDistance;
+          const newScale = canvas._pinchStartScale * scaleFactor;
+          
+          if (canvas.getActiveObject()) {
+            canvas.getActiveObject().scale(newScale);
+            canvas.renderAll();
+          }
+        }
+      });
+      
+      canvas.on('mouse:up', function(opt) {
+        // Reset pinch state
+        canvas._pinchStartDistance = null;
+        canvas._pinchStartScale = null;
+        canvas.selection = true;
+        canvas.defaultCursor = 'default';
+      });
+    }
+    
     const deleteIcon = new Image();
     deleteIcon.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
       <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
@@ -20,7 +70,7 @@
 
         function initCanvas() {
       const canvasElement = document.getElementById("canvas");
-      const canvas = new fabric.Canvas("canvas");
+      canvas = new fabric.Canvas("canvas");
       
       // Configure global object properties for better handles
       fabric.Object.prototype.setControlsVisibility({ 
@@ -44,56 +94,8 @@
       canvasElement.style.width = '100%';
       canvasElement.style.height = '100%';
       
-              // Function to setup canvas event listeners
-        function setupCanvasEventListeners() {
-          // Enable pinch-to-zoom/resize functionality
-          canvas.on('mouse:down', function(opt) {
-            const evt = opt.e;
-            if (evt.touches && evt.touches.length === 2) {
-              // Two finger touch detected - enable pinch mode
-              canvas.selection = false;
-              canvas.defaultCursor = 'move';
-            }
-          });
-          
-          canvas.on('mouse:move', function(opt) {
-            const evt = opt.e;
-            if (evt.touches && evt.touches.length === 2) {
-              // Handle pinch gesture
-              const touch1 = evt.touches[0];
-              const touch2 = evt.touches[1];
-              
-              const currentDistance = Math.sqrt(
-                Math.pow(touch2.clientX - touch1.clientX, 2) + 
-                Math.pow(touch2.clientY - touch1.clientY, 2)
-              );
-              
-              if (!canvas._pinchStartDistance) {
-                canvas._pinchStartDistance = currentDistance;
-                canvas._pinchStartScale = canvas.getActiveObject() ? canvas.getActiveObject().scaleX : 1;
-              }
-              
-              const scaleFactor = currentDistance / canvas._pinchStartDistance;
-              const newScale = canvas._pinchStartScale * scaleFactor;
-              
-              if (canvas.getActiveObject()) {
-                canvas.getActiveObject().scale(newScale);
-                canvas.renderAll();
-              }
-            }
-          });
-          
-          canvas.on('mouse:up', function(opt) {
-            // Reset pinch state
-            canvas._pinchStartDistance = null;
-            canvas._pinchStartScale = null;
-            canvas.selection = true;
-            canvas.defaultCursor = 'default';
-          });
-        }
-        
-        // Setup initial event listeners
-        setupCanvasEventListeners();
+      // Setup initial event listeners
+      setupCanvasEventListeners();
 
       fabric.Image.fromURL('{{ closest.product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}', function (img) {
         img.scaleToWidth(700);
@@ -241,7 +243,7 @@
         // Load the current variant image
         setTimeout(() => {
           updateCanvasBackground();
-        }, 100);
+        }, 200);
       }
 
       // Function to update canvas background with variant image
