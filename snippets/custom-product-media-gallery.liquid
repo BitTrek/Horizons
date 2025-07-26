@@ -77,23 +77,5 @@
     user-select: none;
   }
 
-  /* Mobile-specific touch behavior */
-  @media screen and (max-width: 749px) {
-    .canvas-wrapper {
-      touch-action: pan-y;
-    }
-    
-    #canvas {
-      touch-action: pan-y;
-    }
-    
-    /* When in canvas mode, allow manipulation */
-    .canvas-wrapper.canvas-mode-active {
-      touch-action: manipulation;
-    }
-    
-    .canvas-wrapper.canvas-mode-active #canvas {
-      touch-action: manipulation;
-    }
-  }
+
 </style>

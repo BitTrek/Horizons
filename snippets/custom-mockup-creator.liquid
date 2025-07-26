@@ -18,119 +18,21 @@
       </svg>
     `);
 
-    function initCanvas() {
+        function initCanvas() {
       const canvasElement = document.getElementById("canvas");
       const canvas = new fabric.Canvas("canvas");
       fabric.Object.prototype.setControlsVisibility({ mt: false, mb: false, ml: false, mr: false });
       fabric.Object.prototype.cornerSize = 30;
       fabric.Object.prototype.cornerStyle = 'circle';
-      
-      // Set responsive canvas dimensions
-      const containerWidth = canvasElement.parentElement.offsetWidth || 700;
-      const containerHeight = canvasElement.parentElement.offsetHeight || 700;
-      const canvasSize = Math.min(containerWidth, containerHeight);
-      
-      canvas.setWidth(canvasSize);
-      canvas.setHeight(canvasSize);
+      canvas.setWidth(700);
+      canvas.setHeight(700);
       canvasElement.style.width = '100%';
       canvasElement.style.height = '100%';
-      
-      // Ensure canvas is visible
-      canvasElement.style.display = 'block';
-      canvasElement.style.visibility = 'visible';
-
-      // Mobile UX enhancement
-      const isMobile = window.innerWidth <= 749;
-      let isCanvasMode = false;
-      let touchStartY = 0;
-      let touchStartTime = 0;
-
-      if (isMobile) {
-        // Add a visual indicator for mobile users
-        const canvasWrapper = document.querySelector('.canvas-wrapper');
-        if (canvasWrapper) {
-          const modeIndicator = document.createElement('div');
-          modeIndicator.className = 'canvas-mode-indicator';
-          modeIndicator.innerHTML = '<span>Tap to edit design</span>';
-          modeIndicator.style.cssText = `
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            z-index: 10;
-            pointer-events: none;
-            transition: opacity 0.3s;
-          `;
-          canvasWrapper.appendChild(modeIndicator);
-
-          // Handle touch events for better UX
-          canvasWrapper.addEventListener('touchstart', function(e) {
-            touchStartY = e.touches[0].clientY;
-            touchStartTime = Date.now();
-          }, { passive: true });
-
-          canvasWrapper.addEventListener('touchmove', function(e) {
-            const touchY = e.touches[0].clientY;
-            const touchDeltaY = Math.abs(touchY - touchStartY);
-            const touchDuration = Date.now() - touchStartTime;
-
-            // If it's a quick tap or small movement, enable canvas mode
-            if (touchDuration < 300 && touchDeltaY < 10) {
-              if (!isCanvasMode) {
-                isCanvasMode = true;
-                canvas.selection = true;
-                canvas.defaultCursor = 'crosshair';
-                modeIndicator.innerHTML = '<span>Design mode active</span>';
-                modeIndicator.style.background = 'rgba(0,128,0,0.8)';
-                
-                // Auto-disable canvas mode after 5 seconds of inactivity
-                setTimeout(() => {
-                  if (isCanvasMode) {
-                    isCanvasMode = false;
-                    canvas.selection = false;
-                    canvas.defaultCursor = 'default';
-                    modeIndicator.innerHTML = '<span>Tap to edit design</span>';
-                    modeIndicator.style.background = 'rgba(0,0,0,0.7)';
-                  }
-                }, 5000);
-              }
-            } else if (touchDeltaY > 20) {
-              // Large vertical movement indicates scrolling - disable canvas mode
-              isCanvasMode = false;
-              canvas.selection = false;
-              canvas.defaultCursor = 'default';
-              modeIndicator.innerHTML = '<span>Tap to edit design</span>';
-              modeIndicator.style.background = 'rgba(0,0,0,0.7)';
-            }
-          }, { passive: true });
-
-                // Initially disable canvas selection on mobile
-      canvas.selection = false;
-      canvas.defaultCursor = 'default';
-    }
-  }
-
-  // Handle window resize to maintain responsive canvas
-  window.addEventListener('resize', function() {
-    const containerWidth = canvasElement.parentElement.offsetWidth || 700;
-    const containerHeight = canvasElement.parentElement.offsetHeight || 700;
-    const newCanvasSize = Math.min(containerWidth, containerHeight);
-    
-    if (newCanvasSize !== canvas.getWidth()) {
-      canvas.setWidth(newCanvasSize);
-      canvas.setHeight(newCanvasSize);
-      canvas.renderAll();
-    }
-  });
 
       fabric.Image.fromURL('{{ closest.product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}', function (img) {
-        img.scaleToWidth(canvas.getWidth());
+        img.scaleToWidth(700);
         canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-      }, { crossOrigin: 'anonymous' });
+      });
 
       let uploadedImage;
       document.getElementById('upload-input')?.addEventListener('change', function (e) {
@@ -179,9 +81,9 @@
         const selectedVariant = productData.variants.find(v => v.id == selectedVariantId);
         if (selectedVariant?.featured_image?.src) {
           fabric.Image.fromURL(selectedVariant.featured_image.src, function (img) {
-            img.scaleToWidth(canvas.getWidth());
+            img.scaleToWidth(700);
             canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-          }, { crossOrigin: 'anonymous' });
+          });
         }
       });
 
