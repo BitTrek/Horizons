@@ -147,43 +147,83 @@
         reader.readAsDataURL(file);
       });
 
-      document.addEventListener('variant:update', function () {
-        console.log('[PPT DEBUG] Variant update event triggered');
-        const selectedVariantId = document.querySelector('[name="id"]')?.value;
+      // Function to update canvas background with variant image
+      function updateCanvasBackground() {
+        console.log('[PPT DEBUG] updateCanvasBackground called');
+        
+        // Try multiple ways to get the current variant ID
+        let selectedVariantId = document.querySelector('[name="id"]')?.value;
+        if (!selectedVariantId) {
+          selectedVariantId = document.querySelector('input[name*="variant"]:checked')?.value;
+        }
+        if (!selectedVariantId) {
+          selectedVariantId = document.querySelector('input[name*="Color"]:checked')?.getAttribute('data-variant-id');
+        }
+        
         console.log('[PPT DEBUG] Selected variant ID:', selectedVariantId);
+        console.log('[PPT DEBUG] Product data variants:', productData.variants);
         
         const selectedVariant = productData.variants.find(v => v.id == selectedVariantId);
         console.log('[PPT DEBUG] Found variant:', selectedVariant);
         
         if (selectedVariant?.featured_image?.src) {
           console.log('[PPT DEBUG] Loading variant image:', selectedVariant.featured_image.src);
-          fabric.Image.fromURL(selectedVariant.featured_image.src, function (img) {
+          
+          // Add protocol if missing
+          let imageUrl = selectedVariant.featured_image.src;
+          if (imageUrl.startsWith('//')) {
+            imageUrl = 'https:' + imageUrl;
+          }
+          
+          fabric.Image.fromURL(imageUrl, function (img) {
             console.log('[PPT DEBUG] Variant image loaded successfully');
             img.scaleToWidth(700);
             canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
           }, { crossOrigin: 'anonymous' });
         } else {
-          console.log('[PPT DEBUG] No featured image found for variant');
+          console.log('[PPT DEBUG] No featured image found for variant, trying first available image');
+          // Fallback to first available image
+          const firstVariantWithImage = productData.variants.find(v => v.featured_image?.src);
+          if (firstVariantWithImage?.featured_image?.src) {
+            let imageUrl = firstVariantWithImage.featured_image.src;
+            if (imageUrl.startsWith('//')) {
+              imageUrl = 'https:' + imageUrl;
+            }
+            fabric.Image.fromURL(imageUrl, function (img) {
+              console.log('[PPT DEBUG] Fallback image loaded successfully');
+              img.scaleToWidth(700);
+              canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+            }, { crossOrigin: 'anonymous' });
+          }
+        }
+      }
+
+      // Listen for variant update events
+      document.addEventListener('variant:update', function (event) {
+        console.log('[PPT DEBUG] Variant update event triggered', event);
+        setTimeout(updateCanvasBackground, 50);
+      });
+
+      // Listen for color swatch changes
+      document.addEventListener('change', function (e) {
+        console.log('[PPT DEBUG] Change event detected:', e.target.name, e.target.value);
+        
+        if (e.target.name === 'id' || 
+            e.target.name?.includes('variant') || 
+            e.target.name?.includes('Color') ||
+            e.target.getAttribute('data-variant-id')) {
+          console.log('[PPT DEBUG] Variant-related change detected, updating canvas');
+          setTimeout(updateCanvasBackground, 100);
         }
       });
 
-      // Fallback: Also listen for changes to the variant selector
-      document.addEventListener('change', function (e) {
-        if (e.target.name === 'id' || e.target.name?.includes('variant')) {
-          console.log('[PPT DEBUG] Variant selector changed, triggering update');
-          setTimeout(() => {
-            const selectedVariantId = document.querySelector('[name="id"]')?.value;
-            const selectedVariant = productData.variants.find(v => v.id == selectedVariantId);
-            
-            if (selectedVariant?.featured_image?.src) {
-              console.log('[PPT DEBUG] Fallback: Loading variant image:', selectedVariant.featured_image.src);
-              fabric.Image.fromURL(selectedVariant.featured_image.src, function (img) {
-                console.log('[PPT DEBUG] Fallback: Variant image loaded successfully');
-                img.scaleToWidth(700);
-                canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-              }, { crossOrigin: 'anonymous' });
-            }
-          }, 100); // Small delay to ensure DOM is updated
+      // Listen for clicks on color swatches
+      document.addEventListener('click', function (e) {
+        if (e.target.closest('[data-variant-id]') || 
+            e.target.closest('input[name*="Color"]') ||
+            e.target.closest('.swatch')) {
+          console.log('[PPT DEBUG] Color swatch clicked, updating canvas');
+          setTimeout(updateCanvasBackground, 150);
         }
       });
 
