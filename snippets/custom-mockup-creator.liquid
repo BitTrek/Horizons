@@ -806,21 +806,17 @@
                 // Always use /uploads/uploads/ instead of /uploads/ in the returned URL
                 let fixedUrl = data.url.replace('/uploads/', '/uploads/uploads/');
                 
-                // Only create screenshot input if we have an uploaded design
-                if (uploadedImage) {
-                  let hiddenInput = document.getElementById('mockup-screenshot-url');
-                  if (!hiddenInput) {
-                    hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = 'properties[Mockup Screenshot URL]';
-                    hiddenInput.id = 'mockup-screenshot-url';
-                    form.appendChild(hiddenInput);
-                  }
-                  hiddenInput.value = fixedUrl;
-                  console.log('[PPT DEBUG] Uploaded screenshot URL:', fixedUrl);
-                } else {
-                  console.log('[PPT DEBUG] No uploaded design, skipping screenshot URL');
+                // Always create screenshot input since we successfully uploaded a screenshot
+                let hiddenInput = document.getElementById('mockup-screenshot-url');
+                if (!hiddenInput) {
+                  hiddenInput = document.createElement('input');
+                  hiddenInput.type = 'hidden';
+                  hiddenInput.name = 'properties[Mockup Screenshot URL]';
+                  hiddenInput.id = 'mockup-screenshot-url';
+                  form.appendChild(hiddenInput);
                 }
+                hiddenInput.value = fixedUrl;
+                console.log('[PPT DEBUG] Uploaded screenshot URL:', fixedUrl);
                 
                 submitViaAjax(form);
               } else {
