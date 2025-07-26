@@ -204,27 +204,42 @@
         setTimeout(updateCanvasBackground, 50);
       });
 
-      // Listen for color swatch changes
+      // Listen for radio input changes (color swatches)
       document.addEventListener('change', function (e) {
-        console.log('[PPT DEBUG] Change event detected:', e.target.name, e.target.value);
+        console.log('[PPT DEBUG] Change event detected:', e.target.name, e.target.value, e.target.type);
         
-        if (e.target.name === 'id' || 
-            e.target.name?.includes('variant') || 
-            e.target.name?.includes('Color') ||
-            e.target.getAttribute('data-variant-id')) {
-          console.log('[PPT DEBUG] Variant-related change detected, updating canvas');
+        // Check if it's a radio input (color swatch)
+        if (e.target.type === 'radio') {
+          console.log('[PPT DEBUG] Radio input changed, updating canvas');
           setTimeout(updateCanvasBackground, 100);
         }
       });
 
-      // Listen for clicks on color swatches
+      // Listen for clicks on color swatches and labels
       document.addEventListener('click', function (e) {
-        if (e.target.closest('[data-variant-id]') || 
-            e.target.closest('input[name*="Color"]') ||
-            e.target.closest('.swatch')) {
-          console.log('[PPT DEBUG] Color swatch clicked, updating canvas');
+        const target = e.target;
+        console.log('[PPT DEBUG] Click detected on:', target.tagName, target.className);
+        
+        // Check if clicked on a swatch, label, or radio input
+        if (target.closest('.swatch') || 
+            target.closest('.variant-option__button-label') ||
+            target.closest('input[type="radio"]') ||
+            target.closest('[data-variant-id]')) {
+          console.log('[PPT DEBUG] Color swatch/label clicked, updating canvas');
           setTimeout(updateCanvasBackground, 150);
         }
+      });
+
+      // Also listen for the specific Shopify variant picker events
+      document.addEventListener('DOMContentLoaded', function() {
+        // Find all variant picker components and listen to their events
+        const variantPickers = document.querySelectorAll('variant-picker, swatches-variant-picker-component');
+        variantPickers.forEach(picker => {
+          picker.addEventListener('change', function(e) {
+            console.log('[PPT DEBUG] Variant picker change detected');
+            setTimeout(updateCanvasBackground, 100);
+          });
+        });
       });
 
       const isMobile = window.innerWidth <= 1200;
