@@ -148,13 +148,42 @@
       });
 
       document.addEventListener('variant:update', function () {
+        console.log('[PPT DEBUG] Variant update event triggered');
         const selectedVariantId = document.querySelector('[name="id"]')?.value;
+        console.log('[PPT DEBUG] Selected variant ID:', selectedVariantId);
+        
         const selectedVariant = productData.variants.find(v => v.id == selectedVariantId);
+        console.log('[PPT DEBUG] Found variant:', selectedVariant);
+        
         if (selectedVariant?.featured_image?.src) {
+          console.log('[PPT DEBUG] Loading variant image:', selectedVariant.featured_image.src);
           fabric.Image.fromURL(selectedVariant.featured_image.src, function (img) {
+            console.log('[PPT DEBUG] Variant image loaded successfully');
             img.scaleToWidth(700);
             canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-          });
+          }, { crossOrigin: 'anonymous' });
+        } else {
+          console.log('[PPT DEBUG] No featured image found for variant');
+        }
+      });
+
+      // Fallback: Also listen for changes to the variant selector
+      document.addEventListener('change', function (e) {
+        if (e.target.name === 'id' || e.target.name?.includes('variant')) {
+          console.log('[PPT DEBUG] Variant selector changed, triggering update');
+          setTimeout(() => {
+            const selectedVariantId = document.querySelector('[name="id"]')?.value;
+            const selectedVariant = productData.variants.find(v => v.id == selectedVariantId);
+            
+            if (selectedVariant?.featured_image?.src) {
+              console.log('[PPT DEBUG] Fallback: Loading variant image:', selectedVariant.featured_image.src);
+              fabric.Image.fromURL(selectedVariant.featured_image.src, function (img) {
+                console.log('[PPT DEBUG] Fallback: Variant image loaded successfully');
+                img.scaleToWidth(700);
+                canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+              }, { crossOrigin: 'anonymous' });
+            }
+          }, 100); // Small delay to ensure DOM is updated
         }
       });
 
