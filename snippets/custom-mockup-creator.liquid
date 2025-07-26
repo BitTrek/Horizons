@@ -682,22 +682,52 @@
         }
         canvas.getObjects().forEach(obj => { obj.hasControls = false });
         canvas.renderAll();
-        html2canvas(mockup, { useCORS: true, scale: 2 }).then(canvasScreenshot => {
-          canvas.getObjects().forEach(obj => { obj.hasControls = true });
-          canvas.renderAll();
-          // Crop the screenshot to a square using the left side as base
-          const origWidth = canvasScreenshot.width;
-          const origHeight = canvasScreenshot.height;
-          const size = origHeight; // Use height as the square size
-          const sx = 0; // Always start from the left
-          const sy = 0; // Always start from the top
-          // Create a 250x250 canvas for upload
-          const targetSize = 250;
-          const squareCanvas = document.createElement('canvas');
-          squareCanvas.width = targetSize;
-          squareCanvas.height = targetSize;
-          const ctx = squareCanvas.getContext('2d');
-          ctx.drawImage(canvasScreenshot, sx, sy, size, size, 0, 0, targetSize, targetSize);
+        
+        // Use Fabric.js canvas directly for screenshot
+        const canvasScreenshot = canvas.toDataURL({
+          format: 'png',
+          quality: 1,
+          multiplier: 2
+        });
+        
+        canvas.getObjects().forEach(obj => { obj.hasControls = true });
+        canvas.renderAll();
+        
+        // Create a 250x250 canvas for upload
+        const targetSize = 250;
+        const squareCanvas = document.createElement('canvas');
+        squareCanvas.width = targetSize;
+        squareCanvas.height = targetSize;
+        const ctx = squareCanvas.getContext('2d');
+        
+        // Load the canvas screenshot and draw it properly
+        const img = new Image();
+        img.onload = function() {
+          // Calculate the aspect ratio to maintain proportions
+          const aspectRatio = img.width / img.height;
+          let drawWidth, drawHeight, offsetX, offsetY;
+          
+          if (aspectRatio > 1) {
+            // Image is wider than tall - fit to height
+            drawHeight = targetSize;
+            drawWidth = targetSize * aspectRatio;
+            offsetX = (targetSize - drawWidth) / 2;
+            offsetY = 0;
+          } else {
+            // Image is taller than wide - fit to width
+            drawWidth = targetSize;
+            drawHeight = targetSize / aspectRatio;
+            offsetX = 0;
+            offsetY = (targetSize - drawHeight) / 2;
+          }
+          
+          // Fill background with white
+          ctx.fillStyle = 'white';
+          ctx.fillRect(0, 0, targetSize, targetSize);
+          
+          // Draw the image maintaining aspect ratio
+          ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+          
           // Generate a unique 8-char hash for the filename
           function getShortHash() {
             const str = Date.now().toString() + Math.random().toString();
@@ -735,7 +765,10 @@
               alert('Screenshot upload failed. Please try again.');
             });
           }, 'image/png');
-        });
+        };
+        
+        // Set the image source to load it
+        img.src = canvasScreenshot;
       });
 
       function submitViaAjax(form) {
