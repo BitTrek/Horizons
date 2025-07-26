@@ -8,7 +8,7 @@
 .canvas-wrapper {
   width: 100%;
   max-width: 100%;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
 }
 
@@ -30,5 +30,18 @@
 #canvas {
   max-width: 100%;
   display: block;
+}
+
+/* Handle case when no product description on desktop */
+@media screen and (min-width: 750px) {
+  .product-information__grid:has(.product-details:empty) .canvas-wrapper,
+  .product-information__grid:has(.product-details:not(:has(*))) .canvas-wrapper {
+    overflow: visible;
+  }
+  
+  .product-information__grid:has(.product-details:empty) .canvas-container,
+  .product-information__grid:has(.product-details:not(:has(*))) .canvas-container {
+    max-height: none !important;
+  }
 }
 </style> 
