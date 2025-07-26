@@ -1,35 +1,42 @@
-<div class="canvas-container" style="width: 700px; height: 700px; position: relative; user-select: none;"><canvas id="canvas" class="lower-canvas" style="position: absolute; width: 100%; height: 100%; left: 0px; top: 0px; touch-action: none; user-select: none;" width="700" height="700"></canvas><canvas class="upper-canvas " style="position: absolute; width: 700px; height: 700px; left: 0px; top: 0px; touch-action: none; user-select: none; cursor: default;" width="700" height="700"></canvas></div>
+<div class="product-information__media" data-testid="product-information-media">
+  <div class="canvas-wrapper">
+    <canvas id="canvas"></canvas>
+  </div>
+</div>
 
 <style>
-.canvas-container {
-  width: 100% !important;
-  max-width: 100% !important;
-  height: auto !important;
-  position: relative !important;
-  z-index: 1;
+.canvas-wrapper {
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
-.canvas-container canvas {
-  width: 100% !important;
-  height: auto !important;
-  max-width: 100% !important;
-  position: absolute !important;
-  left: 0 !important;
-  top: 0 !important;
-  z-index: 1;
+#canvas {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
 }
 
-/* Ensure the canvas appears above other elements */
+/* Ensure proper z-index stacking */
 .product-information__media {
   position: relative;
   z-index: 1;
 }
 
+/* Handle responsive behavior */
+@media screen and (max-width: 749px) {
+  .canvas-wrapper {
+    margin-bottom: 1rem;
+  }
+}
+
 /* Handle case when no product description on desktop */
 @media screen and (min-width: 750px) {
-  .product-information__grid:has(.product-details:empty) .canvas-container,
-  .product-information__grid:has(.product-details:not(:has(*))) .canvas-container {
-    height: auto !important;
+  .product-information__grid:has(.product-details:empty) .canvas-wrapper,
+  .product-information__grid:has(.product-details:not(:has(*))) .canvas-wrapper {
+    max-height: none;
   }
 }
 </style>
