@@ -29,15 +29,15 @@
         ml: false, 
         mr: false 
       });
-      fabric.Object.prototype.cornerSize = 30; // 50% smaller hit area
+      fabric.Object.prototype.cornerSize = 60; // Much larger invisible hit area
       fabric.Object.prototype.cornerStyle = 'circle';
       fabric.Object.prototype.transparentCorners = false;
       fabric.Object.prototype.cornerColor = '#b2ccff';
       fabric.Object.prototype.cornerStrokeColor = '#000';
       fabric.Object.prototype.borderColor = '#b2ccff';
       fabric.Object.prototype.borderScaleFactor = 2;
-      fabric.Object.prototype.rotatingPointOffset = 30; // 50% smaller rotation handle area
-      fabric.Object.prototype.padding = 10; // 50% smaller padding
+      fabric.Object.prototype.rotatingPointOffset = 60; // Larger rotation handle area
+      fabric.Object.prototype.padding = 20; // Add padding around the object for easier selection
       
       canvas.setWidth(700);
       canvas.setHeight(700);
@@ -130,12 +130,12 @@
           transparentCorners: false,
           cornerColor: '#b2ccff',
           cornerStrokeColor: '#000',
-          cornerSize: 30, // 50% smaller hit area
+          cornerSize: 60, // Match the global setting
           cornerStyle: 'circle',
           borderColor: '#b2ccff',
           borderScaleFactor: 2,
-          padding: 10, // 50% smaller padding
-          rotatingPointOffset: 30 // 50% smaller rotation handle
+          padding: 20, // Add padding for easier selection
+          rotatingPointOffset: 60 // Larger rotation handle
         });
         canvas.add(fabricImg);
         canvas.renderAll();
