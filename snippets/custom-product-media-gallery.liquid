@@ -1,71 +1,79 @@
-<div class="product-information__media" data-testid="product-information-media">
-  <div class="canvas-wrapper">
-    <canvas id="canvas"></canvas>
+<media-gallery
+  class="spacing-style sticky-content media-gallery--one-column media-gallery--grid"
+  style="--media-radius: 0px; --image-gap: 0px;"
+  data-presentation="grid"
+>
+  <div
+    class="product-media-container product-media-container--image constrain-height media-fit-contain product-media-container--zoomable"
+    style="--media-preview-ratio: 1.0;"
+  >
+    <div class="canvas-wrapper">
+      <canvas id="canvas"></canvas>
+    </div>
   </div>
-</div>
+</media-gallery>
 
 <style>
-.canvas-wrapper {
-  width: 100%;
-  max-width: 100%;
-  position: relative;
-  overflow: visible;
-  touch-action: manipulation;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  aspect-ratio: 1 / 1;
-}
-
-#canvas {
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  max-height: 100%;
-  display: block;
-  touch-action: manipulation;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  pointer-events: auto;
-  object-fit: contain;
-}
-
-/* Ensure proper z-index stacking */
-.product-information__media {
-  position: relative;
-  z-index: 1;
-}
-
-/* Handle responsive behavior */
-@media screen and (max-width: 749px) {
+  /* Match default Shopify product media gallery structure exactly */
   .canvas-wrapper {
-    margin-bottom: 1rem;
-    touch-action: auto !important;
-    width: 100vw;
-    max-width: 100vw;
-    margin-left: calc(-50vw + 50%);
-    margin-right: calc(-50vw + 50%);
-  }
-  
-  #canvas {
-    touch-action: auto !important;
+    position: relative;
     width: 100%;
     height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  
-  .product-information__media {
-    overflow: visible;
-  }
-}
 
-/* Handle case when no product description on desktop */
-@media screen and (min-width: 750px) {
-  .product-information__grid:has(.product-details:empty) .canvas-wrapper,
-  .product-information__grid:has(.product-details:not(:has(*))) .canvas-wrapper {
-    max-height: none;
+  #canvas {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    object-fit: contain;
   }
-}
+
+  /* Inherit all default Shopify media gallery styles */
+  .product-media-container {
+    --slide-width: round(up, 100%, 1px);
+    display: flex;
+    aspect-ratio: var(--gallery-aspect-ratio, var(--media-preview-ratio));
+    max-height: var(--constrained-height);
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .product-media-container.constrain-height {
+    --viewport-offset: 400px;
+    --constrained-min-height: 300px;
+    --constrained-height: max(var(--constrained-min-height), calc(100vh - var(--viewport-offset)));
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  /* Mobile responsive behavior */
+  @media screen and (max-width: 749px) {
+    .product-media-container.constrain-height {
+      max-height: none;
+    }
+  }
+
+  /* Desktop responsive behavior */
+  @media screen and (min-width: 750px) {
+    .product-media-container.constrain-height {
+      --viewport-offset: var(--header-height, 100px);
+      --constrained-min-height: 500px;
+    }
+  }
+
+  /* Ensure proper touch behavior */
+  .canvas-wrapper,
+  #canvas {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
 </style>
