@@ -2,7 +2,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.4.0/fabric.min.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const mockup = document.getElementById("tshirt-base");
+    const mockup = document.querySelector(".canvas-wrapper");
     let productData = {{ closest.product | json }};
     const deleteIcon = new Image();
     deleteIcon.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
@@ -138,7 +138,7 @@
         }
         e.preventDefault();
         const form = button.closest('form');
-        const mockup = document.getElementById('mockup-wrapper');
+        const mockup = document.querySelector('.canvas-wrapper');
         if (!mockup || !form) {
           console.log('[PPT DEBUG] Mockup or form not found', { mockup, form });
           return;
