@@ -186,6 +186,23 @@
           height: fabricImg.height
         };
         console.log('[PPT DEBUG] Uploaded image data saved for restoration');
+        
+        // Add event listeners to track changes
+        fabricImg.on('modified', function() {
+          updateUploadedImageData();
+        });
+        
+        fabricImg.on('moving', function() {
+          updateUploadedImageData();
+        });
+        
+        fabricImg.on('scaling', function() {
+          updateUploadedImageData();
+        });
+        
+        fabricImg.on('rotating', function() {
+          updateUploadedImageData();
+        });
       });
           };
           img.src = event.target.result;
@@ -237,6 +254,27 @@
         }
       }
 
+      // Function to update uploaded image data in real-time
+      function updateUploadedImageData() {
+        if (!uploadedImage || !uploadedImageData) {
+          return;
+        }
+        
+        uploadedImageData.left = uploadedImage.left;
+        uploadedImageData.top = uploadedImage.top;
+        uploadedImageData.scaleX = uploadedImage.scaleX;
+        uploadedImageData.scaleY = uploadedImage.scaleY;
+        uploadedImageData.angle = uploadedImage.angle;
+        
+        console.log('[PPT DEBUG] Uploaded image data updated:', {
+          left: uploadedImageData.left,
+          top: uploadedImageData.top,
+          scaleX: uploadedImageData.scaleX,
+          scaleY: uploadedImageData.scaleY,
+          angle: uploadedImageData.angle
+        });
+      }
+
       // Function to restore uploaded image
       function restoreUploadedImage() {
         if (!uploadedImageData) {
@@ -270,6 +308,23 @@
           canvas.renderAll();
           uploadedImage = fabricImg;
           console.log('[PPT DEBUG] Uploaded image restored successfully');
+          
+          // Add event listeners to track changes on restored image
+          fabricImg.on('modified', function() {
+            updateUploadedImageData();
+          });
+          
+          fabricImg.on('moving', function() {
+            updateUploadedImageData();
+          });
+          
+          fabricImg.on('scaling', function() {
+            updateUploadedImageData();
+          });
+          
+          fabricImg.on('rotating', function() {
+            updateUploadedImageData();
+          });
         });
       }
 
