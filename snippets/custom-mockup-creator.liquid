@@ -70,6 +70,11 @@
 
         function initCanvas() {
       const canvasElement = document.getElementById("canvas");
+      if (!canvasElement) {
+        console.error('[PPT DEBUG] Canvas element not found during initialization');
+        return;
+      }
+      console.log('[PPT DEBUG] Initializing canvas');
       canvas = new fabric.Canvas("canvas");
       
       // Configure global object properties for better handles
@@ -97,10 +102,26 @@
       // Setup initial event listeners
       setupCanvasEventListeners();
 
+      // Load initial background image
+      console.log('[PPT DEBUG] Loading initial background image');
       fabric.Image.fromURL('{{ closest.product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}', function (img) {
+        console.log('[PPT DEBUG] Initial image loaded, dimensions:', img.width, 'x', img.height);
         img.scaleToWidth(700);
-        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+        canvas.setBackgroundImage(img, function() {
+          console.log('[PPT DEBUG] Initial background image set successfully');
+          canvas.renderAll();
+        });
+      }, { 
+        crossOrigin: 'anonymous',
+        onError: function(err) {
+          console.error('[PPT DEBUG] Error loading initial image:', err);
+        }
       });
+      
+      // Also call updateCanvasBackground to ensure proper variant detection
+      setTimeout(() => {
+        updateCanvasBackground();
+      }, 100);
 
       let uploadedImage;
       document.getElementById('upload-input')?.addEventListener('change', function (e) {
@@ -239,6 +260,10 @@
         
         // Re-add event listeners
         setupCanvasEventListeners();
+        
+        // Set canvas dimensions
+        canvas.setWidth(700);
+        canvas.setHeight(700);
         
         // Load the current variant image
         setTimeout(() => {
@@ -644,7 +669,7 @@
       }
     }
 
-    const canvas = initCanvas();
+    initCanvas();
     rebindEvents(canvas);
   });
 </script> 
