@@ -22,8 +22,12 @@
   height: auto;
   max-width: 100%;
   display: block;
-  touch-action: pan-y;
-  -webkit-overflow-scrolling: touch;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  pointer-events: auto;
 }
 
 /* Ensure proper z-index stacking */
