@@ -26,17 +26,20 @@
       fabric.Object.prototype.cornerStyle = 'circle';
       // Set canvas size based on screen size
       const isMobile = window.innerWidth <= 749;
-      const canvasSize = isMobile ? 350 : 700;
+      const canvasSize = isMobile ? 500 : 700;
       
       canvas.setWidth(canvasSize);
       canvas.setHeight(canvasSize);
       canvasElement.style.width = '100%';
       canvasElement.style.height = 'auto';
 
-      fabric.Image.fromURL('{{ closest.product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}', function (img) {
+      const backgroundImageUrl = '{{ closest.product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}';
+      console.log('[PPT DEBUG] Loading background image:', backgroundImageUrl);
+      fabric.Image.fromURL(backgroundImageUrl, function (img) {
+        console.log('[PPT DEBUG] Background image loaded, scaling to width:', canvasSize);
         img.scaleToWidth(canvasSize);
         canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-      });
+      }, { crossOrigin: 'anonymous' });
 
       let uploadedImage;
       document.getElementById('upload-input')?.addEventListener('change', function (e) {
@@ -84,10 +87,11 @@
         const selectedVariantId = document.querySelector('[name="id"]')?.value;
         const selectedVariant = productData.variants.find(v => v.id == selectedVariantId);
         if (selectedVariant?.featured_image?.src) {
+          console.log('[PPT DEBUG] Variant changed, loading new background:', selectedVariant.featured_image.src);
           fabric.Image.fromURL(selectedVariant.featured_image.src, function (img) {
             img.scaleToWidth(canvasSize);
             canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-          });
+          }, { crossOrigin: 'anonymous' });
         }
       });
 
