@@ -135,11 +135,18 @@
             canvas.renderAll();
             uploadedImage = null;
           }
-          // Clear uploaded image data
-          uploadedImageData = null;
-          console.log('[PPT DEBUG] Uploaded image data cleared');
-          label.innerHTML = `Minimum recommended size: 1000 × 1000px`;
-          return;
+                  // Clear uploaded image data
+        uploadedImageData = null;
+        console.log('[PPT DEBUG] Uploaded image data cleared');
+        
+        // Clear any existing screenshot URL
+        const existingScreenshotInput = document.getElementById('mockup-screenshot-url');
+        if (existingScreenshotInput) {
+          existingScreenshotInput.remove();
+        }
+        
+        label.innerHTML = `Minimum recommended size: 1000 × 1000px`;
+        return;
         }
         const reader = new FileReader();
         reader.onload = function (event) {
@@ -680,6 +687,23 @@
           console.log('[PPT DEBUG] Mockup or form not found', { mockup, form });
           return;
         }
+        
+        // Check if there's an uploaded design to screenshot
+        if (!uploadedImage) {
+          console.log('[PPT DEBUG] No uploaded design found, skipping screenshot');
+          alert('Please upload a design first before adding to cart.');
+          return;
+        }
+        
+        // Double-check that the canvas has objects
+        const canvasObjects = canvas.getObjects();
+        if (canvasObjects.length === 0) {
+          console.log('[PPT DEBUG] Canvas has no objects, skipping screenshot');
+          alert('No design found on canvas. Please upload a design first.');
+          return;
+        }
+        
+        console.log('[PPT DEBUG] Canvas has', canvasObjects.length, 'objects, proceeding with screenshot');
         // Hide all handles and controls before taking screenshot
         const objectsWithControls = [];
         canvas.getObjects().forEach(obj => { 
@@ -695,12 +719,17 @@
         
         console.log('[PPT DEBUG] Handles hidden, taking screenshot');
         
+        // Ensure canvas is fully rendered before taking screenshot
+        canvas.renderAll();
+        
         // Use Fabric.js canvas directly for screenshot
         const canvasScreenshot = canvas.toDataURL({
           format: 'png',
           quality: 1,
           multiplier: 2
         });
+        
+        console.log('[PPT DEBUG] Screenshot taken, size:', canvasScreenshot.length);
         
         // Restore all handles and controls after screenshot
         objectsWithControls.forEach(item => {
