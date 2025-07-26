@@ -680,8 +680,20 @@
           console.log('[PPT DEBUG] Mockup or form not found', { mockup, form });
           return;
         }
-        canvas.getObjects().forEach(obj => { obj.hasControls = false });
+        // Hide all handles and controls before taking screenshot
+        const objectsWithControls = [];
+        canvas.getObjects().forEach(obj => { 
+          objectsWithControls.push({
+            object: obj,
+            hasControls: obj.hasControls,
+            hasBorders: obj.hasBorders
+          });
+          obj.hasControls = false;
+          obj.hasBorders = false;
+        });
         canvas.renderAll();
+        
+        console.log('[PPT DEBUG] Handles hidden, taking screenshot');
         
         // Use Fabric.js canvas directly for screenshot
         const canvasScreenshot = canvas.toDataURL({
@@ -690,8 +702,14 @@
           multiplier: 2
         });
         
-        canvas.getObjects().forEach(obj => { obj.hasControls = true });
+        // Restore all handles and controls after screenshot
+        objectsWithControls.forEach(item => {
+          item.object.hasControls = item.hasControls;
+          item.object.hasBorders = item.hasBorders;
+        });
         canvas.renderAll();
+        
+        console.log('[PPT DEBUG] Handles restored after screenshot');
         
         // Create a 250x250 canvas for upload
         const targetSize = 250;
