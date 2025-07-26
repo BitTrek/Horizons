@@ -10,12 +10,14 @@
   max-width: 100%;
   overflow: visible;
   position: relative;
+  min-height: 100%;
 }
 
 .canvas-container {
   width: 100% !important;
   max-width: 100% !important;
   position: relative !important;
+  min-height: 100%;
 }
 
 .canvas-container canvas {
@@ -37,11 +39,19 @@
   .product-information__grid:has(.product-details:empty) .canvas-wrapper,
   .product-information__grid:has(.product-details:not(:has(*))) .canvas-wrapper {
     overflow: visible;
+    height: auto;
   }
   
   .product-information__grid:has(.product-details:empty) .canvas-container,
   .product-information__grid:has(.product-details:not(:has(*))) .canvas-container {
     max-height: none !important;
+    height: auto !important;
+  }
+  
+  .product-information__grid:has(.product-details:empty) .product-information__media,
+  .product-information__grid:has(.product-details:not(:has(*))) .product-information__media {
+    height: auto;
+    min-height: 100%;
   }
 }
 </style> 
