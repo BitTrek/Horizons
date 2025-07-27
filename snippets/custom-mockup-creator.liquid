@@ -681,8 +681,26 @@
         console.log('[PPT DEBUG] Target name attribute:', e.target.name);
         console.log('[PPT DEBUG] Target type attribute:', e.target.type);
         
-        const button = e.target.closest('button[name="add"]');
+        // Try multiple selectors for the add to cart button
+        let button = e.target.closest('button[name="add"]');
+        if (!button) {
+          button = e.target.closest('button[type="submit"]');
+        }
+        if (!button) {
+          button = e.target.closest('input[type="submit"]');
+        }
+        if (!button) {
+          button = e.target.closest('[data-add-to-cart]');
+        }
+        
         console.log('[PPT DEBUG] Found button:', button);
+        console.log('[PPT DEBUG] Button element:', button);
+        if (button) {
+          console.log('[PPT DEBUG] Button name:', button.name);
+          console.log('[PPT DEBUG] Button type:', button.type);
+          console.log('[PPT DEBUG] Button class:', button.className);
+        }
+        
         if (!button) {
           console.log('[PPT DEBUG] Not an add to cart button');
           return;
@@ -1032,6 +1050,8 @@
         for (let [key, value] of formData.entries()) {
           console.log('[PPT DEBUG] Cart field:', key, '=', value);
         }
+        console.log('[PPT DEBUG] Form data includes properties:', formData.has('properties[Uploaded Design]'));
+        console.log('[PPT DEBUG] Form data includes screenshot:', formData.has('properties[Mockup Screenshot URL]'));
         console.log('[PPT DEBUG] Form elements count:', form.elements.length);
         console.log('[PPT DEBUG] Form elements:');
         for (let i = 0; i < form.elements.length; i++) {
