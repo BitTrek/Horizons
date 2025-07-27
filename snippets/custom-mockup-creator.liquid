@@ -196,6 +196,10 @@
         };
         console.log('[PPT DEBUG] Uploaded image data saved for restoration');
         
+        // Save design data to localStorage for download
+        localStorage.setItem('ppt_design_' + Date.now(), event.target.result);
+        console.log('[PPT DEBUG] Design data saved to localStorage for download');
+        
         // Add event listeners to track changes
         fabricImg.on('modified', function() {
           updateUploadedImageData();

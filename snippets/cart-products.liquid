@@ -48,6 +48,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+// Function to download design from localStorage
+function downloadDesign(itemKey) {
+  console.log('[PPT DEBUG] Downloading design for item:', itemKey);
+  
+  // Try to get the design data from localStorage
+  const designData = localStorage.getItem('ppt_design_' + itemKey);
+  if (designData) {
+    console.log('[PPT DEBUG] Found design data in localStorage');
+    
+    // Create a download link
+    const link = document.createElement('a');
+    link.href = designData;
+    link.download = 'uploaded-design.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } else {
+    console.log('[PPT DEBUG] No design data found in localStorage');
+    alert('Design file not found. Please try uploading the design again.');
+  }
+}
 </script>
 
 <div
@@ -220,14 +242,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         {%- assign property_first_char = property.first | slice: 0 -%}
                         {%- if property.last != blank and property_first_char != '_' -%}
                           <div class="cart-items__properties">
-                            {%- if property.first == 'Uploaded Design' and property.last contains '.png' or property.last contains '.jpg' or property.last contains '.jpeg' or property.last contains '.webp' -%}
+                            {%- if property.first == 'Uploaded Design' -%}
                               <dd>
-                                <a href="{{ property.last }}" target="_blank">Design</a>
+                                <a href="#" onclick="downloadDesign('{{ item.key }}')" style="color: #0066cc; text-decoration: underline;">Download Design</a>
                               </dd>
                             {%- elsif property.first == 'Mockup Screenshot URL' and property.last contains 'mockup-screenshot' -%}
                               {%- assign screenshot_filename = property.last | split: '/' | last -%}
                               <dd>
-                                <a href="https://artshop.lv/download.php?file={{ screenshot_filename }}" target="_blank">Mockup</a>
+                                <a href="https://artshop.lv/download.php?file={{ screenshot_filename }}" target="_blank" style="color: #0066cc; text-decoration: underline;">Download Mockup</a>
                               </dd>
                             {%- else -%}
                               <dt>{{ property.first }}</dt>
