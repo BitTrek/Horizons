@@ -16,6 +16,9 @@
   assign widths = '450, 750, 1200, 1800, 2000'
 %}
 
+<!-- Load Fabric.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+
 <div 
   class="product-main-image-block"
   data-product-main-image
@@ -24,6 +27,7 @@
 >
   {% if main_image %}
     <div class="product-main-image-container">
+      <canvas id="product-canvas-{{ block.id }}" class="product-main-canvas"></canvas>
       <img
         src="{{ main_image | image_url: width: 2000 }}"
         alt="{{ alt }}"
@@ -33,6 +37,7 @@
         class="product-main-image"
         data-variant-image
         data-variant-id="{{ current_variant.id }}"
+        style="display: none;"
       >
     </div>
   {% else %}
@@ -50,9 +55,57 @@ document.addEventListener('DOMContentLoaded', function() {
   if (!productMainImage) return;
 
   const imageElement = productMainImage.querySelector('[data-variant-image]');
-  if (!imageElement) return;
+  const canvasElement = productMainImage.querySelector('.product-main-canvas');
+  if (!imageElement || !canvasElement) return;
 
-  // Function to update the image when variant changes
+  let fabricCanvas = null;
+  let euroHoodieLogo = null;
+
+  // Initialize Fabric.js canvas
+  function initFabricCanvas() {
+    if (fabricCanvas) {
+      fabricCanvas.dispose();
+    }
+
+    fabricCanvas = new fabric.Canvas(canvasElement, {
+      width: 600,
+      height: 600,
+      backgroundColor: 'transparent'
+    });
+
+    // Load the Euro Hoodie logo
+    fabric.Image.fromURL('https://cdn.shopify.com/s/files/1/0947/9808/6476/files/eurohoodie_logo.png?v=1750086173', function(img) {
+      euroHoodieLogo = img;
+      
+      // Scale and position the logo
+      const canvasWidth = fabricCanvas.getWidth();
+      const canvasHeight = fabricCanvas.getHeight();
+      
+      // Scale logo to fit nicely on the product
+      const scale = Math.min(canvasWidth * 0.3 / img.width, canvasHeight * 0.3 / img.height);
+      img.scale(scale);
+      
+      // Center the logo
+      img.set({
+        left: (canvasWidth - img.width * scale) / 2,
+        top: (canvasHeight - img.height * scale) / 2,
+        selectable: true,
+        hasControls: true,
+        hasBorders: true,
+        cornerSize: 10,
+        transparentCorners: false,
+        cornerColor: '#007bff',
+        borderColor: '#007bff'
+      });
+      
+      fabricCanvas.add(img);
+      fabricCanvas.renderAll();
+      
+      console.log('Euro Hoodie logo loaded and positioned on canvas');
+    }, { crossOrigin: 'anonymous' });
+  }
+
+  // Function to update the product image when variant changes
   function updateProductImage(variantId) {
     console.log('Updating product image for variant:', variantId);
     
@@ -68,14 +121,62 @@ document.addEventListener('DOMContentLoaded', function() {
       imageElement.src = imageUrl;
       imageElement.setAttribute('data-variant-id', variantId);
       
+      // Update Fabric.js canvas background
+      if (fabricCanvas) {
+        fabric.Image.fromURL(imageUrl, function(img) {
+          // Scale image to fit canvas
+          const canvasWidth = fabricCanvas.getWidth();
+          const canvasHeight = fabricCanvas.getHeight();
+          
+          const scaleX = canvasWidth / img.width;
+          const scaleY = canvasHeight / img.height;
+          const scale = Math.min(scaleX, scaleY);
+          
+          img.scale(scale);
+          img.set({
+            left: (canvasWidth - img.width * scale) / 2,
+            top: (canvasHeight - img.height * scale) / 2,
+            selectable: false,
+            hasControls: false,
+            hasBorders: false
+          });
+          
+          // Remove existing background image
+          fabricCanvas.getObjects().forEach(obj => {
+            if (obj !== euroHoodieLogo) {
+              fabricCanvas.remove(obj);
+            }
+          });
+          
+          // Add new background image behind the logo
+          fabricCanvas.insertAt(img, 0);
+          fabricCanvas.renderAll();
+          
+          console.log('Product image updated on canvas');
+        }, { crossOrigin: 'anonymous' });
+      }
+      
       // Add a subtle fade effect
-      imageElement.style.opacity = '0.7';
+      canvasElement.style.opacity = '0.7';
       setTimeout(() => {
-        imageElement.style.opacity = '1';
+        canvasElement.style.opacity = '1';
       }, 150);
     } else {
       console.log('No image URL found for variant:', variantId);
     }
+  }
+
+  // Initialize canvas when Fabric.js is loaded
+  if (typeof fabric !== 'undefined') {
+    initFabricCanvas();
+  } else {
+    // Wait for Fabric.js to load
+    const checkFabric = setInterval(() => {
+      if (typeof fabric !== 'undefined') {
+        clearInterval(checkFabric);
+        initFabricCanvas();
+      }
+    }, 100);
   }
 
   // Listen for variant changes
@@ -145,6 +246,15 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: {{ block.settings.border_radius | default: 8 }}px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .product-main-canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: opacity 0.3s ease;
+    border-radius: {{ block.settings.border_radius | default: 8 }}px;
+    cursor: crosshair;
   }
 
   .product-main-image {
