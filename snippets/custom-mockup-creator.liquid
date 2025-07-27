@@ -410,13 +410,6 @@
               height: fabricImg.height
             };
             
-            // Save design data to localStorage for download
-            const designKey = 'ppt_design_' + Date.now();
-            localStorage.setItem(designKey, event.target.result);
-            
-            // Store the design key for later use in cart
-            window.currentDesignKey = designKey;
-            
             // Add event listeners to track changes
             fabricImg.on('modified', updateUploadedImageData);
             fabricImg.on('moving', updateUploadedImageData);
@@ -429,7 +422,9 @@
       reader.readAsDataURL(file);
     });
 
-    // Add to cart handling
+
+
+    // Add to cart handling - SIMPLIFIED APPROACH
     function rebindEvents() {
       document.addEventListener('submit', function (e) {
         const isProductForm = e.target.action && e.target.action.includes('/cart/add');
@@ -442,24 +437,7 @@
         const form = e.target;
         const designInput = document.getElementById('upload-input');
         
-                 // Create hidden input for uploaded design if needed
-         if (designInput && designInput.files.length === 0 && uploadedImageData) {
-           const hiddenDesignInput = document.createElement('input');
-           hiddenDesignInput.type = 'hidden';
-           hiddenDesignInput.name = 'properties[Uploaded Design]';
-           hiddenDesignInput.value = window.currentDesignKey || 'Design uploaded successfully';
-           form.appendChild(hiddenDesignInput);
-         }
-        
-                 // Ensure design property exists
-         let designPropertyInput = form.querySelector('input[name="properties[Uploaded Design]"]');
-         if (!designPropertyInput && uploadedImageData) {
-           designPropertyInput = document.createElement('input');
-           designPropertyInput.type = 'hidden';
-           designPropertyInput.name = 'properties[Uploaded Design]';
-           designPropertyInput.value = window.currentDesignKey || 'Design uploaded successfully';
-           form.appendChild(designPropertyInput);
-         }
+        // Let Shopify handle the file upload normally - no additional logic needed
         
         // Screenshot process
         const mockup = document.querySelector('.canvas-wrapper');
@@ -472,14 +450,6 @@
         if (existingScreenshotInput) {
           existingScreenshotInput.remove();
         }
-        
-        // Clear existing design inputs
-        const existingDesignInputs = form.querySelectorAll('input[name="properties[Uploaded Design]"]');
-        existingDesignInputs.forEach(input => input.remove());
-        
-        // Store current state for screenshot
-        const tempUploadedImageData = uploadedImageData;
-        const tempUploadedImage = window.uploadedImage;
         
         // Test server connectivity
         fetch('https://artshop.lv/upload.php', { method: 'HEAD' })

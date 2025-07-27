@@ -5,16 +5,11 @@
 ></script>
 
 <script>
-// Function to download design from localStorage
-function downloadDesign(designKey) {
-  const designData = localStorage.getItem(designKey);
-  if (designData) {
-    const link = document.createElement('a');
-    link.href = designData;
-    link.download = 'uploaded-design.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+// Function to download design - uses Shopify's built-in file handling
+function downloadDesign(designUrl) {
+  if (designUrl) {
+    // Open the design file URL directly - Shopify handles the file
+    window.open(designUrl, '_blank');
   } else {
     alert('Design file not found. Please try uploading the design again.');
   }
