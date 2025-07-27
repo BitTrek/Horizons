@@ -66,8 +66,26 @@
       setupCanvasEventListeners();
 
       // Load initial background image
-      const imageUrl = '{{ product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}';
+      let imageUrl = '{{ product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}';
       console.log('Loading initial image from URL:', imageUrl);
+      
+      // Fix protocol-relative URLs
+      if (imageUrl.startsWith('//')) {
+        imageUrl = 'https:' + imageUrl;
+        console.log('Fixed initial image URL:', imageUrl);
+      }
+      
+      // Test if the image URL is accessible
+      const testImg = new Image();
+      testImg.crossOrigin = 'anonymous';
+      testImg.onload = function() {
+        console.log('✅ Test image loaded successfully:', testImg.width, 'x', testImg.height);
+        console.log('✅ Image URL is valid:', imageUrl);
+      };
+      testImg.onerror = function() {
+        console.error('❌ Test image failed to load:', imageUrl);
+      };
+      testImg.src = imageUrl;
       
       fabric.Image.fromURL(imageUrl, function (img) {
         console.log('Image loaded successfully:', img);
@@ -128,6 +146,7 @@
               canvasElement.style.backgroundColor = '';
             }, 2000);
           }
+          });
         });
       }, { 
         crossOrigin: 'anonymous',
@@ -371,6 +390,12 @@
       }
       
       if (imageUrl) {
+        // Fix protocol-relative URLs
+        if (imageUrl.startsWith('//')) {
+          imageUrl = 'https:' + imageUrl;
+          console.log('Fixed variant image URL:', imageUrl);
+        }
+        
         console.log('Loading variant image from:', imageUrl);
         fabric.Image.fromURL(imageUrl, function(img) {
           console.log('Variant image loaded:', img);
