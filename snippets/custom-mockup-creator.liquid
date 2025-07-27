@@ -1,81 +1,21 @@
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.4.0/fabric.min.js"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const mockup = document.querySelector(".canvas-wrapper");
-    let productData = {{ closest.product | json }};
-    let canvas; // Global canvas variable
-    let uploadedImageData = null; // Store uploaded image data for restoration
-    
-    // Function to setup canvas event listeners
-    function setupCanvasEventListeners() {
-      // Enable pinch-to-zoom/resize functionality
-      canvas.on('mouse:down', function(opt) {
-        const evt = opt.e;
-        if (evt.touches && evt.touches.length === 2) {
-          // Two finger touch detected - enable pinch mode
-          canvas.selection = false;
-          canvas.defaultCursor = 'move';
-        }
-      });
-      
-      canvas.on('mouse:move', function(opt) {
-        const evt = opt.e;
-        if (evt.touches && evt.touches.length === 2) {
-          // Handle pinch gesture
-          const touch1 = evt.touches[0];
-          const touch2 = evt.touches[1];
-          
-          const currentDistance = Math.sqrt(
-            Math.pow(touch2.clientX - touch1.clientX, 2) + 
-            Math.pow(touch2.clientY - touch1.clientY, 2)
-          );
-          
-          if (!canvas._pinchStartDistance) {
-            canvas._pinchStartDistance = currentDistance;
-            canvas._pinchStartScale = canvas.getActiveObject() ? canvas.getActiveObject().scaleX : 1;
-          }
-          
-          const scaleFactor = currentDistance / canvas._pinchStartDistance;
-          const newScale = canvas._pinchStartScale * scaleFactor;
-          
-          if (canvas.getActiveObject()) {
-            canvas.getActiveObject().scale(newScale);
-            canvas.renderAll();
-          }
-        }
-      });
-      
-      canvas.on('mouse:up', function(opt) {
-        // Reset pinch state
-        canvas._pinchStartDistance = null;
-        canvas._pinchStartScale = null;
-        canvas.selection = true;
-        canvas.defaultCursor = 'default';
-      });
-    }
-    
-    const deleteIcon = new Image();
-    deleteIcon.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-      <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <mask id="mask-x">
-            <rect width="60" height="60" fill="white"/>
-            <line x1="15" y1="15" x2="45" y2="45" stroke="black" stroke-width="6"/>
-            <line x1="45" y1="15" x2="15" y2="45" stroke="black" stroke-width="6"/>
-          </mask>
-        </defs>
-        <circle cx="30" cy="30" r="30" fill="#b2ccff" mask="url(#mask-x)"/>
-      </svg>
-    `);
+{% if template contains 'ppt-' %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
 
-        function initCanvas() {
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Global variables
+    let canvas;
+    let uploadedImageData = null;
+    let uploadedImage = null;
+    window.uploadedImage = null;
+
+    // Initialize canvas
+    function initCanvas() {
       const canvasElement = document.getElementById("canvas");
       if (!canvasElement) {
-        console.error('[PPT DEBUG] Canvas element not found during initialization');
         return;
       }
-      console.log('[PPT DEBUG] Initializing canvas');
+      
       canvas = new fabric.Canvas("canvas");
       
       // Configure global object properties for better handles
@@ -85,218 +25,165 @@
         ml: false, 
         mr: false 
       });
-      fabric.Object.prototype.cornerSize = 60; // Much larger invisible hit area
+      fabric.Object.prototype.cornerSize = 60;
       fabric.Object.prototype.cornerStyle = 'circle';
       fabric.Object.prototype.transparentCorners = false;
       fabric.Object.prototype.cornerColor = '#b2ccff';
       fabric.Object.prototype.cornerStrokeColor = '#000';
       fabric.Object.prototype.borderColor = '#b2ccff';
       fabric.Object.prototype.borderScaleFactor = 2;
-      fabric.Object.prototype.rotatingPointOffset = 60; // Larger rotation handle area
-      fabric.Object.prototype.padding = 20; // Add padding around the object for easier selection
+      fabric.Object.prototype.rotatingPointOffset = 60;
+      fabric.Object.prototype.padding = 20;
       
       canvas.setWidth(700);
       canvas.setHeight(700);
       canvasElement.style.width = '100%';
       canvasElement.style.height = '100%';
       
-      // Setup initial event listeners
       setupCanvasEventListeners();
 
       // Load initial background image
-      console.log('[PPT DEBUG] Loading initial background image');
       fabric.Image.fromURL('{{ closest.product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}', function (img) {
-        console.log('[PPT DEBUG] Initial image loaded, dimensions:', img.width, 'x', img.height);
         img.scaleToWidth(700);
         canvas.setBackgroundImage(img, function() {
-          console.log('[PPT DEBUG] Initial background image set successfully');
           canvas.renderAll();
         });
       }, { 
         crossOrigin: 'anonymous',
         onError: function(err) {
-          console.error('[PPT DEBUG] Error loading initial image:', err);
+          console.error('Error loading initial image:', err);
         }
       });
       
-      // Also call updateCanvasBackground to ensure proper variant detection
       setTimeout(() => {
         updateCanvasBackground();
       }, 100);
+    }
 
-      let uploadedImage = null;
-      document.getElementById('upload-input')?.addEventListener('change', function (e) {
-        const label = document.querySelector('label#message');
-        if (!label) return;
-        const file = e.target.files[0];
-        if (!file) {
-          if (uploadedImage) {
-            canvas.remove(uploadedImage);
-            canvas.renderAll();
-            uploadedImage = null;
-        window.uploadedImage = null;
+    // Setup canvas event listeners
+    function setupCanvasEventListeners() {
+      let isPinching = false;
+      let startDistance = 0;
+      let startScale = 1;
+
+      canvas.on('mouse:down', function(e) {
+        if (e.e.touches && e.e.touches.length === 2) {
+          isPinching = true;
+          const touch1 = e.e.touches[0];
+          const touch2 = e.e.touches[1];
+          startDistance = Math.sqrt(
+            Math.pow(touch2.clientX - touch1.clientX, 2) +
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+          );
+          if (e.target) {
+            startScale = e.target.scaleX;
           }
-                  // Clear uploaded image data
-        uploadedImageData = null;
-        console.log('[PPT DEBUG] Uploaded image data cleared');
-        
-        // Clear any existing screenshot URL
-        const existingScreenshotInput = document.getElementById('mockup-screenshot-url');
-        if (existingScreenshotInput) {
-          existingScreenshotInput.remove();
         }
-        
-        label.innerHTML = `Minimum recommended size: 1000 × 1000px`;
-        return;
+      });
+
+      canvas.on('mouse:move', function(e) {
+        if (isPinching && e.e.touches && e.e.touches.length === 2 && e.target) {
+          const touch1 = e.e.touches[0];
+          const touch2 = e.e.touches[1];
+          const currentDistance = Math.sqrt(
+            Math.pow(touch2.clientX - touch1.clientX, 2) +
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+          );
+          const scale = currentDistance / startDistance;
+          e.target.scaleX = startScale * scale;
+          e.target.scaleY = startScale * scale;
+          canvas.renderAll();
         }
-        const reader = new FileReader();
-        reader.onload = function (event) {
-          const img = new Image();
-          img.onload = function () {
-            const width = img.naturalWidth;
-            const height = img.naturalHeight;
-            const isValid = width >= 1000 && height >= 1000;
-            label.innerHTML = `Uploaded size: <span style=\"color:${isValid ? 'green' : 'red'}\">${width} × ${height}px</span>`;
-                  fabric.Image.fromURL(event.target.result, function (fabricImg) {
-        if (uploadedImage) canvas.remove(uploadedImage);
-        const maxWidth = canvas.getWidth() * 0.5;
-        const maxHeight = canvas.getHeight() * 0.5;
-        if (fabricImg.width > maxWidth || fabricImg.height > maxHeight) fabricImg.scaleToWidth(maxWidth);
-        fabricImg.set({
-          left: (canvas.getWidth() - fabricImg.getScaledWidth()) / 2,
-          top: (canvas.getHeight() - fabricImg.getScaledHeight()) / 2,
-          hasBorders: true,
-          hasControls: true,
-          hasRotatingPoint: true,
-          transparentCorners: false,
-          cornerColor: '#b2ccff',
-          cornerStrokeColor: '#000',
-          cornerSize: 60, // Match the global setting
-          cornerStyle: 'circle',
-          borderColor: '#b2ccff',
-          borderScaleFactor: 2,
-          padding: 20, // Add padding for easier selection
-          rotatingPointOffset: 60 // Larger rotation handle
-        });
-        canvas.add(fabricImg);
-        canvas.renderAll();
-        uploadedImage = fabricImg;
-        window.uploadedImage = fabricImg;
-        
-        // Save uploaded image data for restoration
+      });
+
+      canvas.on('mouse:up', function() {
+        isPinching = false;
+      });
+    }
+
+    // Update uploaded image data
+    function updateUploadedImageData() {
+      if (uploadedImageData && window.uploadedImage) {
         uploadedImageData = {
-          src: event.target.result,
-          left: fabricImg.left,
-          top: fabricImg.top,
-          scaleX: fabricImg.scaleX,
-          scaleY: fabricImg.scaleY,
-          angle: fabricImg.angle,
-          width: fabricImg.width,
-          height: fabricImg.height
+          src: uploadedImageData.src,
+          left: window.uploadedImage.left,
+          top: window.uploadedImage.top,
+          scaleX: window.uploadedImage.scaleX,
+          scaleY: window.uploadedImage.scaleY,
+          angle: window.uploadedImage.angle,
+          width: window.uploadedImage.width,
+          height: window.uploadedImage.height
         };
-        console.log('[PPT DEBUG] Uploaded image data saved for restoration');
-        
-        // Save design data to localStorage for download
-        localStorage.setItem('ppt_design_' + Date.now(), event.target.result);
-        console.log('[PPT DEBUG] Design data saved to localStorage for download');
-        
-        // Add event listeners to track changes
-        fabricImg.on('modified', function() {
-          updateUploadedImageData();
-        });
-        
-        fabricImg.on('moving', function() {
-          updateUploadedImageData();
-        });
-        
-        fabricImg.on('scaling', function() {
-          updateUploadedImageData();
-        });
-        
-        fabricImg.on('rotating', function() {
-          updateUploadedImageData();
-        });
-      });
-          };
-          img.src = event.target.result;
-        };
-        reader.readAsDataURL(file);
-      });
-
-      // Function to ensure canvas is ready
-      function ensureCanvasReady() {
-        return new Promise((resolve) => {
-          if (canvas && canvas.width > 0 && canvas.height > 0) {
-            resolve();
-          } else {
-            console.log('[PPT DEBUG] Canvas not ready, waiting...');
-            setTimeout(() => {
-              if (canvas && canvas.width > 0 && canvas.height > 0) {
-                console.log('[PPT DEBUG] Canvas ready after wait');
-                resolve();
-              } else {
-                console.log('[PPT DEBUG] Canvas still not ready, proceeding anyway');
-                resolve();
-              }
-            }, 100);
-          }
-        });
       }
+    }
 
-      // Function to check if canvas needs re-initialization
-      function checkCanvasHealth() {
-        if (!canvas) {
-          console.log('[PPT DEBUG] Canvas is null, needs re-initialization');
+    // Ensure canvas is ready
+    function ensureCanvasReady() {
+      if (!canvas) {
+        return false;
+      }
+      
+      let attempts = 0;
+      while (!canvas.getContext() && attempts < 10) {
+        attempts++;
+        setTimeout(() => {}, 50);
+      }
+      
+      return canvas.getContext() !== null;
+    }
+
+    // Check canvas health
+    function checkCanvasHealth() {
+      if (!canvas) {
+        return false;
+      }
+      
+      try {
+        const canvasElement = canvas.getElement();
+        if (!canvasElement) {
           return false;
         }
         
-        try {
-          const canvasElement = canvas.getElement();
-          const width = canvasElement.offsetWidth;
-          const height = canvasElement.offsetHeight;
-          
-          if (width === 0 || height === 0) {
-            console.log('[PPT DEBUG] Canvas element has zero dimensions, needs re-initialization');
-            return false;
-          }
-          
-          return true;
-        } catch (e) {
-          console.log('[PPT DEBUG] Canvas element error, needs re-initialization:', e);
-          return false;
-        }
+        const rect = canvasElement.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      } catch (e) {
+        return false;
       }
+    }
 
-      // Function to update uploaded image data in real-time
-      function updateUploadedImageData() {
-        if (!uploadedImage || !uploadedImageData) {
-          return;
-        }
-        
-        uploadedImageData.left = uploadedImage.left;
-        uploadedImageData.top = uploadedImage.top;
-        uploadedImageData.scaleX = uploadedImage.scaleX;
-        uploadedImageData.scaleY = uploadedImage.scaleY;
-        uploadedImageData.angle = uploadedImage.angle;
-        
-        console.log('[PPT DEBUG] Uploaded image data updated:', {
-          left: uploadedImageData.left,
-          top: uploadedImageData.top,
-          scaleX: uploadedImageData.scaleX,
-          scaleY: uploadedImageData.scaleY,
-          angle: uploadedImageData.angle
-        });
+    // Reinitialize canvas
+    function reinitializeCanvas() {
+      if (canvas) {
+        canvas.dispose();
       }
-
-      // Function to restore uploaded image
-      function restoreUploadedImage() {
-        if (!uploadedImageData) {
-          console.log('[PPT DEBUG] No uploaded image data to restore');
-          return;
-        }
-        
-        console.log('[PPT DEBUG] Restoring uploaded image');
-        fabric.Image.fromURL(uploadedImageData.src, function (fabricImg) {
+      
+      canvas = new fabric.Canvas("canvas");
+      
+      // Re-apply global settings
+      fabric.Object.prototype.setControlsVisibility({ 
+        mt: false, 
+        mb: false, 
+        ml: false, 
+        mr: false 
+      });
+      fabric.Object.prototype.cornerSize = 60;
+      fabric.Object.prototype.cornerStyle = 'circle';
+      fabric.Object.prototype.transparentCorners = false;
+      fabric.Object.prototype.cornerColor = '#b2ccff';
+      fabric.Object.prototype.cornerStrokeColor = '#000';
+      fabric.Object.prototype.borderColor = '#b2ccff';
+      fabric.Object.prototype.borderScaleFactor = 2;
+      fabric.Object.prototype.rotatingPointOffset = 60;
+      fabric.Object.prototype.padding = 20;
+      
+      canvas.setWidth(700);
+      canvas.setHeight(700);
+      
+      setupCanvasEventListeners();
+      
+      // Restore uploaded image if exists
+      if (uploadedImageData) {
+        fabric.Image.fromURL(uploadedImageData.src, function(fabricImg) {
           fabricImg.set({
             left: uploadedImageData.left,
             top: uploadedImageData.top,
@@ -305,809 +192,410 @@
             angle: uploadedImageData.angle,
             hasBorders: true,
             hasControls: true,
-            hasRotatingPoint: true,
-            transparentCorners: false,
-            cornerColor: '#b2ccff',
-            cornerStrokeColor: '#000',
-            cornerSize: 60,
-            cornerStyle: 'circle',
-            borderColor: '#b2ccff',
-            borderScaleFactor: 2,
-            padding: 20,
-            rotatingPointOffset: 60
+            hasRotatingPoint: true
           });
           
           canvas.add(fabricImg);
-          canvas.renderAll();
-          uploadedImage = fabricImg;
           window.uploadedImage = fabricImg;
-          console.log('[PPT DEBUG] Uploaded image restored successfully');
+          canvas.renderAll();
           
-          // Add event listeners to track changes on restored image
-          fabricImg.on('modified', function() {
-            updateUploadedImageData();
-          });
-          
-          fabricImg.on('moving', function() {
-            updateUploadedImageData();
-          });
-          
-          fabricImg.on('scaling', function() {
-            updateUploadedImageData();
-          });
-          
-          fabricImg.on('rotating', function() {
-            updateUploadedImageData();
-          });
+          // Add event listeners for real-time updates
+          fabricImg.on('modified', updateUploadedImageData);
+          fabricImg.on('moving', updateUploadedImageData);
+          fabricImg.on('scaling', updateUploadedImageData);
+          fabricImg.on('rotating', updateUploadedImageData);
         });
       }
-
-      // Function to re-initialize canvas
-      function reinitializeCanvas() {
-        console.log('[PPT DEBUG] Re-initializing canvas');
-        
-        // Find the canvas element
-        const canvasElement = document.getElementById('canvas');
-        if (!canvasElement) {
-          console.error('[PPT DEBUG] Canvas element not found in DOM');
-          return;
-        }
-        
-        // Re-initialize Fabric.js canvas
-        canvas = new fabric.Canvas('canvas', {
-          width: 700,
-          height: 700,
-          selection: true,
-          preserveObjectStacking: true
-        });
-        
-        console.log('[PPT DEBUG] Canvas re-initialized');
-        
-        // Re-apply global settings
-        fabric.Object.prototype.setControlsVisibility({ 
-          mt: false, 
-          mb: false, 
-          ml: false, 
-          mr: false 
-        });
-        fabric.Object.prototype.cornerSize = 60;
-        fabric.Object.prototype.cornerStyle = 'circle';
-        fabric.Object.prototype.transparentCorners = false;
-        fabric.Object.prototype.cornerColor = '#b2ccff';
-        fabric.Object.prototype.cornerStrokeColor = '#000';
-        fabric.Object.prototype.borderColor = '#b2ccff';
-        fabric.Object.prototype.borderScaleFactor = 2;
-        fabric.Object.prototype.rotatingPointOffset = 60;
-        fabric.Object.prototype.padding = 20;
-        
-        // Re-add event listeners
-        setupCanvasEventListeners();
-        
-        // Set canvas dimensions
-        canvas.setWidth(700);
-        canvas.setHeight(700);
-        
-        // Load the current variant image and restore uploaded image
-        setTimeout(() => {
-          updateCanvasBackground();
-          // Restore uploaded image after background is loaded
-          setTimeout(() => {
-            restoreUploadedImage();
-          }, 100);
-        }, 200);
-      }
-
-      // Function to update canvas background with variant image
-      async function updateCanvasBackground() {
-        console.log('[PPT DEBUG] updateCanvasBackground called');
-        
-        // Check if canvas needs re-initialization
-        if (!checkCanvasHealth()) {
-          console.log('[PPT DEBUG] Canvas unhealthy, re-initializing');
-          reinitializeCanvas();
-          return;
-        }
-        
-        // Wait for canvas to be ready
-        await ensureCanvasReady();
-        
-        console.log('[PPT DEBUG] Canvas found, dimensions:', canvas.width, 'x', canvas.height);
-        
-        try {
-          const canvasElement = canvas.getElement();
-          console.log('[PPT DEBUG] Canvas element visible:', canvasElement.offsetWidth, 'x', canvasElement.offsetHeight);
-          
-          // Check if canvas is visible
-          const canvasStyle = window.getComputedStyle(canvasElement);
-          console.log('[PPT DEBUG] Canvas display:', canvasStyle.display);
-          console.log('[PPT DEBUG] Canvas visibility:', canvasStyle.visibility);
-          console.log('[PPT DEBUG] Canvas opacity:', canvasStyle.opacity);
-        } catch (e) {
-          console.error('[PPT DEBUG] Error checking canvas status:', e);
-        }
-        
-        // Try multiple ways to get the current variant ID
-        let selectedVariantId = null;
-        
-        // Method 1: Check the hidden input with name="id"
-        const hiddenVariantInput = document.querySelector('input[name="id"]');
-        if (hiddenVariantInput) {
-          selectedVariantId = hiddenVariantInput.value;
-          console.log('[PPT DEBUG] Found variant ID from hidden input:', selectedVariantId);
-        }
-        
-        // Method 2: Check checked radio inputs with data-variant-id
-        if (!selectedVariantId) {
-          const checkedRadio = document.querySelector('input[type="radio"]:checked[data-variant-id]');
-          if (checkedRadio) {
-            selectedVariantId = checkedRadio.getAttribute('data-variant-id');
-            console.log('[PPT DEBUG] Found variant ID from checked radio:', selectedVariantId);
-          }
-        }
-        
-        // Method 3: Check any radio input with data-variant-id (fallback)
-        if (!selectedVariantId) {
-          const anyRadio = document.querySelector('input[type="radio"][data-variant-id]');
-          if (anyRadio) {
-            selectedVariantId = anyRadio.getAttribute('data-variant-id');
-            console.log('[PPT DEBUG] Found variant ID from any radio (fallback):', selectedVariantId);
-          }
-        }
-        
-        console.log('[PPT DEBUG] Final selected variant ID:', selectedVariantId);
-        console.log('[PPT DEBUG] Product data variants:', productData.variants);
-        
-        if (!selectedVariantId) {
-          console.log('[PPT DEBUG] No variant ID found, using first available variant');
-          selectedVariantId = productData.variants[0]?.id;
-        }
-        
-        const selectedVariant = productData.variants.find(v => v.id == selectedVariantId);
-        console.log('[PPT DEBUG] Found variant:', selectedVariant);
-        
-        if (selectedVariant?.featured_image?.src) {
-          console.log('[PPT DEBUG] Loading variant image:', selectedVariant.featured_image.src);
-          
-          // Add protocol if missing
-          let imageUrl = selectedVariant.featured_image.src;
-          if (imageUrl.startsWith('//')) {
-            imageUrl = 'https:' + imageUrl;
-          }
-          
-          console.log('[PPT DEBUG] Final image URL:', imageUrl);
-          
-          fabric.Image.fromURL(imageUrl, function (img) {
-            console.log('[PPT DEBUG] Variant image loaded successfully, dimensions:', img.width, 'x', img.height);
-            console.log('[PPT DEBUG] Canvas dimensions:', canvas.width, 'x', canvas.height);
-            
-            img.scaleToWidth(700);
-            console.log('[PPT DEBUG] Image scaled to width 700, new dimensions:', img.width, 'x', img.height);
-            
-            canvas.setBackgroundImage(img, function() {
-              console.log('[PPT DEBUG] Background image set successfully');
-              canvas.renderAll();
-              console.log('[PPT DEBUG] Canvas rendered after background image');
-              
-              // Verify the background image was set
-              const bgImage = canvas.backgroundImage;
-              if (bgImage) {
-                console.log('[PPT DEBUG] Background image confirmed:', bgImage.width, 'x', bgImage.height);
-                console.log('[PPT DEBUG] Background image scale:', bgImage.scaleX, 'x', bgImage.scaleY);
-                console.log('[PPT DEBUG] Background image position:', bgImage.left, ',', bgImage.top);
-              } else {
-                console.error('[PPT DEBUG] Background image not found after setting');
-              }
-              
-              // Force a re-render after a short delay
-              setTimeout(() => {
-                console.log('[PPT DEBUG] Forcing additional render');
-                canvas.renderAll();
-              }, 100);
-            });
-          }, { 
-            crossOrigin: 'anonymous',
-            onError: function(err) {
-              console.error('[PPT DEBUG] Error loading variant image:', err);
-            }
-          });
-        } else {
-          console.log('[PPT DEBUG] No featured image found for variant, trying first available image');
-          // Fallback to first available image
-          const firstVariantWithImage = productData.variants.find(v => v.featured_image?.src);
-          if (firstVariantWithImage?.featured_image?.src) {
-            let imageUrl = firstVariantWithImage.featured_image.src;
-            if (imageUrl.startsWith('//')) {
-              imageUrl = 'https:' + imageUrl;
-            }
-            console.log('[PPT DEBUG] Loading fallback image URL:', imageUrl);
-            fabric.Image.fromURL(imageUrl, function (img) {
-              console.log('[PPT DEBUG] Fallback image loaded successfully, dimensions:', img.width, 'x', img.height);
-              console.log('[PPT DEBUG] Canvas dimensions:', canvas.width, 'x', canvas.height);
-              
-              img.scaleToWidth(700);
-              console.log('[PPT DEBUG] Fallback image scaled to width 700, new dimensions:', img.width, 'x', img.height);
-              
-              canvas.setBackgroundImage(img, function() {
-                console.log('[PPT DEBUG] Fallback background image set successfully');
-                canvas.renderAll();
-                console.log('[PPT DEBUG] Canvas rendered after fallback background image');
-                
-                // Verify the background image was set
-                const bgImage = canvas.backgroundImage;
-                if (bgImage) {
-                  console.log('[PPT DEBUG] Fallback background image confirmed:', bgImage.width, 'x', bgImage.height);
-                  console.log('[PPT DEBUG] Fallback background image scale:', bgImage.scaleX, 'x', bgImage.scaleY);
-                  console.log('[PPT DEBUG] Fallback background image position:', bgImage.left, ',', bgImage.top);
-                } else {
-                  console.error('[PPT DEBUG] Fallback background image not found after setting');
-                }
-                
-                // Force a re-render after a short delay
-                setTimeout(() => {
-                  console.log('[PPT DEBUG] Forcing additional render for fallback');
-                  canvas.renderAll();
-                }, 100);
-              });
-            }, { 
-              crossOrigin: 'anonymous',
-              onError: function(err) {
-                console.error('[PPT DEBUG] Error loading fallback image:', err);
-              }
-            });
-          } else {
-            console.log('[PPT DEBUG] No images found in any variants');
-          }
-        }
-      }
-
-      // Listen for variant update events
-      document.addEventListener('variant:update', function (event) {
-        console.log('[PPT DEBUG] Variant update event triggered', event);
-        setTimeout(updateCanvasBackground, 50);
-      });
-
-      // Listen for radio input changes (color swatches)
-      document.addEventListener('change', function (e) {
-        console.log('[PPT DEBUG] Change event detected:', e.target.name, e.target.value, e.target.type);
-        
-        // Check if it's a radio input (color swatch)
-        if (e.target.type === 'radio') {
-          console.log('[PPT DEBUG] Radio input changed, updating canvas');
-          setTimeout(updateCanvasBackground, 100);
-        }
-      });
-
-      // Listen for clicks on color swatches and labels
-      document.addEventListener('click', function (e) {
-        const target = e.target;
-        console.log('[PPT DEBUG] Click detected on:', target.tagName, target.className);
-        
-        // Check if clicked on a swatch, label, or radio input
-        if (target.closest('.swatch') || 
-            target.closest('.variant-option__button-label') ||
-            target.closest('input[type="radio"]') ||
-            target.closest('[data-variant-id]')) {
-          console.log('[PPT DEBUG] Color swatch/label clicked, updating canvas');
-          setTimeout(updateCanvasBackground, 150);
-        }
-      });
-
-      // Also listen for the specific Shopify variant picker events
-      document.addEventListener('DOMContentLoaded', function() {
-        // Find all variant picker components and listen to their events
-        const variantPickers = document.querySelectorAll('variant-picker, swatches-variant-picker-component');
-        variantPickers.forEach(picker => {
-          picker.addEventListener('change', function(e) {
-            console.log('[PPT DEBUG] Variant picker change detected');
-            setTimeout(updateCanvasBackground, 100);
-          });
-        });
-        
-        // Monitor the hidden variant input for changes
-        const hiddenVariantInput = document.querySelector('input[name="id"]');
-        if (hiddenVariantInput) {
-          console.log('[PPT DEBUG] Setting up MutationObserver for hidden variant input');
-          
-          // Create a MutationObserver to watch for changes to the input's value
-          const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-              if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
-                console.log('[PPT DEBUG] Hidden variant input value changed to:', hiddenVariantInput.value);
-                setTimeout(updateCanvasBackground, 50);
-              }
-            });
-          });
-          
-          // Start observing
-          observer.observe(hiddenVariantInput, {
-            attributes: true,
-            attributeFilter: ['value']
-          });
-          
-          // Also listen for input events
-          hiddenVariantInput.addEventListener('input', function(e) {
-            console.log('[PPT DEBUG] Hidden variant input input event:', e.target.value);
-            setTimeout(updateCanvasBackground, 50);
-          });
-          
-          // Also listen for change events
-          hiddenVariantInput.addEventListener('change', function(e) {
-            console.log('[PPT DEBUG] Hidden variant input change event:', e.target.value);
-            setTimeout(updateCanvasBackground, 50);
-          });
-        }
-      });
-
-      const isMobile = window.innerWidth <= 1200;
-      fabric.Object.prototype.controls.deleteControl = new fabric.Control({
-        x: 0,
-        y: 0.5,
-        offsetY: isMobile ? 40 : 22,
-        offsetX: 0,
-        cursorStyle: 'pointer',
-        cornerSize: isMobile ? 66 : 33,
-        mouseUpHandler: function (_, transform) {
-          const target = transform.target;
-          const canvas = target.canvas;
-          canvas.remove(target);
-          canvas.requestRenderAll();
-          const label = document.querySelector('label#message');
-          if (label) label.innerHTML = `Minimum recommended size: 1000 × 1000px`;
-          const uploadInput = document.getElementById('upload-input');
-          if (uploadInput) uploadInput.value = '';
-        },
-        render: function (ctx, left, top, _, fabricObject) {
-          const size = this.cornerSize;
-          if (deleteIcon.complete) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(left, top, size / 2, 0, 2 * Math.PI);
-            ctx.clip();
-            ctx.drawImage(deleteIcon, left - size / 2, top - size / 2, size, size);
-            ctx.restore();
-          } else {
-            deleteIcon.onload = function () {
-              fabricObject.canvas.requestRenderAll();
-            };
-          }
-        }
-      });
-
-      return canvas;
+      
+      // Load current variant image
+      updateCanvasBackground();
     }
 
-    function rebindEvents(canvas) {
-      // Access the global uploadedImage variable
-      const globalUploadedImage = window.uploadedImage || null;
-      document.body.addEventListener('click', function (e) {
-        console.log('[PPT DEBUG] Click detected on:', e.target.tagName, e.target.className);
-        console.log('[PPT DEBUG] Target element:', e.target);
-        console.log('[PPT DEBUG] Target name attribute:', e.target.name);
-        console.log('[PPT DEBUG] Target type attribute:', e.target.type);
+    // Update canvas background
+    function updateCanvasBackground() {
+      if (!checkCanvasHealth()) {
+        reinitializeCanvas();
+        return;
+      }
+      
+      const canvasElement = canvas.getElement();
+      const canvasStyle = window.getComputedStyle(canvasElement);
+      
+      // Get selected variant ID
+      let selectedVariantId = null;
+      
+      // Method 1: Check hidden input
+      const hiddenInput = document.querySelector('input[name="id"]');
+      if (hiddenInput) {
+        selectedVariantId = hiddenInput.value;
+      }
+      
+      // Method 2: Check checked radio buttons
+      if (!selectedVariantId) {
+        const checkedRadio = document.querySelector('input[type="radio"]:checked[data-variant-id]');
+        if (checkedRadio) {
+          selectedVariantId = checkedRadio.getAttribute('data-variant-id');
+        }
+      }
+      
+      // Method 3: Check any radio button (fallback)
+      if (!selectedVariantId) {
+        const anyRadio = document.querySelector('input[type="radio"][data-variant-id]');
+        if (anyRadio) {
+          selectedVariantId = anyRadio.getAttribute('data-variant-id');
+        }
+      }
+      
+      if (!selectedVariantId) {
+        return;
+      }
+      
+      // Get product data
+      const productData = {{ product | json }};
+      let selectedVariant = null;
+      
+      if (productData && productData.variants) {
+        selectedVariant = productData.variants.find(v => v.id.toString() === selectedVariantId.toString());
+      }
+      
+      if (!selectedVariant) {
+        return;
+      }
+      
+      // Load variant image
+      let imageUrl = selectedVariant.featured_image ? selectedVariant.featured_image.src : null;
+      
+      if (imageUrl) {
+        // Fix protocol if needed
+        if (imageUrl.startsWith('//')) {
+          imageUrl = window.location.protocol + imageUrl;
+        }
         
-        // Try multiple selectors for the add to cart button
-        let button = e.target.closest('button[name="add"]');
-        if (!button) {
-          button = e.target.closest('button[type="submit"]');
+        fabric.Image.fromURL(imageUrl, function(img) {
+          img.scaleToWidth(700);
+          canvas.setBackgroundImage(img, function() {
+            canvas.renderAll();
+            
+            // Force additional renders
+            setTimeout(() => canvas.renderAll(), 50);
+            setTimeout(() => canvas.renderAll(), 100);
+          });
+        }, { crossOrigin: 'anonymous' });
+      } else {
+        // Fallback to first available image
+        if (productData.images && productData.images.length > 0) {
+          imageUrl = productData.images[0];
+          if (imageUrl.startsWith('//')) {
+            imageUrl = window.location.protocol + imageUrl;
+          }
+          
+          fabric.Image.fromURL(imageUrl, function(img) {
+            img.scaleToWidth(700);
+            canvas.setBackgroundImage(img, function() {
+              canvas.renderAll();
+              
+              setTimeout(() => canvas.renderAll(), 50);
+              setTimeout(() => canvas.renderAll(), 100);
+            });
+          }, { crossOrigin: 'anonymous' });
         }
-        if (!button) {
-          button = e.target.closest('input[type="submit"]');
-        }
-        if (!button) {
-          button = e.target.closest('[data-add-to-cart]');
+      }
+    }
+
+    // Event listeners for variant changes
+    document.addEventListener('variant:update', function(event) {
+      setTimeout(() => updateCanvasBackground(), 50);
+    });
+
+    document.addEventListener('change', function(e) {
+      if (e.target.type === 'radio' && e.target.hasAttribute('data-variant-id')) {
+        setTimeout(() => updateCanvasBackground(), 100);
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      const target = e.target;
+      if (target.tagName === 'LABEL' || target.closest('label')) {
+        setTimeout(() => updateCanvasBackground(), 150);
+      }
+    });
+
+    // Setup MutationObserver for hidden variant input
+    const hiddenVariantInput = document.querySelector('input[name="id"]');
+    if (hiddenVariantInput) {
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+            setTimeout(() => updateCanvasBackground(), 50);
+          }
+        });
+      });
+      
+      observer.observe(hiddenVariantInput, { attributes: true });
+      
+      hiddenVariantInput.addEventListener('input', function(e) {
+        setTimeout(() => updateCanvasBackground(), 50);
+      });
+      
+      hiddenVariantInput.addEventListener('change', function(e) {
+        setTimeout(() => updateCanvasBackground(), 50);
+      });
+    }
+
+    // File upload handling
+    document.getElementById('upload-input')?.addEventListener('change', function (e) {
+      const label = document.querySelector('label#message');
+      if (!label) return;
+      
+      const file = e.target.files[0];
+      if (!file) {
+        if (uploadedImage) {
+          canvas.remove(uploadedImage);
+          canvas.renderAll();
+          uploadedImage = null;
+          window.uploadedImage = null;
         }
         
-        console.log('[PPT DEBUG] Found button:', button);
-        console.log('[PPT DEBUG] Button element:', button);
-        if (button) {
-          console.log('[PPT DEBUG] Button name:', button.name);
-          console.log('[PPT DEBUG] Button type:', button.type);
-          console.log('[PPT DEBUG] Button class:', button.className);
+        uploadedImageData = null;
+        
+        const existingScreenshotInput = document.getElementById('mockup-screenshot-url');
+        if (existingScreenshotInput) {
+          existingScreenshotInput.remove();
         }
         
-        if (!button) {
-          console.log('[PPT DEBUG] Not an add to cart button');
-          return;
-        }
-        console.log('[PPT DEBUG] Add to cart button clicked');
-        const designInput = document.getElementById('upload-input');
-        console.log('[PPT DEBUG] Design input found:', !!designInput);
-        console.log('[PPT DEBUG] Design input files length:', designInput ? designInput.files.length : 'no input');
-        console.log('[PPT DEBUG] Uploaded image data exists:', !!uploadedImageData);
-        
-        if (!designInput.files.length && !uploadedImageData) {
-          e.preventDefault();
-          alert('Please upload a design and wait for the mockup screenshot before adding to cart.');
+        label.innerHTML = `Minimum recommended size: 1000 × 1000px`;
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const img = new Image();
+        img.onload = function () {
+          const width = img.naturalWidth;
+          const height = img.naturalHeight;
+          const isValid = width >= 1000 && height >= 1000;
+          label.innerHTML = `Uploaded size: <span style="color:${isValid ? 'green' : 'red'}">${width} × ${height}px</span>`;
+          
+          fabric.Image.fromURL(event.target.result, function (fabricImg) {
+            if (uploadedImage) canvas.remove(uploadedImage);
+            
+            const maxWidth = canvas.getWidth() * 0.5;
+            const maxHeight = canvas.getHeight() * 0.5;
+            if (fabricImg.width > maxWidth || fabricImg.height > maxHeight) {
+              fabricImg.scaleToWidth(maxWidth);
+            }
+            
+            fabricImg.set({
+              left: (canvas.getWidth() - fabricImg.getScaledWidth()) / 2,
+              top: (canvas.getHeight() - fabricImg.getScaledHeight()) / 2,
+              hasBorders: true,
+              hasControls: true,
+              hasRotatingPoint: true
+            });
+            
+            canvas.add(fabricImg);
+            uploadedImage = fabricImg;
+            window.uploadedImage = fabricImg;
+            canvas.renderAll();
+            
+            // Save uploaded image data for restoration
+            uploadedImageData = {
+              src: event.target.result,
+              left: fabricImg.left,
+              top: fabricImg.top,
+              scaleX: fabricImg.scaleX,
+              scaleY: fabricImg.scaleY,
+              angle: fabricImg.angle,
+              width: fabricImg.width,
+              height: fabricImg.height
+            };
+            
+            // Save design data to localStorage for download
+            localStorage.setItem('ppt_design_' + Date.now(), event.target.result);
+            
+            // Add event listeners to track changes
+            fabricImg.on('modified', updateUploadedImageData);
+            fabricImg.on('moving', updateUploadedImageData);
+            fabricImg.on('scaling', updateUploadedImageData);
+            fabricImg.on('rotating', updateUploadedImageData);
+          });
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Add to cart handling
+    function rebindEvents() {
+      document.addEventListener('submit', function (e) {
+        const isProductForm = e.target.action && e.target.action.includes('/cart/add');
+        if (!isProductForm) {
           return;
         }
         
         e.preventDefault();
-        const form = button.closest('form');
         
-        // If we have uploaded image data but no file input, create a hidden input for the design
-        if (!designInput.files.length && uploadedImageData && form) {
-          console.log('[PPT DEBUG] Creating hidden input for uploaded design');
-          let hiddenDesignInput = document.getElementById('uploaded-design-data');
-          if (!hiddenDesignInput) {
-            hiddenDesignInput = document.createElement('input');
-            hiddenDesignInput.type = 'hidden';
-            hiddenDesignInput.name = 'properties[Uploaded Design]';
-            hiddenDesignInput.id = 'uploaded-design-data';
-            form.appendChild(hiddenDesignInput);
-          }
+        const form = e.target;
+        const designInput = document.getElementById('upload-input');
+        
+        // Create hidden input for uploaded design if needed
+        if (designInput && designInput.files.length === 0 && uploadedImageData) {
+          const hiddenDesignInput = document.createElement('input');
+          hiddenDesignInput.type = 'hidden';
+          hiddenDesignInput.name = 'properties[Uploaded Design]';
           hiddenDesignInput.value = 'Design uploaded successfully';
-          console.log('[PPT DEBUG] Hidden design input created with value:', hiddenDesignInput.value);
+          form.appendChild(hiddenDesignInput);
         }
         
-        // Always ensure we have a design property if we have uploaded image data
-        if (uploadedImageData && form) {
-          console.log('[PPT DEBUG] Ensuring design property exists');
-          try {
-            let designPropertyInput = form.querySelector('input[name="properties[Uploaded Design]"]');
-            if (!designPropertyInput) {
-              designPropertyInput = document.createElement('input');
-              designPropertyInput.type = 'hidden';
-              designPropertyInput.name = 'properties[Uploaded Design]';
-              form.appendChild(designPropertyInput);
-            }
-            designPropertyInput.value = 'Design uploaded successfully';
-            console.log('[PPT DEBUG] Design property set:', designPropertyInput.value);
-          } catch (e) {
-            console.error('[PPT DEBUG] Error setting design property:', e);
-          }
+        // Ensure design property exists
+        let designPropertyInput = form.querySelector('input[name="properties[Uploaded Design]"]');
+        if (!designPropertyInput && uploadedImageData) {
+          designPropertyInput = document.createElement('input');
+          designPropertyInput.type = 'hidden';
+          designPropertyInput.name = 'properties[Uploaded Design]';
+          designPropertyInput.value = 'Design uploaded successfully';
+          form.appendChild(designPropertyInput);
         }
+        
+        // Screenshot process
         const mockup = document.querySelector('.canvas-wrapper');
         if (!mockup || !form) {
-          console.log('[PPT DEBUG] Mockup or form not found', { mockup, form });
           return;
         }
         
-        console.log('[PPT DEBUG] Form found, proceeding with screenshot process');
-        
-        // Check if form is still valid
-        try {
-          if (!form || !form.checkValidity) {
-            console.error('[PPT DEBUG] Form is not valid or missing checkValidity method');
-            return;
-          }
-          form.checkValidity();
-        } catch (e) {
-          console.error('[PPT DEBUG] Form is no longer valid:', e);
-          return;
-        }
-        
-        // Clear any existing screenshot URL before taking new screenshot
+        // Clear existing screenshot URL
         const existingScreenshotInput = document.getElementById('mockup-screenshot-url');
         if (existingScreenshotInput) {
           existingScreenshotInput.remove();
-          console.log('[PPT DEBUG] Cleared existing screenshot URL');
         }
         
-        // Clear any existing uploaded design input
-        const existingDesignInput = document.getElementById('upload-input');
-        if (existingDesignInput) {
-          existingDesignInput.value = '';
-          console.log('[PPT DEBUG] Cleared existing design input');
-        }
+        // Clear existing design inputs
+        const existingDesignInputs = form.querySelectorAll('input[name="properties[Uploaded Design]"]');
+        existingDesignInputs.forEach(input => input.remove());
         
-        // Clear any existing hidden design input
-        const existingHiddenDesignInput = document.getElementById('uploaded-design-data');
-        if (existingHiddenDesignInput) {
-          existingHiddenDesignInput.remove();
-          console.log('[PPT DEBUG] Cleared existing hidden design input');
-        }
-        
-        // Store uploaded image data for screenshot process
+        // Store current state for screenshot
         const tempUploadedImageData = uploadedImageData;
         const tempUploadedImage = window.uploadedImage;
-        console.log('[PPT DEBUG] Stored uploaded image data for screenshot process');
         
         // Test server connectivity
-        console.log('[PPT DEBUG] Testing server connectivity...');
-        fetch('https://artshop.lv/uploads/upload.php', { method: 'HEAD' })
+        fetch('https://artshop.lv/upload.php', { method: 'HEAD' })
           .then(res => {
-            console.log('[PPT DEBUG] Server test response:', res.status);
-            if (res.status !== 200) {
-              console.error('[PPT DEBUG] Server not responding correctly');
-            }
-          })
-          .catch(err => {
-            console.error('[PPT DEBUG] Server test failed:', err);
-            console.log('[PPT DEBUG] Proceeding without screenshot upload');
-            submitViaAjax(form);
-            return;
-          });
-        
-        // Check if we should proceed with screenshot
-        if (!tempUploadedImageData) {
-          console.log('[PPT DEBUG] No uploaded image data, skipping screenshot');
-          submitViaAjax(form);
-          return;
-        }
-        
-        // Check if server is accessible
-        console.log('[PPT DEBUG] Checking server accessibility before screenshot');
-        fetch('https://artshop.lv/uploads/upload.php', { method: 'HEAD' })
-          .then(res => {
-            if (res.status !== 200) {
-              console.error('[PPT DEBUG] Server not accessible, skipping screenshot');
-              submitViaAjax(form);
-              return;
-            }
-            console.log('[PPT DEBUG] Server accessible, proceeding with screenshot');
-          })
-          .catch(err => {
-            console.error('[PPT DEBUG] Server not accessible:', err);
-            submitViaAjax(form);
-            return;
-          });
-        
-        // Force canvas render before screenshot
-        canvas.renderAll();
-        console.log('[PPT DEBUG] Forced canvas render before screenshot');
-        
-        // If we have data but no object, try to restore it
-        if (!tempUploadedImage && tempUploadedImageData) {
-          console.log('[PPT DEBUG] Attempting to restore uploaded image from data');
-          restoreUploadedImage();
-          // Wait a bit for restoration
-          setTimeout(() => {
-            if (!window.uploadedImage) {
-              console.log('[PPT DEBUG] Failed to restore uploaded image, skipping screenshot');
-              submitViaAjax(form);
-              return;
-            }
-          }, 100);
-        }
-        
-        // Check if canvas has objects after restoration attempt
-        if (canvas.getObjects().length === 0) {
-          console.log('[PPT DEBUG] Canvas has no objects, skipping screenshot');
-          // Clear uploaded image data after screenshot process
-          uploadedImageData = null;
-          window.uploadedImage = null;
-          console.log('[PPT DEBUG] Cleared uploaded image data and object');
-          submitViaAjax(form);
-          return;
-        }
-        
-        console.log('[PPT DEBUG] === SCREENSHOT PROCESS START ===');
-        console.log('[PPT DEBUG] Canvas objects count:', canvas.getObjects().length);
-        console.log('[PPT DEBUG] Uploaded image data exists:', !!tempUploadedImageData);
-        console.log('[PPT DEBUG] Uploaded image object exists:', !!globalUploadedImage);
-        console.log('[PPT DEBUG] Uploaded image object type:', globalUploadedImage ? globalUploadedImage.type : 'null');
-        console.log('[PPT DEBUG] Global uploadedImage exists:', !!window.uploadedImage);
-        console.log('[PPT DEBUG] Canvas objects:', canvas.getObjects().map(obj => ({ type: obj.type, visible: obj.visible, left: obj.left, top: obj.top })));
-        
-
-        // Hide all handles and controls before taking screenshot
-        const objectsWithControls = [];
-        canvas.getObjects().forEach(obj => { 
-          objectsWithControls.push({
-            object: obj,
-            hasControls: obj.hasControls,
-            hasBorders: obj.hasBorders
-          });
-          obj.hasControls = false;
-          obj.hasBorders = false;
-        });
-        canvas.renderAll();
-        
-        console.log('[PPT DEBUG] Handles hidden, taking screenshot');
-        console.log('[PPT DEBUG] Canvas background image exists:', !!canvas.backgroundImage);
-        console.log('[PPT DEBUG] Canvas objects after hiding handles:', canvas.getObjects().length);
-        console.log('[PPT DEBUG] Canvas objects details:', canvas.getObjects().map(obj => ({ type: obj.type, visible: obj.visible })));
-        
-        // Use Fabric.js canvas directly for screenshot
-        const canvasScreenshot = canvas.toDataURL({
-          format: 'png',
-          quality: 1,
-          multiplier: 2
-        });
-        
-        console.log('[PPT DEBUG] Screenshot data URL length:', canvasScreenshot.length);
-        console.log('[PPT DEBUG] Screenshot data URL starts with:', canvasScreenshot.substring(0, 50));
-        
-        // Restore all handles and controls after screenshot
-        objectsWithControls.forEach(item => {
-          item.object.hasControls = item.hasControls;
-          item.object.hasBorders = item.hasBorders;
-        });
-        canvas.renderAll();
-        
-        console.log('[PPT DEBUG] Handles restored after screenshot');
-        
-        // Create a 250x250 canvas for upload
-        const targetSize = 250;
-        const squareCanvas = document.createElement('canvas');
-        squareCanvas.width = targetSize;
-        squareCanvas.height = targetSize;
-        const ctx = squareCanvas.getContext('2d');
-        
-        // Load the canvas screenshot and draw it properly
-        const img = new Image();
-        img.onerror = function() {
-          console.error('[PPT DEBUG] Failed to load canvas screenshot image');
-          alert('Screenshot creation failed. Please try again.');
-        };
-        img.onload = function() {
-          console.log('[PPT DEBUG] Canvas screenshot image loaded, dimensions:', img.width, 'x', img.height);
-          console.log('[PPT DEBUG] Image data URL for screenshot:', img.src.substring(0, 100));
-          // Calculate the aspect ratio to maintain proportions
-          const aspectRatio = img.width / img.height;
-          let drawWidth, drawHeight, offsetX, offsetY;
-          
-          if (aspectRatio > 1) {
-            // Image is wider than tall - fit to height
-            drawHeight = targetSize;
-            drawWidth = targetSize * aspectRatio;
-            offsetX = (targetSize - drawWidth) / 2;
-            offsetY = 0;
-          } else {
-            // Image is taller than wide - fit to width
-            drawWidth = targetSize;
-            drawHeight = targetSize / aspectRatio;
-            offsetX = 0;
-            offsetY = (targetSize - drawHeight) / 2;
-          }
-          
-          // Fill background with white
-          ctx.fillStyle = 'white';
-          ctx.fillRect(0, 0, targetSize, targetSize);
-          
-          // Draw the image maintaining aspect ratio
-          ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-          
-          // Generate a unique 8-char hash for the filename
-          function getShortHash() {
-            const str = Date.now().toString() + Math.random().toString();
-            return btoa(str).replace(/[^a-zA-Z0-9]/g, '').substring(0, 8);
-          }
-          const mockupScreenshotName = 'mockup-screenshot-' + getShortHash() + '.png';
-          squareCanvas.toBlob(function(blob) {
-            if (!blob) {
-              console.error('[PPT DEBUG] Failed to create blob from canvas');
-              alert('Screenshot creation failed. Please try again.');
-              return;
-            }
-            console.log('[PPT DEBUG] Blob created, size:', blob.size, 'bytes');
-            console.log('[PPT DEBUG] Blob type:', blob.type);
-            console.log('[PPT DEBUG] Filename:', mockupScreenshotName);
-            const formDataUpload = new FormData();
-            formDataUpload.append('file', blob, mockupScreenshotName);
-            console.log('[PPT DEBUG] Attempting upload to: https://artshop.lv/uploads/upload.php');
-            console.log('[PPT DEBUG] FormData entries:');
-            for (let [key, value] of formDataUpload.entries()) {
-              console.log('[PPT DEBUG] Upload field:', key, '=', value instanceof File ? `File: ${value.name} (${value.size} bytes)` : value);
-            }
-            fetch('https://artshop.lv/uploads/upload.php', {
-              method: 'POST',
-              body: formDataUpload
-            })
-            .then(res => {
-              console.log('[PPT DEBUG] Upload response status:', res.status);
-              if (!res.ok) {
-                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-              }
-              return res.json();
-            })
-            .then(data => {
-              console.log('[PPT DEBUG] Upload response data:', data);
-              if (data.url) {
-                // Always use /uploads/uploads/ instead of /uploads/ in the returned URL
-                let fixedUrl = data.url.replace('/uploads/', '/uploads/uploads/');
+            if (res.ok) {
+              // Take screenshot
+              const objects = canvas.getObjects();
+              const originalStates = [];
+              
+              // Hide handles
+              objects.forEach(obj => {
+                originalStates.push({
+                  hasControls: obj.hasControls,
+                  hasBorders: obj.hasBorders
+                });
+                obj.set({ hasControls: false, hasBorders: false });
+              });
+              
+              canvas.renderAll();
+              
+              // Create screenshot
+              const dataUrl = canvas.toDataURL();
+              const img = new Image();
+              img.onload = function() {
+                const squareCanvas = document.createElement('canvas');
+                squareCanvas.width = 250;
+                squareCanvas.height = 250;
+                const ctx = squareCanvas.getContext('2d');
                 
-                // Always create screenshot input since we successfully uploaded a screenshot
-                let hiddenInput = document.getElementById('mockup-screenshot-url');
-                if (!hiddenInput) {
-                  hiddenInput = document.createElement('input');
-                  hiddenInput.type = 'hidden';
-                  hiddenInput.name = 'properties[Mockup Screenshot URL]';
-                  hiddenInput.id = 'mockup-screenshot-url';
-                  form.appendChild(hiddenInput);
-                }
-                        hiddenInput.value = fixedUrl;
-        console.log('[PPT DEBUG] Uploaded screenshot URL:', fixedUrl);
-        console.log('[PPT DEBUG] Form data before submission:');
-        const formDataDebug = new FormData(form);
-        for (let [key, value] of formDataDebug.entries()) {
-          console.log('[PPT DEBUG] Form field:', key, '=', value);
-        }
-        
-        // Clear uploaded image data after screenshot process
-        uploadedImageData = null;
-        window.uploadedImage = null;
-        console.log('[PPT DEBUG] Cleared uploaded image data and object');
-        
-        submitViaAjax(form);
-              } else {
-                console.error('[PPT DEBUG] Upload failed - no URL in response:', data);
-                console.log('[PPT DEBUG] Proceeding with cart submission without screenshot');
-                // Continue with cart submission even if screenshot upload fails
-                submitViaAjax(form);
-              }
-            })
-            .catch((error) => {
-              console.error('[PPT DEBUG] Upload error:', error);
-              console.log('[PPT DEBUG] Proceeding with cart submission without screenshot');
-              // Continue with cart submission even if screenshot upload fails
+                // Calculate dimensions to maintain aspect ratio
+                const scale = Math.min(250 / img.width, 250 / img.height);
+                const scaledWidth = img.width * scale;
+                const scaledHeight = img.height * scale;
+                const x = (250 - scaledWidth) / 2;
+                const y = (250 - scaledHeight) / 2;
+                
+                ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+                
+                // Convert to blob and upload
+                squareCanvas.toBlob(function(blob) {
+                  if (!blob) {
+                    restoreHandles(originalStates);
+                    submitViaAjax(form);
+                    return;
+                  }
+                  
+                  const formData = new FormData();
+                  formData.append('image', blob, 'mockup-screenshot.png');
+                  
+                  fetch('https://artshop.lv/upload.php', {
+                    method: 'POST',
+                    body: formData
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.url) {
+                      const screenshotInput = document.createElement('input');
+                      screenshotInput.type = 'hidden';
+                      screenshotInput.name = 'properties[Mockup Screenshot URL]';
+                      screenshotInput.value = data.url;
+                      form.appendChild(screenshotInput);
+                    }
+                    restoreHandles(originalStates);
+                    submitViaAjax(form);
+                  })
+                  .catch(error => {
+                    restoreHandles(originalStates);
+                    submitViaAjax(form);
+                  });
+                }, 'image/png', 0.9);
+              };
+              img.src = dataUrl;
+            } else {
               submitViaAjax(form);
-            });
-          }, 'image/png');
-        };
-        
-        // Set the image source to load it
-        img.src = canvasScreenshot;
+            }
+          })
+          .catch(() => {
+            submitViaAjax(form);
+          });
       });
-
-      function submitViaAjax(form) {
-        const submitButton = form.querySelector('[name="add"]');
-        const spinner = submitButton.querySelector('.loading__spinner');
-        const originalText = submitButton.querySelector('span');
-        submitButton.disabled = true;
-        submitButton.classList.add('loading');
-        if (spinner) spinner.classList.remove('hidden');
-        if (originalText) originalText.textContent = 'Adding...';
-        const formData = new FormData(form);
-        console.log('[PPT DEBUG] === CART SUBMISSION START ===');
-        console.log('[PPT DEBUG] Form data for cart submission:');
-        for (let [key, value] of formData.entries()) {
-          console.log('[PPT DEBUG] Cart field:', key, '=', value);
+    }
+    
+    function restoreHandles(originalStates) {
+      const objects = canvas.getObjects();
+      objects.forEach((obj, index) => {
+        if (originalStates[index]) {
+          obj.set({
+            hasControls: originalStates[index].hasControls,
+            hasBorders: originalStates[index].hasBorders
+          });
         }
-        console.log('[PPT DEBUG] Form data includes properties:', formData.has('properties[Uploaded Design]'));
-        console.log('[PPT DEBUG] Form data includes screenshot:', formData.has('properties[Mockup Screenshot URL]'));
-        console.log('[PPT DEBUG] Form elements count:', form.elements.length);
-        console.log('[PPT DEBUG] Form elements:');
-        for (let i = 0; i < form.elements.length; i++) {
-          const element = form.elements[i];
-          console.log('[PPT DEBUG] Element:', element.name, '=', element.value, 'type:', element.type);
+      });
+      canvas.renderAll();
+    }
+    
+    function submitViaAjax(form) {
+      const formData = new FormData(form);
+      
+      fetch('/cart/add.js', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        const cartDrawer = document.querySelector('cart-drawer');
+        if (cartDrawer) {
+          cartDrawer.renderContents({ key: data.key });
+        } else {
+          window.location.reload();
         }
-        console.log('[PPT DEBUG] Sending AJAX request to /cart/add.js');
-        fetch('/cart/add.js', {
-          method: 'POST',
-          body: formData,
-          headers: { 'Accept': 'application/json' }
-        }).then(response => {
-          console.log('[PPT DEBUG] /cart/add.js response', response);
-          return response.json();
-        }).then(data => {
-          console.log('[PPT DEBUG] /cart/add.js response data', data);
-          console.log('[PPT DEBUG] Cart item properties:', data.properties);
-          if (!data.key) {
-            console.error('[PPT DEBUG] No cart key in response');
-            submitButton.disabled = false;
-            submitButton.classList.remove('loading');
-            if (spinner) spinner.classList.add('hidden');
-            if (originalText) originalText.textContent = 'Add to cart';
-            return;
-          }
-          console.log('[PPT DEBUG] Fetching cart sections with key:', data.key);
-          
-          // Try multiple approaches to update cart
-          const cartDrawer = document.querySelector('cart-drawer-component');
-          if (cartDrawer && typeof cartDrawer.renderContents === 'function') {
-            console.log('[PPT DEBUG] Using cart drawer renderContents');
-            cartDrawer.renderContents({ key: data.key });
-          } else {
-            console.log('[PPT DEBUG] No cart drawer found, reloading page');
-            window.location.reload();
-          }
-          
-          submitButton.disabled = false;
-          submitButton.classList.remove('loading');
-          if (spinner) spinner.classList.add('hidden');
-          if (originalText) originalText.textContent = 'Add to cart';
-        }).catch((err) => {
-          console.log('[PPT DEBUG] Error in add to cart AJAX', err);
-          submitButton.disabled = false;
-          submitButton.classList.remove('loading');
-          if (spinner) spinner.classList.add('hidden');
-          if (originalText) originalText.textContent = 'Add to cart';
-        });
-      }
+      })
+      .catch(error => {
+        console.error('Error adding to cart:', error);
+        window.location.reload();
+      });
     }
 
+    // Initialize
     initCanvas();
-    rebindEvents(canvas);
+    rebindEvents();
   });
-</script> 
+</script>
+{% endif %} 

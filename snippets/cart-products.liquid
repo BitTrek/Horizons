@@ -5,60 +5,10 @@
 ></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // For each cart item row, try to inject the screenshot
-  document.querySelectorAll('[data-variant-id]').forEach(function(row) {
-    const variantId = row.getAttribute('data-variant-id');
-    const dataUrl = localStorage.getItem('ppt_screenshot_' + variantId);
-    if (dataUrl) {
-      // Find the product image element
-      const mediaCell = row.querySelector('.cart-items__media');
-      if (mediaCell) {
-        // Replace the entire contents with the same structure as the default product image
-        // Get the original <a> for href and style
-        const originalLink = mediaCell.querySelector('a.cart-items__media-container');
-        let href = '#';
-        let style = '';
-        if (originalLink) {
-          href = originalLink.getAttribute('href') || '#';
-          style = originalLink.getAttribute('style') || '';
-        }
-        mediaCell.innerHTML = '';
-        const a = document.createElement('a');
-        a.href = href;
-        a.className = 'cart-items__media-container';
-        a.setAttribute('style', style);
-        // Create the screenshot image
-        const img = document.createElement('img');
-        img.src = dataUrl;
-        img.alt = 'Custom Mockup Screenshot';
-        img.width = 250;
-        img.height = 250;
-        img.className = 'cart-items__media-image border-style';
-        // Copy border style from original image if present
-        const originalImg = mediaCell.querySelector('img');
-        if (originalImg) {
-          img.setAttribute('style', originalImg.getAttribute('style') || '');
-        } else {
-          img.setAttribute('style', '--border-width: 1px; --border-style: none; --border-color: rgb(var(--color-border-rgb) / 0.5); --border-radius: 0px;');
-        }
-        a.appendChild(img);
-        mediaCell.appendChild(a);
-      }
-    }
-  });
-});
-
 // Function to download design from localStorage
 function downloadDesign(itemKey) {
-  console.log('[PPT DEBUG] Downloading design for item:', itemKey);
-  
-  // Try to get the design data from localStorage
   const designData = localStorage.getItem('ppt_design_' + itemKey);
   if (designData) {
-    console.log('[PPT DEBUG] Found design data in localStorage');
-    
-    // Create a download link
     const link = document.createElement('a');
     link.href = designData;
     link.download = 'uploaded-design.png';
@@ -66,7 +16,6 @@ function downloadDesign(itemKey) {
     link.click();
     document.body.removeChild(link);
   } else {
-    console.log('[PPT DEBUG] No design data found in localStorage');
     alert('Design file not found. Please try uploading the design again.');
   }
 }
@@ -268,15 +217,7 @@ function downloadDesign(itemKey) {
                         </div>
                       {%- endunless -%}
                       
-                      <!-- DEBUG: Show all properties -->
-                      {%- if item.properties.size > 0 -%}
-                        <div style="background: #f0f0f0; padding: 5px; margin: 5px 0; font-size: 12px;">
-                          <strong>DEBUG - All properties:</strong><br>
-                          {%- for property in item.properties -%}
-                            {{ property.first }}: {{ property.last }}<br>
-                          {%- endfor -%}
-                        </div>
-                      {%- endif -%}
+
                     </dl>
 
                     {% if item.selling_plan_allocation %}
