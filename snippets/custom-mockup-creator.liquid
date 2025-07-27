@@ -55,7 +55,30 @@
       
       fabric.Image.fromURL(imageUrl, function (img) {
         console.log('Image loaded successfully:', img);
-        img.scaleToWidth(700);
+        console.log('Initial image dimensions:', img.width, 'x', img.height);
+        
+        // Calculate proper scaling to fit canvas
+        const canvasWidth = canvas.getWidth();
+        const canvasHeight = canvas.getHeight();
+        const scaleX = canvasWidth / img.width;
+        const scaleY = canvasHeight / img.height;
+        const scale = Math.min(scaleX, scaleY);
+        
+        console.log('Canvas dimensions:', canvasWidth, 'x', canvasHeight);
+        console.log('Calculated scale:', scale);
+        
+        // Scale the image to fit the canvas
+        img.scale(scale);
+        
+        // Center the image
+        img.set({
+          left: (canvasWidth - img.getScaledWidth()) / 2,
+          top: (canvasHeight - img.getScaledHeight()) / 2
+        });
+        
+        console.log('Scaled image dimensions:', img.getScaledWidth(), 'x', img.getScaledHeight());
+        console.log('Image position:', img.left, img.top);
+        
         canvas.setBackgroundImage(img, function() {
           console.log('Background image set, rendering canvas');
           canvas.renderAll();
@@ -284,7 +307,30 @@
         console.log('Loading variant image from:', imageUrl);
         fabric.Image.fromURL(imageUrl, function(img) {
           console.log('Variant image loaded:', img);
-          img.scaleToWidth(700);
+          console.log('Original image dimensions:', img.width, 'x', img.height);
+          
+          // Calculate proper scaling to fit canvas
+          const canvasWidth = canvas.getWidth();
+          const canvasHeight = canvas.getHeight();
+          const scaleX = canvasWidth / img.width;
+          const scaleY = canvasHeight / img.height;
+          const scale = Math.min(scaleX, scaleY);
+          
+          console.log('Canvas dimensions:', canvasWidth, 'x', canvasHeight);
+          console.log('Calculated scale:', scale);
+          
+          // Scale the image to fit the canvas
+          img.scale(scale);
+          
+          // Center the image
+          img.set({
+            left: (canvasWidth - img.getScaledWidth()) / 2,
+            top: (canvasHeight - img.getScaledHeight()) / 2
+          });
+          
+          console.log('Scaled image dimensions:', img.getScaledWidth(), 'x', img.getScaledHeight());
+          console.log('Image position:', img.left, img.top);
+          
           canvas.setBackgroundImage(img, function() {
             console.log('Variant background image set, rendering canvas');
             canvas.renderAll();
@@ -297,7 +343,18 @@
             const fallbackUrl = '{{ product.featured_image | image_url: width: 700 }}';
             console.log('Trying fallback URL:', fallbackUrl);
             fabric.Image.fromURL(fallbackUrl, function(fallbackImg) {
-              fallbackImg.scaleToWidth(700);
+              const canvasWidth = canvas.getWidth();
+              const canvasHeight = canvas.getHeight();
+              const scaleX = canvasWidth / fallbackImg.width;
+              const scaleY = canvasHeight / fallbackImg.height;
+              const scale = Math.min(scaleX, scaleY);
+              
+              fallbackImg.scale(scale);
+              fallbackImg.set({
+                left: (canvasWidth - fallbackImg.getScaledWidth()) / 2,
+                top: (canvasHeight - fallbackImg.getScaledHeight()) / 2
+              });
+              
               canvas.setBackgroundImage(fallbackImg, function() {
                 canvas.renderAll();
               });
@@ -310,7 +367,18 @@
         const fallbackUrl = '{{ product.featured_image | image_url: width: 700 }}';
         console.log('Using fallback URL:', fallbackUrl);
         fabric.Image.fromURL(fallbackUrl, function(fallbackImg) {
-          fallbackImg.scaleToWidth(700);
+          const canvasWidth = canvas.getWidth();
+          const canvasHeight = canvas.getHeight();
+          const scaleX = canvasWidth / fallbackImg.width;
+          const scaleY = canvasHeight / fallbackImg.height;
+          const scale = Math.min(scaleX, scaleY);
+          
+          fallbackImg.scale(scale);
+          fallbackImg.set({
+            left: (canvasWidth - fallbackImg.getScaledWidth()) / 2,
+            top: (canvasHeight - fallbackImg.getScaledHeight()) / 2
+          });
+          
           canvas.setBackgroundImage(fallbackImg, function() {
             canvas.renderAll();
           });
