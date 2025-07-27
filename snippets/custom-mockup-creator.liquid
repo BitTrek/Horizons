@@ -687,7 +687,7 @@
         }
         
         // If we have uploaded image data but no file input, create a hidden input for the design
-        if (!designInput.files.length && uploadedImageData) {
+        if (!designInput.files.length && uploadedImageData && form) {
           console.log('[PPT DEBUG] Creating hidden input for uploaded design');
           let hiddenDesignInput = document.getElementById('uploaded-design-data');
           if (!hiddenDesignInput) {
@@ -702,9 +702,9 @@
         }
         
         // Always ensure we have a design property if we have uploaded image data
-        if (uploadedImageData) {
+        if (uploadedImageData && form) {
           console.log('[PPT DEBUG] Ensuring design property exists');
-          let designPropertyInput = document.querySelector('input[name="properties[Uploaded Design]"]');
+          let designPropertyInput = form.querySelector('input[name="properties[Uploaded Design]"]');
           if (!designPropertyInput) {
             designPropertyInput = document.createElement('input');
             designPropertyInput.type = 'hidden';
@@ -719,6 +719,14 @@
         const mockup = document.querySelector('.canvas-wrapper');
         if (!mockup || !form) {
           console.log('[PPT DEBUG] Mockup or form not found', { mockup, form });
+          return;
+        }
+        
+        // Check if form is still valid
+        try {
+          form.checkValidity();
+        } catch (e) {
+          console.error('[PPT DEBUG] Form is no longer valid:', e);
           return;
         }
         
