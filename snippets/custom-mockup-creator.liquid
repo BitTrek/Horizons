@@ -309,13 +309,19 @@
 
     // Update canvas background
     let lastUpdateTime = 0;
+    let isUpdating = false;
     function updateCanvasBackground() {
       const now = Date.now();
-      if (now - lastUpdateTime < 100) {
+      if (now - lastUpdateTime < 200) {
         console.log('Skipping update - too soon since last update');
         return;
       }
+      if (isUpdating) {
+        console.log('Update already in progress, skipping');
+        return;
+      }
       lastUpdateTime = now;
+      isUpdating = true;
       
       console.log('=== UPDATE CANVAS BACKGROUND ===');
       const productData = {{ product | json }};
@@ -456,6 +462,10 @@
               canvasElement.style.backgroundColor = '';
             }, 2000);
             }
+            
+            // Mark update as complete
+            isUpdating = false;
+            console.log('✅ Variant image update completed successfully');
           });
         });
       }, { 
@@ -480,6 +490,8 @@
             
             canvas.setBackgroundImage(fallbackImg, function() {
               canvas.renderAll();
+              isUpdating = false;
+              console.log('✅ Fallback image update completed');
             });
           }, { crossOrigin: 'anonymous' });
         }
@@ -504,13 +516,15 @@
           
           canvas.setBackgroundImage(fallbackImg, function() {
             canvas.renderAll();
+            isUpdating = false;
+            console.log('✅ Final fallback image update completed');
           });
         }, { crossOrigin: 'anonymous' });
       }
     }
 
     // Function to wait for variant input to be updated
-    function waitForVariantUpdate(expectedVariantId, maxAttempts = 10) {
+    function waitForVariantUpdate(expectedVariantId, maxAttempts = 15) {
       return new Promise((resolve, reject) => {
         let attempts = 0;
         const checkVariant = () => {
@@ -518,33 +532,49 @@
           const variantInput = document.querySelector('input[name="id"]');
           const currentVariantId = variantInput ? variantInput.value : null;
           
-          console.log(`Variant check attempt ${attempts}: current=${currentVariantId}, expected=${expectedVariantId}`);
+          console.log(`🎯 Variant check attempt ${attempts}: current=${currentVariantId}, expected=${expectedVariantId}`);
           
           if (currentVariantId === expectedVariantId) {
-            console.log('Variant input updated successfully');
+            console.log('✅ Variant input updated successfully');
             resolve();
           } else if (attempts >= maxAttempts) {
-            console.log('Max attempts reached, proceeding anyway');
+            console.log('⚠️ Max attempts reached, proceeding anyway');
             resolve();
           } else {
-            setTimeout(checkVariant, 100);
+            setTimeout(checkVariant, 150);
           }
         };
         checkVariant();
       });
     }
+    
+    // Function to force canvas reinitialization (like page refresh)
+    function forceCanvasRefresh() {
+      console.log('🔄 Force canvas refresh initiated');
+      
+      // Clear current background
+      canvas.setBackgroundImage(null, function() {
+        console.log('🔄 Background cleared');
+        canvas.renderAll();
+        
+        // Wait a moment then reload
+        setTimeout(() => {
+          updateCanvasBackground();
+        }, 100);
+      });
+    }
 
     // Event listeners for variant changes
     document.addEventListener('variant:update', function(event) {
-      console.log('Variant update event detected');
-      setTimeout(() => updateCanvasBackground(), 200);
+      console.log('🎯 Variant update event detected');
+      setTimeout(() => updateCanvasBackground(), 300);
     });
 
     document.addEventListener('change', function(e) {
-      console.log('Change event detected:', e.target);
+      console.log('🎯 Change event detected:', e.target);
       if (e.target.type === 'radio' && e.target.hasAttribute('data-variant-id')) {
         const variantId = e.target.getAttribute('data-variant-id');
-        console.log('Radio variant change detected for variant ID:', variantId);
+        console.log('🎯 Radio variant change detected for variant ID:', variantId);
         
         // Wait for the variant input to be updated
         waitForVariantUpdate(variantId).then(() => {
@@ -553,39 +583,39 @@
       }
       // Also check for color swatch changes
       if (e.target.closest('[data-color-swatch]') || e.target.closest('[data-variant-option]')) {
-        console.log('Color swatch change detected');
-        setTimeout(() => updateCanvasBackground(), 200);
+        console.log('🎯 Color swatch change detected');
+        setTimeout(() => updateCanvasBackground(), 300);
       }
     });
 
     document.addEventListener('click', function(e) {
       const target = e.target;
-      console.log('Click event detected:', target);
+      console.log('🎯 Click event detected:', target);
       
       // Check for radio button clicks
       if (target.type === 'radio' && target.hasAttribute('data-variant-id')) {
         const variantId = target.getAttribute('data-variant-id');
-        console.log('Radio click detected for variant ID:', variantId);
+        console.log('🎯 Radio click detected for variant ID:', variantId);
         
         // Wait for the variant input to be updated
         waitForVariantUpdate(variantId).then(() => {
-          updateCanvasBackground();
+          forceCanvasRefresh();
         });
       }
       
       if (target.tagName === 'LABEL' || target.closest('label')) {
-        console.log('Label click detected');
-        setTimeout(() => updateCanvasBackground(), 300);
+        console.log('🎯 Label click detected');
+        setTimeout(() => forceCanvasRefresh(), 300);
       }
       // Check for color swatch clicks
       if (target.closest('[data-color-swatch]') || target.closest('[data-variant-option]')) {
-        console.log('Color swatch click detected');
-        setTimeout(() => updateCanvasBackground(), 300);
+        console.log('🎯 Color swatch click detected');
+        setTimeout(() => forceCanvasRefresh(), 300);
       }
       // Check for product media clicks
       if (target.closest('.product__media') || target.closest('.product__media-gallery')) {
-        console.log('Product media click detected');
-        setTimeout(() => updateCanvasBackground(), 300);
+        console.log('🎯 Product media click detected');
+        setTimeout(() => forceCanvasRefresh(), 300);
       }
     });
 
