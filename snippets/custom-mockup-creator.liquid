@@ -4,6 +4,8 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded - Custom mockup creator script started');
+    
     // Global variables
     let canvas;
     let uploadedImageData = null;
@@ -12,12 +14,16 @@
 
     // Initialize canvas
     function initCanvas() {
+      console.log('initCanvas called');
       const canvasElement = document.getElementById("canvas");
       if (!canvasElement) {
+        console.error('Canvas element not found');
         return;
       }
+      console.log('Canvas element found:', canvasElement);
       
       canvas = new fabric.Canvas("canvas");
+      console.log('Fabric canvas created:', canvas);
       
       // Configure global object properties for better handles
       fabric.Object.prototype.setControlsVisibility({ 
@@ -44,13 +50,21 @@
       setupCanvasEventListeners();
 
       // Load initial background image
-      fabric.Image.fromURL('{{ product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}', function (img) {
+      const imageUrl = '{{ product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}';
+      console.log('Loading initial image from URL:', imageUrl);
+      
+      fabric.Image.fromURL(imageUrl, function (img) {
+        console.log('Image loaded successfully:', img);
         img.scaleToWidth(700);
         canvas.setBackgroundImage(img, function() {
+          console.log('Background image set, rendering canvas');
           canvas.renderAll();
         });
       }, { 
-        crossOrigin: 'anonymous'
+        crossOrigin: 'anonymous',
+        onError: function(err) {
+          console.error('Error loading initial image:', err);
+        }
       });
     }
 
@@ -207,17 +221,39 @@
 
     // Update canvas background
     function updateCanvasBackground() {
+      console.log('updateCanvasBackground called');
       const productData = {{ product | json }};
-      const selectedVariantId = document.querySelector('input[name="id"]').value;
+      console.log('Product data:', productData);
+      
+      const variantInput = document.querySelector('input[name="id"]');
+      if (!variantInput) {
+        console.error('Variant input not found');
+        return;
+      }
+      
+      const selectedVariantId = variantInput.value;
+      console.log('Selected variant ID:', selectedVariantId);
+      
       const selectedVariant = productData.variants.find(v => v.id.toString() === selectedVariantId.toString());
+      console.log('Selected variant:', selectedVariant);
       
       if (selectedVariant && selectedVariant.featured_image) {
+        console.log('Loading variant image from:', selectedVariant.featured_image.src);
         fabric.Image.fromURL(selectedVariant.featured_image.src, function(img) {
+          console.log('Variant image loaded:', img);
           img.scaleToWidth(700);
           canvas.setBackgroundImage(img, function() {
+            console.log('Variant background image set, rendering canvas');
             canvas.renderAll();
           });
-        }, { crossOrigin: 'anonymous' });
+        }, { 
+          crossOrigin: 'anonymous',
+          onError: function(err) {
+            console.error('Error loading variant image:', err);
+          }
+        });
+      } else {
+        console.error('No variant or featured image found');
       }
     }
 
