@@ -707,10 +707,10 @@
           console.log('[PPT DEBUG] Cleared existing design input');
         }
         
-        // Clear uploaded image data after cart submission
-        uploadedImageData = null;
-        window.uploadedImage = null;
-        console.log('[PPT DEBUG] Cleared uploaded image data and object');
+        // Store uploaded image data for screenshot process
+        const tempUploadedImageData = uploadedImageData;
+        const tempUploadedImage = window.uploadedImage;
+        console.log('[PPT DEBUG] Stored uploaded image data for screenshot process');
         
         // Test server connectivity
         console.log('[PPT DEBUG] Testing server connectivity...');
@@ -719,7 +719,7 @@
           .catch(err => console.log('[PPT DEBUG] Server test failed:', err));
         
         // Check if we should proceed with screenshot
-        if (!uploadedImageData) {
+        if (!tempUploadedImageData) {
           console.log('[PPT DEBUG] No uploaded image data, skipping screenshot');
           submitViaAjax(form);
           return;
@@ -730,7 +730,7 @@
         console.log('[PPT DEBUG] Forced canvas render before screenshot');
         
         // If we have data but no object, try to restore it
-        if (!window.uploadedImage && uploadedImageData) {
+        if (!tempUploadedImage && tempUploadedImageData) {
           console.log('[PPT DEBUG] Attempting to restore uploaded image from data');
           restoreUploadedImage();
           // Wait a bit for restoration
@@ -746,13 +746,17 @@
         // Check if canvas has objects after restoration attempt
         if (canvas.getObjects().length === 0) {
           console.log('[PPT DEBUG] Canvas has no objects, skipping screenshot');
+          // Clear uploaded image data after screenshot process
+          uploadedImageData = null;
+          window.uploadedImage = null;
+          console.log('[PPT DEBUG] Cleared uploaded image data and object');
           submitViaAjax(form);
           return;
         }
         
         console.log('[PPT DEBUG] === SCREENSHOT PROCESS START ===');
         console.log('[PPT DEBUG] Canvas objects count:', canvas.getObjects().length);
-        console.log('[PPT DEBUG] Uploaded image data exists:', !!uploadedImageData);
+        console.log('[PPT DEBUG] Uploaded image data exists:', !!tempUploadedImageData);
         console.log('[PPT DEBUG] Uploaded image object exists:', !!globalUploadedImage);
         console.log('[PPT DEBUG] Uploaded image object type:', globalUploadedImage ? globalUploadedImage.type : 'null');
         console.log('[PPT DEBUG] Global uploadedImage exists:', !!window.uploadedImage);
@@ -881,15 +885,20 @@
                   hiddenInput.id = 'mockup-screenshot-url';
                   form.appendChild(hiddenInput);
                 }
-                hiddenInput.value = fixedUrl;
-                console.log('[PPT DEBUG] Uploaded screenshot URL:', fixedUrl);
-                console.log('[PPT DEBUG] Form data before submission:');
-                const formDataDebug = new FormData(form);
-                for (let [key, value] of formDataDebug.entries()) {
-                  console.log('[PPT DEBUG] Form field:', key, '=', value);
-                }
-                
-                submitViaAjax(form);
+                        hiddenInput.value = fixedUrl;
+        console.log('[PPT DEBUG] Uploaded screenshot URL:', fixedUrl);
+        console.log('[PPT DEBUG] Form data before submission:');
+        const formDataDebug = new FormData(form);
+        for (let [key, value] of formDataDebug.entries()) {
+          console.log('[PPT DEBUG] Form field:', key, '=', value);
+        }
+        
+        // Clear uploaded image data after screenshot process
+        uploadedImageData = null;
+        window.uploadedImage = null;
+        console.log('[PPT DEBUG] Cleared uploaded image data and object');
+        
+        submitViaAjax(form);
               } else {
                 console.error('[PPT DEBUG] Upload failed - no URL in response:', data);
                 console.log('[PPT DEBUG] Proceeding with cart submission without screenshot');
