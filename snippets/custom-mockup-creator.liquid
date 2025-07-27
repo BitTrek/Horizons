@@ -701,6 +701,11 @@
           .then(res => console.log('[PPT DEBUG] Server test response:', res.status))
           .catch(err => console.log('[PPT DEBUG] Server test failed:', err));
         
+        console.log('[PPT DEBUG] === SCREENSHOT PROCESS START ===');
+        console.log('[PPT DEBUG] Canvas objects count:', canvas.getObjects().length);
+        console.log('[PPT DEBUG] Uploaded image exists:', !!uploadedImage);
+        console.log('[PPT DEBUG] Uploaded image data exists:', !!uploadedImageData);
+        
 
         // Hide all handles and controls before taking screenshot
         const objectsWithControls = [];
@@ -716,6 +721,8 @@
         canvas.renderAll();
         
         console.log('[PPT DEBUG] Handles hidden, taking screenshot');
+        console.log('[PPT DEBUG] Canvas background image exists:', !!canvas.backgroundImage);
+        console.log('[PPT DEBUG] Canvas objects after hiding handles:', canvas.getObjects().length);
         
         // Use Fabric.js canvas directly for screenshot
         const canvasScreenshot = canvas.toDataURL({
@@ -723,6 +730,9 @@
           quality: 1,
           multiplier: 2
         });
+        
+        console.log('[PPT DEBUG] Screenshot data URL length:', canvasScreenshot.length);
+        console.log('[PPT DEBUG] Screenshot data URL starts with:', canvasScreenshot.substring(0, 50));
         
         // Restore all handles and controls after screenshot
         objectsWithControls.forEach(item => {
@@ -748,6 +758,7 @@
         };
         img.onload = function() {
           console.log('[PPT DEBUG] Canvas screenshot image loaded, dimensions:', img.width, 'x', img.height);
+          console.log('[PPT DEBUG] Image data URL for screenshot:', img.src.substring(0, 100));
           // Calculate the aspect ratio to maintain proportions
           const aspectRatio = img.width / img.height;
           let drawWidth, drawHeight, offsetX, offsetY;
@@ -786,6 +797,8 @@
               return;
             }
             console.log('[PPT DEBUG] Blob created, size:', blob.size, 'bytes');
+            console.log('[PPT DEBUG] Blob type:', blob.type);
+            console.log('[PPT DEBUG] Filename:', mockupScreenshotName);
             const formDataUpload = new FormData();
             formDataUpload.append('file', blob, mockupScreenshotName);
             console.log('[PPT DEBUG] Attempting upload to: https://artshop.lv/uploads/upload.php');
@@ -817,6 +830,11 @@
                 }
                 hiddenInput.value = fixedUrl;
                 console.log('[PPT DEBUG] Uploaded screenshot URL:', fixedUrl);
+                console.log('[PPT DEBUG] Form data before submission:');
+                const formDataDebug = new FormData(form);
+                for (let [key, value] of formDataDebug.entries()) {
+                  console.log('[PPT DEBUG] Form field:', key, '=', value);
+                }
                 
                 submitViaAjax(form);
               } else {
@@ -848,6 +866,11 @@
         if (spinner) spinner.classList.remove('hidden');
         if (originalText) originalText.textContent = 'Adding...';
         const formData = new FormData(form);
+        console.log('[PPT DEBUG] === CART SUBMISSION START ===');
+        console.log('[PPT DEBUG] Form data for cart submission:');
+        for (let [key, value] of formData.entries()) {
+          console.log('[PPT DEBUG] Cart field:', key, '=', value);
+        }
         console.log('[PPT DEBUG] Sending AJAX request to /cart/add.js');
         fetch('/cart/add.js', {
           method: 'POST',
