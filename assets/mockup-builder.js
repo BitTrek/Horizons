@@ -92,14 +92,16 @@ class MockupBuilder {
   }
 
   initializeCanvas() {
-    const container = document.getElementById(this.containerId);
+    // Handle both ID and CSS selector
+    const containerId = this.containerId.replace('#', '');
+    const container = document.getElementById(containerId);
     if (!container) {
-      throw new Error(`Container with id "${this.containerId}" not found`);
+      throw new Error(`Container with id "${containerId}" not found`);
     }
 
     // Create stage
     this.stage = new Konva.Stage({
-      container: this.containerId,
+      container: containerId,
       width: this.options.width,
       height: this.options.height
     });

@@ -74,25 +74,20 @@
     // Get asset URLs from window object (set by Liquid template)
     const assetUrls = window.mockupAssetUrls || {};
     
-    console.log('Asset URLs from Liquid:', assetUrls);
-    
     // Load CSS if not already loaded
     if (!document.querySelector('link[href*="mockup-builder.css"]')) {
       const cssUrl = assetUrls.css || '/assets/mockup-builder.css';
-      console.log('Loading CSS from:', cssUrl);
       promises.push(loadCSS(cssUrl));
     }
     
     // Load JS modules if not already loaded
     if (!window.MockupBuilder) {
       const builderUrl = assetUrls.builder || '/assets/mockup-builder.js';
-      console.log('Loading Builder JS from:', builderUrl);
       promises.push(loadJS(builderUrl));
     }
     
     if (!window.MockupCart) {
       const cartUrl = assetUrls.cart || '/assets/mockup-cart.js';
-      console.log('Loading Cart JS from:', cartUrl);
       promises.push(loadJS(cartUrl));
     }
     
