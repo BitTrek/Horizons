@@ -21,6 +21,17 @@
         return;
       }
       console.log('Canvas element found:', canvasElement);
+      console.log('Canvas element dimensions:', canvasElement.offsetWidth, 'x', canvasElement.offsetHeight);
+      console.log('Canvas element style:', canvasElement.style.cssText);
+      console.log('Canvas element visible:', canvasElement.offsetWidth > 0 && canvasElement.offsetHeight > 0);
+      
+      // Check parent container
+      const container = canvasElement.parentElement;
+      if (container) {
+        console.log('Canvas container:', container);
+        console.log('Container dimensions:', container.offsetWidth, 'x', container.offsetHeight);
+        console.log('Container style:', container.style.cssText);
+      }
       
       canvas = new fabric.Canvas("canvas");
       console.log('Fabric canvas created:', canvas);
@@ -87,13 +98,19 @@
           canvas.renderAll();
           console.log('Canvas rendered successfully');
           
-          // Add a visual indicator that the image was loaded
+          // Check canvas visibility after rendering
           const canvasElement = document.getElementById('canvas');
           if (canvasElement) {
-            canvasElement.style.border = '3px solid #00ff00';
+            console.log('Canvas element after render - dimensions:', canvasElement.offsetWidth, 'x', canvasElement.offsetHeight);
+            console.log('Canvas element after render - visible:', canvasElement.offsetWidth > 0 && canvasElement.offsetHeight > 0);
+            
+            // Add a visual indicator that the image was loaded
+            canvasElement.style.border = '5px solid #ff0000';
+            canvasElement.style.backgroundColor = '#ffff00';
             setTimeout(() => {
               canvasElement.style.border = '1px solid #ccc';
-            }, 1000);
+              canvasElement.style.backgroundColor = '';
+            }, 2000);
           }
         });
       }, { 
@@ -373,13 +390,19 @@
             canvas.renderAll();
             console.log('Canvas rendered successfully');
             
-            // Add a visual indicator that the image was loaded
+            // Check canvas visibility after rendering
             const canvasElement = document.getElementById('canvas');
             if (canvasElement) {
-              canvasElement.style.border = '3px solid #00ff00';
-              setTimeout(() => {
-                canvasElement.style.border = '1px solid #ccc';
-              }, 1000);
+              console.log('Canvas element after render - dimensions:', canvasElement.offsetWidth, 'x', canvasElement.offsetHeight);
+              console.log('Canvas element after render - visible:', canvasElement.offsetWidth > 0 && canvasElement.offsetHeight > 0);
+              
+                          // Add a visual indicator that the image was loaded
+            canvasElement.style.border = '5px solid #ff0000';
+            canvasElement.style.backgroundColor = '#ffff00';
+            setTimeout(() => {
+              canvasElement.style.border = '1px solid #ccc';
+              canvasElement.style.backgroundColor = '';
+            }, 2000);
             }
           });
         }, { 
