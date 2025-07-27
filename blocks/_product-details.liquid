@@ -28,6 +28,20 @@
   {% render 'group', children: children, settings: block.settings, shopify_attributes: block.shopify_attributes %}
 </div>
 
+<script>
+  // Product data for variant image updates
+  window.productData = {
+    id: {{ closest.product.id | json }},
+    title: {{ closest.product.title | json }},
+    handle: {{ closest.product.handle | json }},
+    tags: {{ closest.product.tags | json }},
+    featured_image: {{ closest.product.featured_image | json }},
+    images: {{ closest.product.images | json }},
+    variants: {{ closest.product.variants | json }},
+    selected_or_first_available_variant: {{ closest.product.selected_or_first_available_variant | json }}
+  };
+</script>
+
 {% stylesheet %}
   /* Clear padding on mobile, if not full-width */
   @media screen and (max-width: 749px) {

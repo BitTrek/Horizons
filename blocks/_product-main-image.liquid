@@ -1,0 +1,221 @@
+{%- doc -%}
+  Renders the product's main image that updates when variants change.
+
+  @param {string} [loading] - The html loading attribute
+{%- enddoc -%}
+
+{% assign current_variant = closest.product.selected_or_first_available_variant %}
+{% assign main_image = current_variant.featured_image | default: closest.product.featured_image %}
+{% assign alt = closest.product.title %}
+
+{% liquid
+  assign width = '100%'
+  assign media_width_desktop = '100vw'
+  assign media_width_mobile = '100vw'
+  assign sizes = 'auto, (min-width: 750px) ' | append: media_width_desktop | append: ', ' | append: media_width_mobile
+  assign widths = '450, 750, 1200, 1800, 2000'
+%}
+
+<div 
+  class="product-main-image-block"
+  data-product-main-image
+  data-product-id="{{ closest.product.id }}"
+  {{ block.shopify_attributes }}
+>
+  {% if main_image %}
+    <div class="product-main-image-container">
+      <img
+        src="{{ main_image | image_url: width: 2000 }}"
+        alt="{{ alt }}"
+        loading="{{ loading | default: 'lazy' }}"
+        width="{{ width }}"
+        sizes="{{ sizes }}"
+        class="product-main-image"
+        data-variant-image
+        data-variant-id="{{ current_variant.id }}"
+      >
+    </div>
+  {% else %}
+    <div class="product-main-image-container product-main-image--placeholder">
+      <div class="product-main-image-placeholder">
+        <span>No image available</span>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const productMainImage = document.querySelector('[data-product-main-image]');
+  if (!productMainImage) return;
+
+  const imageElement = productMainImage.querySelector('[data-variant-image]');
+  if (!imageElement) return;
+
+  // Function to update the image when variant changes
+  function updateProductImage(variantId) {
+    console.log('Updating product image for variant:', variantId);
+    
+    // Find the variant data
+    const productData = window.productData || {};
+    const variants = productData.variants || [];
+    const variant = variants.find(v => v.id === variantId);
+    
+    if (variant && variant.featured_image) {
+      console.log('Found variant image:', variant.featured_image);
+      
+      // Update the image source
+      imageElement.src = variant.featured_image;
+      imageElement.setAttribute('data-variant-id', variantId);
+      
+      // Add a subtle fade effect
+      imageElement.style.opacity = '0.7';
+      setTimeout(() => {
+        imageElement.style.opacity = '1';
+      }, 150);
+    } else {
+      console.log('No variant image found for variant:', variantId);
+    }
+  }
+
+  // Listen for variant changes
+  document.addEventListener('variant:update', function(event) {
+    if (event.detail && event.detail.variant) {
+      updateProductImage(event.detail.variant.id);
+    }
+  });
+
+  // Also listen for form changes (fallback)
+  const variantInputs = document.querySelectorAll('input[name="id"], select[name="id"]');
+  variantInputs.forEach(input => {
+    input.addEventListener('change', function() {
+      const variantId = parseInt(this.value);
+      if (variantId) {
+        updateProductImage(variantId);
+      }
+    });
+  });
+
+  // Listen for radio button changes (color swatches)
+  const variantRadios = document.querySelectorAll('input[type="radio"][data-variant-id]');
+  variantRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (this.checked) {
+        const variantId = parseInt(this.getAttribute('data-variant-id'));
+        if (variantId) {
+          updateProductImage(variantId);
+        }
+      }
+    });
+  });
+
+  // Listen for mutation observer changes (for dynamic variant updates)
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+        const target = mutation.target;
+        if (target.name === 'id' && target.value) {
+          const variantId = parseInt(target.value);
+          if (variantId) {
+            updateProductImage(variantId);
+          }
+        }
+      }
+    });
+  });
+
+  // Observe variant input changes
+  variantInputs.forEach(input => {
+    observer.observe(input, { attributes: true });
+  });
+});
+</script>
+
+{% stylesheet %}
+  .product-main-image-block {
+    width: 100%;
+    margin: 2rem 0;
+  }
+
+  .product-main-image-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    border-radius: {{ block.settings.border_radius | default: 8 }}px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .product-main-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: opacity 0.3s ease;
+    border-radius: {{ block.settings.border_radius | default: 8 }}px;
+  }
+
+  .product-main-image--placeholder {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .product-main-image-placeholder {
+    text-align: center;
+    color: #6c757d;
+    font-size: 1.1rem;
+  }
+
+  .product-main-image-placeholder span {
+    display: block;
+    margin-top: 0.5rem;
+  }
+
+  /* Responsive adjustments */
+  @media screen and (max-width: 749px) {
+    .product-main-image-container {
+      max-width: 100%;
+      margin: 1rem 0;
+    }
+    
+    .product-main-image--placeholder {
+      min-height: 200px;
+    }
+  }
+
+  /* Loading state */
+  .product-main-image--loading {
+    opacity: 0.7;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Product Main Image",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image Settings"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border Radius",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "paragraph",
+      "content": "This block automatically shows the product's main image and updates when variant colors are changed."
+    }
+  ]
+}
+{% endschema %} 

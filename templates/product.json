@@ -216,6 +216,14 @@
               },
               "block_order": []
             },
+            "product_main_image_block": {
+              "type": "_product-main-image",
+              "name": "Product Main Image",
+              "settings": {
+                "border_radius": 8
+              },
+              "blocks": {}
+            },
             "text_aEtTtq": {
               "type": "text",
               "name": "Product description",
@@ -248,6 +256,7 @@
             "divider_VJhene",
             "variant_picker_R3rGDr",
             "buy_buttons_eYQEYi",
+            "product_main_image_block",
             "text_aEtTtq"
           ]
         }
