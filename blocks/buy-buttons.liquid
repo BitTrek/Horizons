@@ -67,6 +67,11 @@
           <label id="message" class="form__label">Minimum recommended size: 1000 × 1000px</label>
           <input type="file" name="properties[Uploaded Design]" accept="image/*" id="upload-input" />
         {% endif %}
+        
+        <!-- Last updated: {{ 'now' | date: '%Y-%m-%d %H:%M:%S' }} (Latvia time) -->
+        <div style="font-size: 12px; color: #999; margin: 10px 0; text-align: center; border-top: 1px solid #eee; padding-top: 10px;">
+          Last updated: {{ 'now' | date: '%Y-%m-%d %H:%M:%S' }} (Latvia time)
+        </div>
         <div
           class="product-form-buttons spacing-style{% if block.settings.stacking %} product-form-buttons--stacked{% endif %}"
           style="{% render 'spacing-style', settings: block.settings %}"
