@@ -251,7 +251,8 @@ class MockupBuilder {
     events.forEach(eventType => {
       document.addEventListener(eventType, (e) => {
         if (this.isVariantChangeEvent(e)) {
-          this.debounce(() => this.updateProductImage(), 100)();
+          // Use a longer debounce to prevent rapid updates
+          this.debounce(() => this.updateProductImage(), 300)();
         }
       });
     });
@@ -267,14 +268,55 @@ class MockupBuilder {
 
   async updateProductImage() {
     try {
-      // Remove old product image
-      if (this.state.productImage) {
-        this.state.productImage.destroy();
-        this.state.setState({ productImage: null });
+      // Get new product image URL first
+      const newImageUrl = this.getProductImageUrl();
+      if (!newImageUrl) {
+        console.warn('No new product image URL available');
+        return;
       }
 
-      // Load new product image
-      await this.loadProductImage();
+      // Load new image before removing old one to prevent flickering
+      let newImageUrlFixed = newImageUrl;
+      if (newImageUrlFixed.startsWith('//')) {
+        newImageUrlFixed = 'https:' + newImageUrlFixed;
+      }
+
+      const image = await this.loadImage(newImageUrlFixed);
+      
+      // Create new Konva image
+      const newKonvaImage = new Konva.Image({
+        image: image,
+        x: 0,
+        y: 0
+      });
+
+      // Scale to fit canvas (leave some padding)
+      const padding = 20;
+      const maxWidth = this.options.width - padding * 2;
+      const maxHeight = this.options.height - padding * 2;
+      const scale = Math.min(
+        maxWidth / image.width,
+        maxHeight / image.height
+      );
+      
+      newKonvaImage.scale({ x: scale, y: scale });
+      
+      // Center the image
+      const scaledWidth = image.width * scale;
+      const scaledHeight = image.height * scale;
+      newKonvaImage.x((this.options.width - scaledWidth) / 2);
+      newKonvaImage.y((this.options.height - scaledHeight) / 2);
+
+      // Remove old product image only after new one is ready
+      if (this.state.productImage) {
+        this.state.productImage.destroy();
+      }
+
+      // Add new image to product layer
+      this.productLayer.add(newKonvaImage);
+      this.productLayer.draw();
+
+      this.state.setState({ productImage: newKonvaImage });
       
     } catch (error) {
       console.error('Failed to update product image:', error);
@@ -389,7 +431,7 @@ class MockupBuilder {
   }
 
   handleResize() {
-    if (!this.stage) return;
+    if (!this.stage || !this.productLayer || !this.designLayer) return;
 
     // Handle both ID and CSS selector
     const containerId = this.containerId.replace('#', '');
@@ -402,9 +444,20 @@ class MockupBuilder {
     
     const rect = container.getBoundingClientRect();
     
-    this.stage.width(rect.width);
-    this.stage.height(rect.height);
-    this.stage.draw();
+    // Only resize if dimensions actually changed
+    if (this.stage.width() !== rect.width || this.stage.height() !== rect.height) {
+      this.stage.width(rect.width);
+      this.stage.height(rect.height);
+      
+      // Update background rectangle size
+      const background = this.productLayer.findOne('Rect');
+      if (background) {
+        background.width(rect.width);
+        background.height(rect.height);
+      }
+      
+      this.stage.draw();
+    }
   }
 
   debounce(func, wait) {
