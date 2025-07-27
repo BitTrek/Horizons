@@ -677,7 +677,12 @@
       const globalUploadedImage = window.uploadedImage || null;
       document.body.addEventListener('click', function (e) {
         console.log('[PPT DEBUG] Click detected on:', e.target.tagName, e.target.className);
+        console.log('[PPT DEBUG] Target element:', e.target);
+        console.log('[PPT DEBUG] Target name attribute:', e.target.name);
+        console.log('[PPT DEBUG] Target type attribute:', e.target.type);
+        
         const button = e.target.closest('button[name="add"]');
+        console.log('[PPT DEBUG] Found button:', button);
         if (!button) {
           console.log('[PPT DEBUG] Not an add to cart button');
           return;
@@ -1043,6 +1048,7 @@
           return response.json();
         }).then(data => {
           console.log('[PPT DEBUG] /cart/add.js response data', data);
+          console.log('[PPT DEBUG] Cart item properties:', data.properties);
           if (!data.key) {
             console.error('[PPT DEBUG] No cart key in response');
             submitButton.disabled = false;
