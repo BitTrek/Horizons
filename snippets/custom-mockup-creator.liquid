@@ -109,45 +109,44 @@
           left: (canvasWidth - img.getScaledWidth()) / 2,
           top: (canvasHeight - img.getScaledHeight()) / 2,
           selectable: false,
-          evented: false
+          evented: false,
+          hasBorders: false,
+          hasControls: false
         });
         
         console.log('Scaled image dimensions:', img.getScaledWidth(), 'x', img.getScaledHeight());
         console.log('Image position:', img.left, img.top);
         
-        // Clear any existing background
-        canvas.setBackgroundImage(null, function() {
-          // Set the new background image
-          canvas.setBackgroundImage(img, function() {
-          console.log('Background image set, rendering canvas');
-          console.log('Canvas background image:', canvas.backgroundImage);
-          console.log('Canvas background image dimensions:', canvas.backgroundImage ? `${canvas.backgroundImage.getScaledWidth()} x ${canvas.backgroundImage.getScaledHeight()}` : 'none');
-          console.log('Canvas background image position:', canvas.backgroundImage ? `${canvas.backgroundImage.left}, ${canvas.backgroundImage.top}` : 'none');
-          canvas.renderAll();
-          console.log('Canvas rendered successfully');
+        // Add the image to canvas (not as background)
+        canvas.add(img);
+        currentProductImage = img;
+        
+        // Move the product image to the back
+        canvas.sendToBack(img);
+        
+        canvas.renderAll();
+        console.log('Canvas rendered successfully');
+        
+        // Force a refresh to ensure the image is visible
+        setTimeout(() => {
+          canvas.requestRenderAll();
+          console.log('Canvas force refreshed');
+        }, 100);
+        
+        // Check canvas visibility after rendering
+        const canvasElement = document.getElementById('canvas');
+        if (canvasElement) {
+          console.log('Canvas element after render - dimensions:', canvasElement.offsetWidth, 'x', canvasElement.offsetHeight);
+          console.log('Canvas element after render - visible:', canvasElement.offsetWidth > 0 && canvasElement.offsetHeight > 0);
           
-          // Force a refresh to ensure the background is visible
+          // Add a visual indicator that the image was loaded
+          canvasElement.style.border = '5px solid #ff0000';
+          canvasElement.style.backgroundColor = '#ffff00';
           setTimeout(() => {
-            canvas.requestRenderAll();
-            console.log('Canvas force refreshed');
-          }, 100);
-          
-          // Check canvas visibility after rendering
-          const canvasElement = document.getElementById('canvas');
-          if (canvasElement) {
-            console.log('Canvas element after render - dimensions:', canvasElement.offsetWidth, 'x', canvasElement.offsetHeight);
-            console.log('Canvas element after render - visible:', canvasElement.offsetWidth > 0 && canvasElement.offsetHeight > 0);
-            
-            // Add a visual indicator that the image was loaded
-            canvasElement.style.border = '5px solid #ff0000';
-            canvasElement.style.backgroundColor = '#ffff00';
-            setTimeout(() => {
-              canvasElement.style.border = '1px solid #ccc';
-              canvasElement.style.backgroundColor = '';
-            }, 2000);
-          }
-          });
-        });
+            canvasElement.style.border = '1px solid #ccc';
+            canvasElement.style.backgroundColor = '';
+          }, 2000);
+        }
       }, { 
         crossOrigin: 'anonymous',
         onError: function(err) {
@@ -307,9 +306,11 @@
       updateCanvasBackground();
     }
 
-    // Update canvas background
+        // Update canvas background
     let lastUpdateTime = 0;
     let isUpdating = false;
+    let currentProductImage = null;
+    
     function updateCanvasBackground() {
       const now = Date.now();
       if (now - lastUpdateTime < 200) {
@@ -407,6 +408,12 @@
           console.log('Variant image loaded:', img);
           console.log('Original image dimensions:', img.width, 'x', img.height);
           
+          // Remove existing product image if it exists
+          if (currentProductImage) {
+            canvas.remove(currentProductImage);
+            currentProductImage = null;
+          }
+          
           // Calculate proper scaling to fit canvas
           const canvasWidth = canvas.getWidth();
           const canvasHeight = canvas.getHeight();
@@ -425,83 +432,98 @@
             left: (canvasWidth - img.getScaledWidth()) / 2,
             top: (canvasHeight - img.getScaledHeight()) / 2,
             selectable: false,
-            evented: false
+            evented: false,
+            hasBorders: false,
+            hasControls: false
           });
           
           console.log('Scaled image dimensions:', img.getScaledWidth(), 'x', img.getScaledHeight());
           console.log('Image position:', img.left, img.top);
           
-          // Clear any existing background
-          canvas.setBackgroundImage(null, function() {
-            // Set the new background image
-            canvas.setBackgroundImage(img, function() {
-            console.log('Variant background image set, rendering canvas');
-            console.log('Canvas background image:', canvas.backgroundImage);
-            console.log('Canvas background image dimensions:', canvas.backgroundImage ? `${canvas.backgroundImage.getScaledWidth()} x ${canvas.backgroundImage.getScaledHeight()}` : 'none');
-            console.log('Canvas background image position:', canvas.backgroundImage ? `${canvas.backgroundImage.left}, ${canvas.backgroundImage.top}` : 'none');
-            canvas.renderAll();
-            console.log('Canvas rendered successfully');
+          // Add the image to canvas (not as background)
+          canvas.add(img);
+          currentProductImage = img;
+          
+          // Move the product image to the back
+          canvas.sendToBack(img);
+          
+          canvas.renderAll();
+          console.log('Canvas rendered successfully');
+          
+          // Force a refresh to ensure the image is visible
+          setTimeout(() => {
+            canvas.requestRenderAll();
+            console.log('Canvas force refreshed');
+          }, 100);
+          
+          // Check canvas visibility after rendering
+          const canvasElement = document.getElementById('canvas');
+          if (canvasElement) {
+            console.log('Canvas element after render - dimensions:', canvasElement.offsetWidth, 'x', canvasElement.offsetHeight);
+            console.log('Canvas element after render - visible:', canvasElement.offsetWidth > 0 && canvasElement.offsetHeight > 0);
             
-            // Force a refresh to ensure the background is visible
-            setTimeout(() => {
-              canvas.requestRenderAll();
-              console.log('Canvas force refreshed');
-            }, 100);
-            
-            // Check canvas visibility after rendering
-            const canvasElement = document.getElementById('canvas');
-            if (canvasElement) {
-              console.log('Canvas element after render - dimensions:', canvasElement.offsetWidth, 'x', canvasElement.offsetHeight);
-              console.log('Canvas element after render - visible:', canvasElement.offsetWidth > 0 && canvasElement.offsetHeight > 0);
-              
-                          // Add a visual indicator that the image was loaded
+            // Add a visual indicator that the image was loaded
             canvasElement.style.border = '5px solid #ff0000';
             canvasElement.style.backgroundColor = '#ffff00';
             setTimeout(() => {
               canvasElement.style.border = '1px solid #ccc';
               canvasElement.style.backgroundColor = '';
             }, 2000);
-            }
-            
-            // Mark update as complete
-            isUpdating = false;
-            console.log('✅ Variant image update completed successfully');
-          });
-        });
-      }, { 
-        crossOrigin: 'anonymous',
-        onError: function(err) {
-          console.error('Error loading variant image:', err);
-          // Fallback to original product image
-          const fallbackUrl = '{{ product.featured_image | image_url: width: 700 }}';
-          console.log('Trying fallback URL:', fallbackUrl);
-          fabric.Image.fromURL(fallbackUrl, function(fallbackImg) {
-            const canvasWidth = canvas.getWidth();
-            const canvasHeight = canvas.getHeight();
-            const scaleX = canvasWidth / fallbackImg.width;
-            const scaleY = canvasHeight / fallbackImg.height;
-            const scale = Math.min(scaleX, scaleY);
-            
-            fallbackImg.scale(scale);
-            fallbackImg.set({
-              left: (canvasWidth - fallbackImg.getScaledWidth()) / 2,
-              top: (canvasHeight - fallbackImg.getScaledHeight()) / 2
-            });
-            
-            canvas.setBackgroundImage(fallbackImg, function() {
+          }
+          
+          // Mark update as complete
+          isUpdating = false;
+          console.log('✅ Variant image update completed successfully');
+        }, { 
+          crossOrigin: 'anonymous',
+          onError: function(err) {
+            console.error('Error loading variant image:', err);
+            // Fallback to original product image
+            const fallbackUrl = '{{ product.featured_image | image_url: width: 700 }}';
+            console.log('Trying fallback URL:', fallbackUrl);
+            fabric.Image.fromURL(fallbackUrl, function(fallbackImg) {
+              if (currentProductImage) {
+                canvas.remove(currentProductImage);
+                currentProductImage = null;
+              }
+              
+              const canvasWidth = canvas.getWidth();
+              const canvasHeight = canvas.getHeight();
+              const scaleX = canvasWidth / fallbackImg.width;
+              const scaleY = canvasHeight / fallbackImg.height;
+              const scale = Math.min(scaleX, scaleY);
+              
+              fallbackImg.scale(scale);
+              fallbackImg.set({
+                left: (canvasWidth - fallbackImg.getScaledWidth()) / 2,
+                top: (canvasHeight - fallbackImg.getScaledHeight()) / 2,
+                selectable: false,
+                evented: false,
+                hasBorders: false,
+                hasControls: false
+              });
+              
+              canvas.add(fallbackImg);
+              currentProductImage = fallbackImg;
+              canvas.sendToBack(fallbackImg);
               canvas.renderAll();
+              
               isUpdating = false;
               console.log('✅ Fallback image update completed');
-            });
-          }, { crossOrigin: 'anonymous' });
-        }
-      });
+            }, { crossOrigin: 'anonymous' });
+          }
+        });
       } else {
         console.error('No variant image found, using fallback');
         // Fallback to original product image
         const fallbackUrl = '{{ product.featured_image | image_url: width: 700 }}';
         console.log('Using fallback URL:', fallbackUrl);
         fabric.Image.fromURL(fallbackUrl, function(fallbackImg) {
+          if (currentProductImage) {
+            canvas.remove(currentProductImage);
+            currentProductImage = null;
+          }
+          
           const canvasWidth = canvas.getWidth();
           const canvasHeight = canvas.getHeight();
           const scaleX = canvasWidth / fallbackImg.width;
@@ -511,14 +533,20 @@
           fallbackImg.scale(scale);
           fallbackImg.set({
             left: (canvasWidth - fallbackImg.getScaledWidth()) / 2,
-            top: (canvasHeight - fallbackImg.getScaledHeight()) / 2
+            top: (canvasHeight - fallbackImg.getScaledHeight()) / 2,
+            selectable: false,
+            evented: false,
+            hasBorders: false,
+            hasControls: false
           });
           
-          canvas.setBackgroundImage(fallbackImg, function() {
-            canvas.renderAll();
-            isUpdating = false;
-            console.log('✅ Final fallback image update completed');
-          });
+          canvas.add(fallbackImg);
+          currentProductImage = fallbackImg;
+          canvas.sendToBack(fallbackImg);
+          canvas.renderAll();
+          
+          isUpdating = false;
+          console.log('✅ Final fallback image update completed');
         }, { crossOrigin: 'anonymous' });
       }
     }
@@ -552,16 +580,19 @@
     function forceCanvasRefresh() {
       console.log('🔄 Force canvas refresh initiated');
       
-      // Clear current background
-      canvas.setBackgroundImage(null, function() {
-        console.log('🔄 Background cleared');
-        canvas.renderAll();
-        
-        // Wait a moment then reload
-        setTimeout(() => {
-          updateCanvasBackground();
-        }, 100);
-      });
+      // Remove current product image if it exists
+      if (currentProductImage) {
+        canvas.remove(currentProductImage);
+        currentProductImage = null;
+        console.log('🔄 Current product image removed');
+      }
+      
+      canvas.renderAll();
+      
+      // Wait a moment then reload
+      setTimeout(() => {
+        updateCanvasBackground();
+      }, 100);
     }
 
     // Event listeners for variant changes
