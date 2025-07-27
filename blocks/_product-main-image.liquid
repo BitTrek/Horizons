@@ -97,59 +97,32 @@ document.addEventListener('DOMContentLoaded', function() {
       fabricCanvas.renderAll();
     });
 
-    // Load the Euro Hoodie logo
-    fabric.Image.fromURL('https://cdn.shopify.com/s/files/1/0947/9808/6476/files/eurohoodie_logo.png?v=1750086173', function(img) {
-      euroHoodieLogo = img;
-      
-      // Scale and position the logo
-      const canvasWidth = fabricCanvas.getWidth();
-      const canvasHeight = fabricCanvas.getHeight();
-      
-      // Scale logo to fit nicely on the product
-      const scale = Math.min(canvasWidth * 0.3 / img.width, canvasHeight * 0.3 / img.height);
-      img.scale(scale);
-      
-      // Center the logo
-      img.set({
-        left: (canvasWidth - img.width * scale) / 2,
-        top: (canvasHeight - img.height * scale) / 2,
-        selectable: true,
-        hasControls: true,
-        hasBorders: true,
-        cornerSize: 10,
-        transparentCorners: false,
-        cornerColor: '#007bff',
-        borderColor: '#007bff'
-      });
-      
-      fabricCanvas.add(img);
-      
-      // Set initial product image as background
-      const initialImageUrl = imageElement.src;
-      if (initialImageUrl) {
-        fabric.Image.fromURL(initialImageUrl, function(bgImg) {
-          const scaleX = canvasWidth / bgImg.width;
-          const scaleY = canvasHeight / bgImg.height;
-          const bgScale = Math.min(scaleX, scaleY);
-          
-          bgImg.scale(bgScale);
-          bgImg.set({
-            left: (canvasWidth - bgImg.width * bgScale) / 2,
-            top: (canvasHeight - bgImg.height * bgScale) / 2
-          });
-          
-          fabricCanvas.setBackgroundImage(bgImg, fabricCanvas.renderAll.bind(fabricCanvas), {
-            crossOrigin: 'anonymous'
-          });
-          
-          console.log('Initial product image set as canvas background');
-        }, { crossOrigin: 'anonymous' });
-      } else {
-        fabricCanvas.renderAll();
-      }
-      
-      console.log('Euro Hoodie logo loaded and positioned on canvas');
-    }, { crossOrigin: 'anonymous' });
+    // Set initial product image as background
+    const initialImageUrl = imageElement.src;
+    if (initialImageUrl) {
+      fabric.Image.fromURL(initialImageUrl, function(bgImg) {
+        const canvasWidth = fabricCanvas.getWidth();
+        const canvasHeight = fabricCanvas.getHeight();
+        
+        const scaleX = canvasWidth / bgImg.width;
+        const scaleY = canvasHeight / bgImg.height;
+        const bgScale = Math.min(scaleX, scaleY);
+        
+        bgImg.scale(bgScale);
+        bgImg.set({
+          left: (canvasWidth - bgImg.width * bgScale) / 2,
+          top: (canvasHeight - bgImg.height * bgScale) / 2
+        });
+        
+        fabricCanvas.setBackgroundImage(bgImg, fabricCanvas.renderAll.bind(fabricCanvas), {
+          crossOrigin: 'anonymous'
+        });
+        
+        console.log('Initial product image set as canvas background');
+      }, { crossOrigin: 'anonymous' });
+    } else {
+      fabricCanvas.renderAll();
+    }
   }
 
   // Function to update the product image when variant changes
@@ -280,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const canvasWidth = fabricCanvas.getWidth();
         const canvasHeight = fabricCanvas.getHeight();
         
-        // Scale design to fit nicely on the product (similar to logo)
+        // Scale design to fit nicely on the product
         const scale = Math.min(canvasWidth * 0.4 / img.width, canvasHeight * 0.4 / img.height);
         img.scale(scale);
         
@@ -297,6 +270,9 @@ document.addEventListener('DOMContentLoaded', function() {
           borderColor: '#007bff'
         });
         
+        // Add X button to remove design
+        addRemoveButton(img);
+        
         fabricCanvas.add(img);
         fabricCanvas.renderAll();
         
@@ -311,6 +287,59 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     reader.readAsDataURL(file);
+  }
+
+  // Add X button to remove design
+  function addRemoveButton(designObject) {
+    // Create X button text
+    const xButton = new fabric.Text('✕', {
+      fontSize: 20,
+      fill: '#ff0000',
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      padding: 8,
+      borderRadius: 50,
+      selectable: false,
+      hasControls: false,
+      hasBorders: false,
+      originX: 'center',
+      originY: 'center'
+    });
+
+    // Position X button at top-right corner of design
+    xButton.set({
+      left: designObject.left + designObject.width * designObject.scaleX - 15,
+      top: designObject.top - 15
+    });
+
+    // Add click event to X button
+    xButton.on('mousedown', function() {
+      removeDesign();
+    });
+
+    fabricCanvas.add(xButton);
+    
+    // Store reference to X button
+    designObject.xButton = xButton;
+  }
+
+  // Remove design and show upload button
+  function removeDesign() {
+    if (uploadedDesign) {
+      fabricCanvas.remove(uploadedDesign);
+      if (uploadedDesign.xButton) {
+        fabricCanvas.remove(uploadedDesign.xButton);
+      }
+      uploadedDesign = null;
+    }
+    
+    // Show the upload button again
+    const uploadButton = productMainImage.querySelector('.upload-design-button');
+    if (uploadButton) {
+      uploadButton.classList.remove('hidden');
+    }
+    
+    fabricCanvas.renderAll();
+    console.log('Design removed, upload button restored');
   }
 
   // Listen for variant changes
@@ -413,10 +442,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   .upload-design-circle {
-    width: 120px;
-    height: 120px;
+    width: 240px;
+    height: 240px;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(4px);
     display: flex;
     flex-direction: column;
@@ -424,25 +453,25 @@ document.addEventListener('DOMContentLoaded', function() {
     justify-content: center;
     color: white;
     text-align: center;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
   }
 
   .upload-design-button:hover .upload-design-circle {
-    background: rgba(0, 0, 0, 0.8);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.3);
   }
 
   .upload-design-icon {
-    font-size: 2rem;
-    margin-bottom: 8px;
+    font-size: 3rem;
+    margin-bottom: 12px;
   }
 
   .upload-design-text {
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     font-weight: 500;
     line-height: 1.2;
-    max-width: 80px;
+    max-width: 160px;
   }
 
   /* Hide upload button when design is uploaded */
