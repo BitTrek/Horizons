@@ -258,6 +258,16 @@ function downloadDesign(itemKey) {
                           </div>
                         {%- endif -%}
                       {%- endfor -%}
+                      
+                      <!-- DEBUG: Show all properties -->
+                      {%- if item.properties.size > 0 -%}
+                        <div style="background: #f0f0f0; padding: 5px; margin: 5px 0; font-size: 12px;">
+                          <strong>DEBUG - All properties:</strong><br>
+                          {%- for property in item.properties -%}
+                            {{ property.first }}: {{ property.last }}<br>
+                          {%- endfor -%}
+                        </div>
+                      {%- endif -%}
                     </dl>
 
                     {% if item.selling_plan_allocation %}
