@@ -676,10 +676,18 @@
       // Access the global uploadedImage variable
       const globalUploadedImage = window.uploadedImage || null;
       document.body.addEventListener('click', function (e) {
+        console.log('[PPT DEBUG] Click detected on:', e.target.tagName, e.target.className);
         const button = e.target.closest('button[name="add"]');
-        if (!button) return;
+        if (!button) {
+          console.log('[PPT DEBUG] Not an add to cart button');
+          return;
+        }
         console.log('[PPT DEBUG] Add to cart button clicked');
         const designInput = document.getElementById('upload-input');
+        console.log('[PPT DEBUG] Design input found:', !!designInput);
+        console.log('[PPT DEBUG] Design input files length:', designInput ? designInput.files.length : 'no input');
+        console.log('[PPT DEBUG] Uploaded image data exists:', !!uploadedImageData);
+        
         if (!designInput.files.length && !uploadedImageData) {
           e.preventDefault();
           alert('Please upload a design and wait for the mockup screenshot before adding to cart.');
