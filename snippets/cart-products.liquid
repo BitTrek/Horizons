@@ -238,11 +238,13 @@ function downloadDesign(itemKey) {
                         {%- endfor -%}
                       {%- endif -%}
 
+                      {%- assign has_uploaded_design = false -%}
                       {%- for property in item.properties -%}
                         {%- assign property_first_char = property.first | slice: 0 -%}
                         {%- if property.last != blank and property_first_char != '_' -%}
                           <div class="cart-items__properties">
                             {%- if property.first == 'Uploaded Design' -%}
+                              {%- assign has_uploaded_design = true -%}
                               <dd>
                                 <a href="#" onclick="downloadDesign('{{ item.key }}')" style="color: #0066cc; text-decoration: underline;">Download Design</a>
                               </dd>
@@ -258,6 +260,13 @@ function downloadDesign(itemKey) {
                           </div>
                         {%- endif -%}
                       {%- endfor -%}
+                      
+                      <!-- Show "No design file available" if no Uploaded Design property found -->
+                      {%- unless has_uploaded_design -%}
+                        <div class="cart-items__properties">
+                          <dd style="color: #999; font-style: italic;">No design file available</dd>
+                        </div>
+                      {%- endunless -%}
                       
                       <!-- DEBUG: Show all properties -->
                       {%- if item.properties.size > 0 -%}
