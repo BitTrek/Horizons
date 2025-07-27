@@ -28,10 +28,12 @@
 
   // Initialize when DOM is ready
   function init() {
+    console.log('=== MOCKUP BUILDER INITIALIZATION ===');
     console.log('Initializing Mockup Builder...');
     console.log('Template:', document.body.getAttribute('data-template'));
     console.log('Body classes:', document.body.className);
     console.log('Product data:', window.productData);
+    console.log('Mockup builder container:', document.getElementById('mockup-builder'));
     
     // Check if we're on a product page with personalization
     if (!isPersonalizationPage()) {
