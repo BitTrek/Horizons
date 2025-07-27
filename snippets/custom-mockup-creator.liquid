@@ -707,15 +707,19 @@
         // Always ensure we have a design property if we have uploaded image data
         if (uploadedImageData && form) {
           console.log('[PPT DEBUG] Ensuring design property exists');
-          let designPropertyInput = form.querySelector('input[name="properties[Uploaded Design]"]');
-          if (!designPropertyInput) {
-            designPropertyInput = document.createElement('input');
-            designPropertyInput.type = 'hidden';
-            designPropertyInput.name = 'properties[Uploaded Design]';
-            form.appendChild(designPropertyInput);
+          try {
+            let designPropertyInput = form.querySelector('input[name="properties[Uploaded Design]"]');
+            if (!designPropertyInput) {
+              designPropertyInput = document.createElement('input');
+              designPropertyInput.type = 'hidden';
+              designPropertyInput.name = 'properties[Uploaded Design]';
+              form.appendChild(designPropertyInput);
+            }
+            designPropertyInput.value = 'Design uploaded successfully';
+            console.log('[PPT DEBUG] Design property set:', designPropertyInput.value);
+          } catch (e) {
+            console.error('[PPT DEBUG] Error setting design property:', e);
           }
-          designPropertyInput.value = 'Design uploaded successfully';
-          console.log('[PPT DEBUG] Design property set:', designPropertyInput.value);
         }
         const mockup = document.querySelector('.canvas-wrapper');
         if (!mockup || !form) {
@@ -723,8 +727,14 @@
           return;
         }
         
+        console.log('[PPT DEBUG] Form found, proceeding with screenshot process');
+        
         // Check if form is still valid
         try {
+          if (!form || !form.checkValidity) {
+            console.error('[PPT DEBUG] Form is not valid or missing checkValidity method');
+            return;
+          }
           form.checkValidity();
         } catch (e) {
           console.error('[PPT DEBUG] Form is no longer valid:', e);
