@@ -457,32 +457,33 @@
             }, 2000);
             }
           });
-        }, { 
-          crossOrigin: 'anonymous',
-          onError: function(err) {
-            console.error('Error loading variant image:', err);
-            // Fallback to original product image
-            const fallbackUrl = '{{ product.featured_image | image_url: width: 700 }}';
-            console.log('Trying fallback URL:', fallbackUrl);
-            fabric.Image.fromURL(fallbackUrl, function(fallbackImg) {
-              const canvasWidth = canvas.getWidth();
-              const canvasHeight = canvas.getHeight();
-              const scaleX = canvasWidth / fallbackImg.width;
-              const scaleY = canvasHeight / fallbackImg.height;
-              const scale = Math.min(scaleX, scaleY);
-              
-              fallbackImg.scale(scale);
-              fallbackImg.set({
-                left: (canvasWidth - fallbackImg.getScaledWidth()) / 2,
-                top: (canvasHeight - fallbackImg.getScaledHeight()) / 2
-              });
-              
-              canvas.setBackgroundImage(fallbackImg, function() {
-                canvas.renderAll();
-              });
-            }, { crossOrigin: 'anonymous' });
-          }
         });
+      }, { 
+        crossOrigin: 'anonymous',
+        onError: function(err) {
+          console.error('Error loading variant image:', err);
+          // Fallback to original product image
+          const fallbackUrl = '{{ product.featured_image | image_url: width: 700 }}';
+          console.log('Trying fallback URL:', fallbackUrl);
+          fabric.Image.fromURL(fallbackUrl, function(fallbackImg) {
+            const canvasWidth = canvas.getWidth();
+            const canvasHeight = canvas.getHeight();
+            const scaleX = canvasWidth / fallbackImg.width;
+            const scaleY = canvasHeight / fallbackImg.height;
+            const scale = Math.min(scaleX, scaleY);
+            
+            fallbackImg.scale(scale);
+            fallbackImg.set({
+              left: (canvasWidth - fallbackImg.getScaledWidth()) / 2,
+              top: (canvasHeight - fallbackImg.getScaledHeight()) / 2
+            });
+            
+            canvas.setBackgroundImage(fallbackImg, function() {
+              canvas.renderAll();
+            });
+          }, { crossOrigin: 'anonymous' });
+        }
+      });
       } else {
         console.error('No variant image found, using fallback');
         // Fallback to original product image
