@@ -32,6 +32,10 @@ class MockupState {
 // Main Mockup Builder Class
 class MockupBuilder {
   constructor(containerId, options = {}) {
+    console.log('=== MOCKUP BUILDER CONSTRUCTOR ===');
+    console.log('containerId:', containerId);
+    console.log('options:', options);
+    
     this.containerId = containerId;
     this.options = {
       width: 700,
@@ -166,6 +170,11 @@ class MockupBuilder {
   }
 
   getProductImageUrl() {
+    console.log('=== GET PRODUCT IMAGE URL ===');
+    console.log('window.productData:', window.productData);
+    console.log('featured_image:', window.productData?.featured_image);
+    console.log('images array:', window.productData?.images);
+    
     // Try multiple methods to get product image URL
     const methods = [
       () => window.productData?.featured_image, // Direct string URL
@@ -179,14 +188,16 @@ class MockupBuilder {
       () => document.querySelector('.product__image img')?.src
     ];
 
-    for (const method of methods) {
+    for (let i = 0; i < methods.length; i++) {
       try {
-        const url = method();
+        const url = methods[i]();
+        console.log(`Method ${i} result:`, url);
         if (url) {
           console.log('Found product image URL:', url);
           return url;
         }
       } catch (e) {
+        console.log(`Method ${i} error:`, e);
         continue;
       }
     }
