@@ -713,11 +713,26 @@
           return;
         }
         
+        // If we have data but no object, try to restore it
+        if (!window.uploadedImage && uploadedImageData) {
+          console.log('[PPT DEBUG] Attempting to restore uploaded image from data');
+          restoreUploadedImage();
+          // Wait a bit for restoration
+          setTimeout(() => {
+            if (!window.uploadedImage) {
+              console.log('[PPT DEBUG] Failed to restore uploaded image, skipping screenshot');
+              submitViaAjax(form);
+              return;
+            }
+          }, 100);
+        }
+        
         console.log('[PPT DEBUG] === SCREENSHOT PROCESS START ===');
         console.log('[PPT DEBUG] Canvas objects count:', canvas.getObjects().length);
         console.log('[PPT DEBUG] Uploaded image data exists:', !!uploadedImageData);
         console.log('[PPT DEBUG] Uploaded image object exists:', !!globalUploadedImage);
         console.log('[PPT DEBUG] Uploaded image object type:', globalUploadedImage ? globalUploadedImage.type : 'null');
+        console.log('[PPT DEBUG] Global uploadedImage exists:', !!window.uploadedImage);
         console.log('[PPT DEBUG] Canvas objects:', canvas.getObjects().map(obj => ({ type: obj.type, visible: obj.visible, left: obj.left, top: obj.top })));
         
 
