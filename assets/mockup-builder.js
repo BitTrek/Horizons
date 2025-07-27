@@ -99,16 +99,30 @@ class MockupBuilder {
       throw new Error(`Container with id "${containerId}" not found`);
     }
 
-    // Create stage
+    // Create stage with background
     this.stage = new Konva.Stage({
       container: containerId,
       width: this.options.width,
       height: this.options.height
     });
 
+    // Add background rectangle
+    const background = new Konva.Rect({
+      x: 0,
+      y: 0,
+      width: this.options.width,
+      height: this.options.height,
+      fill: '#f8f9fa',
+      stroke: '#dee2e6',
+      strokeWidth: 1
+    });
+
     // Create layers
     this.productLayer = new Konva.Layer();
     this.designLayer = new Konva.Layer();
+    
+    // Add background to product layer
+    this.productLayer.add(background);
     
     this.stage.add(this.productLayer);
     this.stage.add(this.designLayer);
@@ -119,6 +133,11 @@ class MockupBuilder {
 
   async loadProductImage() {
     try {
+      // Don't load if already loaded
+      if (this.state.productImage) {
+        return;
+      }
+
       let productImageUrl = this.getProductImageUrl();
       if (!productImageUrl) {
         throw new Error('No product image URL available');
@@ -138,10 +157,13 @@ class MockupBuilder {
         y: 0
       });
 
-      // Scale to fit canvas
+      // Scale to fit canvas (leave some padding)
+      const padding = 20;
+      const maxWidth = this.options.width - padding * 2;
+      const maxHeight = this.options.height - padding * 2;
       const scale = Math.min(
-        this.options.width / image.width,
-        this.options.height / image.height
+        maxWidth / image.width,
+        maxHeight / image.height
       );
       
       konvaImage.scale({ x: scale, y: scale });
