@@ -70,7 +70,13 @@ document.addEventListener('DOMContentLoaded', function() {
     fabricCanvas = new fabric.Canvas(canvasElement, {
       width: 600,
       height: 600,
-      backgroundColor: 'transparent'
+      backgroundColor: 'transparent',
+      preserveObjectStacking: true
+    });
+
+    // Set canvas background to transparent
+    fabricCanvas.setBackgroundColor('transparent', function() {
+      fabricCanvas.renderAll();
     });
 
     // Load the Euro Hoodie logo
@@ -99,7 +105,30 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       
       fabricCanvas.add(img);
-      fabricCanvas.renderAll();
+      
+      // Set initial product image as background
+      const initialImageUrl = imageElement.src;
+      if (initialImageUrl) {
+        fabric.Image.fromURL(initialImageUrl, function(bgImg) {
+          const scaleX = canvasWidth / bgImg.width;
+          const scaleY = canvasHeight / bgImg.height;
+          const bgScale = Math.min(scaleX, scaleY);
+          
+          bgImg.scale(bgScale);
+          bgImg.set({
+            left: (canvasWidth - bgImg.width * bgScale) / 2,
+            top: (canvasHeight - bgImg.height * bgScale) / 2
+          });
+          
+          fabricCanvas.setBackgroundImage(bgImg, fabricCanvas.renderAll.bind(fabricCanvas), {
+            crossOrigin: 'anonymous'
+          });
+          
+          console.log('Initial product image set as canvas background');
+        }, { crossOrigin: 'anonymous' });
+      } else {
+        fabricCanvas.renderAll();
+      }
       
       console.log('Euro Hoodie logo loaded and positioned on canvas');
     }, { crossOrigin: 'anonymous' });
@@ -141,18 +170,12 @@ document.addEventListener('DOMContentLoaded', function() {
             hasBorders: false
           });
           
-          // Remove existing background image
-          fabricCanvas.getObjects().forEach(obj => {
-            if (obj !== euroHoodieLogo) {
-              fabricCanvas.remove(obj);
-            }
+          // Set as background image instead of object
+          fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas), {
+            crossOrigin: 'anonymous'
           });
           
-          // Add new background image behind the logo
-          fabricCanvas.insertAt(img, 0);
-          fabricCanvas.renderAll();
-          
-          console.log('Product image updated on canvas');
+          console.log('Product image set as canvas background');
         }, { crossOrigin: 'anonymous' });
       }
       
@@ -255,6 +278,12 @@ document.addEventListener('DOMContentLoaded', function() {
     transition: opacity 0.3s ease;
     border-radius: {{ block.settings.border_radius | default: 8 }}px;
     cursor: crosshair;
+    background: transparent !important;
+  }
+
+  /* Ensure Fabric.js canvas elements are transparent */
+  .product-main-canvas canvas {
+    background: transparent !important;
   }
 
   .product-main-image {
