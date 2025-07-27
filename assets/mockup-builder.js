@@ -119,11 +119,17 @@ class MockupBuilder {
 
   async loadProductImage() {
     try {
-      const productImageUrl = this.getProductImageUrl();
+      let productImageUrl = this.getProductImageUrl();
       if (!productImageUrl) {
         throw new Error('No product image URL available');
       }
 
+      // Fix protocol-relative URLs
+      if (productImageUrl.startsWith('//')) {
+        productImageUrl = 'https:' + productImageUrl;
+      }
+
+      console.log('Loading product image from:', productImageUrl);
       const image = await this.loadImage(productImageUrl);
       
       // Create Konva image
@@ -162,21 +168,30 @@ class MockupBuilder {
   getProductImageUrl() {
     // Try multiple methods to get product image URL
     const methods = [
-      () => window.productData?.featured_image?.src,
+      () => window.productData?.featured_image, // Direct string URL
+      () => window.productData?.featured_image?.src, // Object with src property
+      () => window.productData?.images?.[0]?.src, // First image from images array
+      () => window.productData?.images?.[0], // Direct URL from images array
       () => document.querySelector('[data-product-image]')?.src,
       () => document.querySelector('.product__media img')?.src,
-      () => document.querySelector('img[alt*="product"]')?.src
+      () => document.querySelector('.product__media-gallery img')?.src,
+      () => document.querySelector('img[alt*="product"]')?.src,
+      () => document.querySelector('.product__image img')?.src
     ];
 
     for (const method of methods) {
       try {
         const url = method();
-        if (url) return url;
+        if (url) {
+          console.log('Found product image URL:', url);
+          return url;
+        }
       } catch (e) {
         continue;
       }
     }
 
+    console.log('No product image URL found. Available data:', window.productData);
     return null;
   }
 
