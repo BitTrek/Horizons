@@ -4,35 +4,12 @@
 {% endcomment %}
 
 {%- liquid
-  assign show_mockup_builder = false
-  
-  # Check if this product supports personalization
-  if product.tags contains 'personalization' or product.tags contains 'ppt-'
-    assign show_mockup_builder = true
-  endif
-  
-  # Check if we're on a personalization template
-  if template contains 'product-personalization' or template contains 'ppt-'
-    assign show_mockup_builder = true
-  endif
-  
-  # Check for specific template types
-  if template == 'product.ppt-tshirt' or template == 'product.ppt-hoodie' or template == 'product.ppt-mug'
-    assign show_mockup_builder = true
-  endif
-  
-  # Force show for debugging
+  # Always show mockup builder when snippet is included
   assign show_mockup_builder = true
 -%}
 
-<!-- DEBUG: Template = {{ template }}, Show Mockup = {{ show_mockup_builder }} -->
-
 {%- if show_mockup_builder -%}
-  <!-- MOCKUP BUILDER START -->
-  <div class="mockup-builder" id="mockup-builder" style="border: 2px solid red; padding: 20px; margin: 20px 0;">
-    <div style="background: yellow; padding: 10px; margin-bottom: 10px;">
-      <strong>MOCKUP BUILDER IS LOADING!</strong>
-    </div>
+  <div class="mockup-builder" id="mockup-builder">
     <div class="mockup-builder__header">
       <h3 class="mockup-builder__title">Customize Your Product</h3>
       <p class="mockup-builder__subtitle">Upload your design and position it on the product</p>

@@ -63,36 +63,8 @@
 
   // Check if current page supports personalization
   function isPersonalizationPage() {
-    // Check for personalization template
-    if (document.body.classList.contains('template-product-personalization')) {
-      return true;
-    }
-    
-    // Check for personalization container
-    if (document.getElementById(CONFIG.selectors.container)) {
-      return true;
-    }
-    
-    // Check for personalization product tag
-    const productTags = window.productData?.tags || [];
-    if (productTags.some(tag => tag.toLowerCase().includes('personalization'))) {
-      return true;
-    }
-    
-    // Check for ppt- template types
-    const template = document.body.getAttribute('data-template');
-    if (template && (template.includes('ppt-') || template.includes('personalization'))) {
-      return true;
-    }
-    
-    // Check for specific template classes
-    if (document.body.classList.contains('template-product-ppt-tshirt') || 
-        document.body.classList.contains('template-product-ppt-hoodie') ||
-        document.body.classList.contains('template-product-ppt-mug')) {
-      return true;
-    }
-    
-    return false;
+    // Always return true - mockup builder works on any page
+    return true;
   }
 
   // Load required CSS and JS assets
