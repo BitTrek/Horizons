@@ -698,6 +698,21 @@
             form.appendChild(hiddenDesignInput);
           }
           hiddenDesignInput.value = 'Design uploaded successfully';
+          console.log('[PPT DEBUG] Hidden design input created with value:', hiddenDesignInput.value);
+        }
+        
+        // Always ensure we have a design property if we have uploaded image data
+        if (uploadedImageData) {
+          console.log('[PPT DEBUG] Ensuring design property exists');
+          let designPropertyInput = document.querySelector('input[name="properties[Uploaded Design]"]');
+          if (!designPropertyInput) {
+            designPropertyInput = document.createElement('input');
+            designPropertyInput.type = 'hidden';
+            designPropertyInput.name = 'properties[Uploaded Design]';
+            form.appendChild(designPropertyInput);
+          }
+          designPropertyInput.value = 'Design uploaded successfully';
+          console.log('[PPT DEBUG] Design property set:', designPropertyInput.value);
         }
         e.preventDefault();
         const form = button.closest('form');
@@ -953,6 +968,12 @@
         console.log('[PPT DEBUG] Form data for cart submission:');
         for (let [key, value] of formData.entries()) {
           console.log('[PPT DEBUG] Cart field:', key, '=', value);
+        }
+        console.log('[PPT DEBUG] Form elements count:', form.elements.length);
+        console.log('[PPT DEBUG] Form elements:');
+        for (let i = 0; i < form.elements.length; i++) {
+          const element = form.elements[i];
+          console.log('[PPT DEBUG] Element:', element.name, '=', element.value, 'type:', element.type);
         }
         console.log('[PPT DEBUG] Sending AJAX request to /cart/add.js');
         fetch('/cart/add.js', {
