@@ -973,34 +973,21 @@
             return;
           }
           console.log('[PPT DEBUG] Fetching cart sections with key:', data.key);
-          fetch(`/cart?sections=cart-products,cart-bubble&key=${data.key}`)
-            .then(res => {
-              console.log('[PPT DEBUG] Cart sections response status:', res.status);
-              return res.json();
-            })
-            .then(sectionData => {
-              console.log('[PPT DEBUG] Cart sections response', sectionData);
-              const cartDrawer = document.querySelector('cart-drawer-component');
-              if (cartDrawer && typeof cartDrawer.renderContents === 'function') {
-                cartDrawer.renderContents({ key: data.key, sections: sectionData });
-              } else {
-                // Fallback: reload the page to update the cart
-                window.location.reload();
-              }
-              submitButton.disabled = false;
-              submitButton.classList.remove('loading');
-              if (spinner) spinner.classList.add('hidden');
-              if (originalText) originalText.textContent = 'Add to cart';
-            })
-            .catch(sectionErr => {
-              console.error('[PPT DEBUG] Error fetching cart sections:', sectionErr);
-              // Fallback: reload the page to update the cart
-              window.location.reload();
-              submitButton.disabled = false;
-              submitButton.classList.remove('loading');
-              if (spinner) spinner.classList.add('hidden');
-              if (originalText) originalText.textContent = 'Add to cart';
-            });
+          
+          // Try multiple approaches to update cart
+          const cartDrawer = document.querySelector('cart-drawer-component');
+          if (cartDrawer && typeof cartDrawer.renderContents === 'function') {
+            console.log('[PPT DEBUG] Using cart drawer renderContents');
+            cartDrawer.renderContents({ key: data.key });
+          } else {
+            console.log('[PPT DEBUG] No cart drawer found, reloading page');
+            window.location.reload();
+          }
+          
+          submitButton.disabled = false;
+          submitButton.classList.remove('loading');
+          if (spinner) spinner.classList.add('hidden');
+          if (originalText) originalText.textContent = 'Add to cart';
         }).catch((err) => {
           console.log('[PPT DEBUG] Error in add to cart AJAX', err);
           submitButton.disabled = false;
