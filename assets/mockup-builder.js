@@ -60,8 +60,9 @@ class MockupBuilder {
       // Initialize canvas
       this.initializeCanvas();
       
-      // Load initial product image
-      await this.loadProductImage();
+      // Wait a bit for DOM to be ready, then load product image with retry
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      await this.loadProductImageWithRetry();
       
       // Setup event listeners
       this.setupEventListeners();
@@ -131,75 +132,92 @@ class MockupBuilder {
     this.state.setState({ canvas: this.stage });
   }
 
-  async loadProductImage() {
-    try {
-      console.log('=== LOAD PRODUCT IMAGE ===');
-      
-      // Don't load if already loaded
-      if (this.state.productImage) {
-        console.log('Product image already loaded, skipping');
-        return;
+  async loadProductImageWithRetry(maxRetries = 5) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`=== LOAD PRODUCT IMAGE ATTEMPT ${attempt}/${maxRetries} ===`);
+        
+        // Don't load if already loaded
+        if (this.state.productImage) {
+          console.log('Product image already loaded, skipping');
+          return;
+        }
+
+        let productImageUrl = this.getProductImageUrl();
+        console.log('Product image URL:', productImageUrl);
+        
+        if (!productImageUrl) {
+          if (attempt < maxRetries) {
+            console.log(`No product image URL found, waiting 1 second before retry...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          }
+          throw new Error('No product image URL available after all retries');
+        }
+
+        // Fix protocol-relative URLs
+        if (productImageUrl.startsWith('//')) {
+          productImageUrl = 'https:' + productImageUrl;
+          console.log('Fixed protocol-relative URL:', productImageUrl);
+        }
+
+        console.log('Loading image from:', productImageUrl);
+        const image = await this.loadImage(productImageUrl);
+        console.log('Image loaded successfully:', image);
+        
+        // Create Konva image
+        const konvaImage = new Konva.Image({
+          image: image,
+          x: 0,
+          y: 0
+        });
+
+        // Scale to fit canvas (leave some padding)
+        const padding = 20;
+        const maxWidth = this.options.width - padding * 2;
+        const maxHeight = this.options.height - padding * 2;
+        const scale = Math.min(
+          maxWidth / image.width,
+          maxHeight / image.height
+        );
+        
+        console.log('Image dimensions:', image.width, 'x', image.height);
+        console.log('Canvas dimensions:', this.options.width, 'x', this.options.height);
+        console.log('Scale factor:', scale);
+        
+        konvaImage.scale({ x: scale, y: scale });
+        
+        // Center the image
+        const scaledWidth = image.width * scale;
+        const scaledHeight = image.height * scale;
+        konvaImage.x((this.options.width - scaledWidth) / 2);
+        konvaImage.y((this.options.height - scaledHeight) / 2);
+        
+        console.log('Image positioned at:', konvaImage.x(), konvaImage.y());
+
+        // Add to product layer
+        this.productLayer.add(konvaImage);
+        this.productLayer.draw();
+        console.log('Image added to product layer');
+
+        this.state.setState({ productImage: konvaImage });
+        console.log('Product image state updated');
+        return; // Success!
+        
+      } catch (error) {
+        console.error(`Attempt ${attempt} failed:`, error);
+        if (attempt < maxRetries) {
+          console.log(`Waiting 2 seconds before retry...`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        } else {
+          throw error;
+        }
       }
-
-      let productImageUrl = this.getProductImageUrl();
-      console.log('Product image URL:', productImageUrl);
-      
-      if (!productImageUrl) {
-        throw new Error('No product image URL available');
-      }
-
-      // Fix protocol-relative URLs
-      if (productImageUrl.startsWith('//')) {
-        productImageUrl = 'https:' + productImageUrl;
-        console.log('Fixed protocol-relative URL:', productImageUrl);
-      }
-
-      console.log('Loading image from:', productImageUrl);
-      const image = await this.loadImage(productImageUrl);
-      console.log('Image loaded successfully:', image);
-      
-      // Create Konva image
-      const konvaImage = new Konva.Image({
-        image: image,
-        x: 0,
-        y: 0
-      });
-
-      // Scale to fit canvas (leave some padding)
-      const padding = 20;
-      const maxWidth = this.options.width - padding * 2;
-      const maxHeight = this.options.height - padding * 2;
-      const scale = Math.min(
-        maxWidth / image.width,
-        maxHeight / image.height
-      );
-      
-      console.log('Image dimensions:', image.width, 'x', image.height);
-      console.log('Canvas dimensions:', this.options.width, 'x', this.options.height);
-      console.log('Scale factor:', scale);
-      
-      konvaImage.scale({ x: scale, y: scale });
-      
-      // Center the image
-      const scaledWidth = image.width * scale;
-      const scaledHeight = image.height * scale;
-      konvaImage.x((this.options.width - scaledWidth) / 2);
-      konvaImage.y((this.options.height - scaledHeight) / 2);
-      
-      console.log('Image positioned at:', konvaImage.x(), konvaImage.y());
-
-      // Add to product layer
-      this.productLayer.add(konvaImage);
-      this.productLayer.draw();
-      console.log('Image added to product layer');
-
-      this.state.setState({ productImage: konvaImage });
-      console.log('Product image state updated');
-      
-    } catch (error) {
-      console.error('Failed to load product image:', error);
-      throw error;
     }
+  }
+
+  async loadProductImage() {
+    return this.loadProductImageWithRetry(1);
   }
 
   getProductImageUrl() {
@@ -220,10 +238,34 @@ class MockupBuilder {
       },
       // Try to get the currently visible product image from the DOM
       () => {
-        const selector = '.product__media img[src*="cdn.shopify.com"]';
-        const element = document.querySelector(selector);
-        console.log('Method 1 - visible product image:', element?.src);
-        return element?.src;
+        // Look for the main product image that's currently visible
+        const selectors = [
+          '.product__media img[src*="cdn.shopify.com"]',
+          '.product__media-gallery img[src*="cdn.shopify.com"]',
+          '.product__image img[src*="cdn.shopify.com"]',
+          'img[src*="cdn.shopify.com"][src*="hoodie"]',
+          'img[src*="cdn.shopify.com"][src*="orange"]'
+        ];
+        
+        for (const selector of selectors) {
+          const element = document.querySelector(selector);
+          if (element && element.src) {
+            console.log(`Method 1 - found image with selector "${selector}":`, element.src);
+            return element.src;
+          }
+        }
+        
+        // If no specific image found, get the first visible product image
+        const allImages = document.querySelectorAll('img[src*="cdn.shopify.com"]');
+        for (const img of allImages) {
+          const rect = img.getBoundingClientRect();
+          if (rect.width > 100 && rect.height > 100) { // Only visible images
+            console.log('Method 1 - first visible product image:', img.src);
+            return img.src;
+          }
+        }
+        
+        return null;
       },
       () => {
         const selector = '.product__media-gallery img[src*="cdn.shopify.com"]';
