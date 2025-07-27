@@ -670,6 +670,10 @@
     }
 
     function rebindEvents(canvas) {
+      // Ensure uploadedImage is accessible in this scope
+      if (typeof uploadedImage === 'undefined') {
+        let uploadedImage = null;
+      }
       document.body.addEventListener('click', function (e) {
         const button = e.target.closest('button[name="add"]');
         if (!button) return;
@@ -702,8 +706,8 @@
           .catch(err => console.log('[PPT DEBUG] Server test failed:', err));
         
         // Check if we should proceed with screenshot
-        if (!uploadedImageData || !uploadedImage) {
-          console.log('[PPT DEBUG] No uploaded image data or object, skipping screenshot');
+        if (!uploadedImageData) {
+          console.log('[PPT DEBUG] No uploaded image data, skipping screenshot');
           submitViaAjax(form);
           return;
         }
@@ -713,6 +717,7 @@
         console.log('[PPT DEBUG] Uploaded image data exists:', !!uploadedImageData);
         console.log('[PPT DEBUG] Uploaded image object exists:', !!uploadedImage);
         console.log('[PPT DEBUG] Uploaded image object type:', uploadedImage ? uploadedImage.type : 'null');
+        console.log('[PPT DEBUG] Canvas objects:', canvas.getObjects().map(obj => ({ type: obj.type, visible: obj.visible, left: obj.left, top: obj.top })));
         
 
         // Hide all handles and controls before taking screenshot
