@@ -39,6 +39,23 @@
         data-variant-id="{{ current_variant.id }}"
         style="display: none;"
       >
+      
+      <!-- Upload Button -->
+      <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
+        <div class="upload-design-circle">
+          <div class="upload-design-icon">📁</div>
+          <div class="upload-design-text">Add your design here</div>
+        </div>
+      </div>
+      
+      <!-- Hidden File Input -->
+      <input 
+        type="file" 
+        id="design-upload-input-{{ block.id }}" 
+        accept="image/*" 
+        style="display: none;"
+        class="design-upload-input"
+      >
     </div>
   {% else %}
     <div class="product-main-image-container product-main-image--placeholder">
@@ -60,6 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   let fabricCanvas = null;
   let euroHoodieLogo = null;
+  let uploadedDesign = null;
 
   // Initialize Fabric.js canvas
   function initFabricCanvas() {
@@ -192,14 +210,107 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize canvas when Fabric.js is loaded
   if (typeof fabric !== 'undefined') {
     initFabricCanvas();
+    setupFileUpload();
   } else {
     // Wait for Fabric.js to load
     const checkFabric = setInterval(() => {
       if (typeof fabric !== 'undefined') {
         clearInterval(checkFabric);
         initFabricCanvas();
+        setupFileUpload();
       }
     }, 100);
+  }
+
+  // Setup file upload functionality
+  function setupFileUpload() {
+    const uploadButton = productMainImage.querySelector('.upload-design-button');
+    const fileInput = productMainImage.querySelector('.design-upload-input');
+    
+    if (!uploadButton || !fileInput) return;
+
+    // Handle upload button click
+    uploadButton.addEventListener('click', function() {
+      fileInput.click();
+    });
+
+    // Handle file selection
+    fileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        handleFileUpload(file);
+      }
+    });
+  }
+
+  // Handle uploaded file
+  function handleFileUpload(file) {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file.');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const imageUrl = e.target.result;
+      
+      // Remove Euro Hoodie logo if it exists
+      if (euroHoodieLogo) {
+        fabricCanvas.remove(euroHoodieLogo);
+        euroHoodieLogo = null;
+      }
+
+      // Remove uploaded design if it exists
+      if (uploadedDesign) {
+        fabricCanvas.remove(uploadedDesign);
+      }
+
+      // Load and add the uploaded design
+      fabric.Image.fromURL(imageUrl, function(img) {
+        uploadedDesign = img;
+        
+        // Scale and position the uploaded design
+        const canvasWidth = fabricCanvas.getWidth();
+        const canvasHeight = fabricCanvas.getHeight();
+        
+        // Scale design to fit nicely on the product (similar to logo)
+        const scale = Math.min(canvasWidth * 0.4 / img.width, canvasHeight * 0.4 / img.height);
+        img.scale(scale);
+        
+        // Center the design
+        img.set({
+          left: (canvasWidth - img.width * scale) / 2,
+          top: (canvasHeight - img.height * scale) / 2,
+          selectable: true,
+          hasControls: true,
+          hasBorders: true,
+          cornerSize: 10,
+          transparentCorners: false,
+          cornerColor: '#007bff',
+          borderColor: '#007bff'
+        });
+        
+        fabricCanvas.add(img);
+        fabricCanvas.renderAll();
+        
+        // Hide the upload button
+        const uploadButton = productMainImage.querySelector('.upload-design-button');
+        if (uploadButton) {
+          uploadButton.classList.add('hidden');
+        }
+        
+        console.log('Uploaded design loaded and positioned on canvas');
+      });
+    };
+    
+    reader.readAsDataURL(file);
   }
 
   // Listen for variant changes
@@ -284,6 +395,59 @@ document.addEventListener('DOMContentLoaded', function() {
   /* Ensure Fabric.js canvas elements are transparent */
   .product-main-canvas canvas {
     background: transparent !important;
+  }
+
+  /* Upload Design Button */
+  .upload-design-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .upload-design-button:hover {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+
+  .upload-design-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .upload-design-button:hover .upload-design-circle {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  .upload-design-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+
+  .upload-design-text {
+    font-size: 0.8rem;
+    font-weight: 500;
+    line-height: 1.2;
+    max-width: 80px;
+  }
+
+  /* Hide upload button when design is uploaded */
+  .upload-design-button.hidden {
+    display: none;
   }
 
   .product-main-image {
