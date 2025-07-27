@@ -452,9 +452,12 @@
         }
         
         // Test server connectivity
+        console.log('Testing server connectivity...');
         fetch('https://artshop.lv/upload.php', { method: 'HEAD' })
           .then(res => {
+            console.log('Server test response:', res.status);
             if (res.ok) {
+              console.log('Server accessible, taking screenshot...');
               // Take screenshot
               const objects = canvas.getObjects();
               const originalStates = [];
@@ -472,6 +475,7 @@
               
               // Create screenshot
               const dataUrl = canvas.toDataURL();
+              console.log('Screenshot created, uploading...');
               const img = new Image();
               img.onload = function() {
                 const squareCanvas = document.createElement('canvas');
@@ -491,11 +495,13 @@
                 // Convert to blob and upload
                 squareCanvas.toBlob(function(blob) {
                   if (!blob) {
+                    console.log('Failed to create blob');
                     restoreHandles(originalStates);
                     submitViaAjax(form);
                     return;
                   }
                   
+                  console.log('Blob created, uploading to server...');
                   const formData = new FormData();
                   formData.append('image', blob, 'mockup-screenshot.png');
                   
@@ -505,17 +511,22 @@
                   })
                   .then(response => response.json())
                   .then(data => {
+                    console.log('Upload response:', data);
                     if (data.url) {
+                      console.log('Screenshot uploaded successfully:', data.url);
                       const screenshotInput = document.createElement('input');
                       screenshotInput.type = 'hidden';
                       screenshotInput.name = 'properties[Mockup Screenshot URL]';
                       screenshotInput.value = data.url;
                       form.appendChild(screenshotInput);
+                    } else {
+                      console.log('No URL in upload response');
                     }
                     restoreHandles(originalStates);
                     submitViaAjax(form);
                   })
                   .catch(error => {
+                    console.error('Upload error:', error);
                     restoreHandles(originalStates);
                     submitViaAjax(form);
                   });
@@ -523,10 +534,12 @@
               };
               img.src = dataUrl;
             } else {
+              console.log('Server not accessible, skipping screenshot');
               submitViaAjax(form);
             }
           })
-          .catch(() => {
+          .catch((error) => {
+            console.error('Server connectivity test failed:', error);
             submitViaAjax(form);
           });
       });
