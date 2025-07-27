@@ -32,10 +32,6 @@ class MockupState {
 // Main Mockup Builder Class
 class MockupBuilder {
   constructor(containerId, options = {}) {
-    console.log('=== MOCKUP BUILDER CONSTRUCTOR ===');
-    console.log('containerId:', containerId);
-    console.log('options:', options);
-    
     this.containerId = containerId;
     this.options = {
       width: 700,
@@ -133,7 +129,6 @@ class MockupBuilder {
         productImageUrl = 'https:' + productImageUrl;
       }
 
-      console.log('Loading product image from:', productImageUrl);
       const image = await this.loadImage(productImageUrl);
       
       // Create Konva image
@@ -170,11 +165,6 @@ class MockupBuilder {
   }
 
   getProductImageUrl() {
-    console.log('=== GET PRODUCT IMAGE URL ===');
-    console.log('window.productData:', window.productData);
-    console.log('featured_image:', window.productData?.featured_image);
-    console.log('images array:', window.productData?.images);
-    
     // Try multiple methods to get product image URL
     const methods = [
       () => window.productData?.featured_image, // Direct string URL
@@ -188,21 +178,15 @@ class MockupBuilder {
       () => document.querySelector('.product__image img')?.src
     ];
 
-    for (let i = 0; i < methods.length; i++) {
+    for (const method of methods) {
       try {
-        const url = methods[i]();
-        console.log(`Method ${i} result:`, url);
-        if (url) {
-          console.log('Found product image URL:', url);
-          return url;
-        }
+        const url = method();
+        if (url) return url;
       } catch (e) {
-        console.log(`Method ${i} error:`, e);
         continue;
       }
     }
 
-    console.log('No product image URL found. Available data:', window.productData);
     return null;
   }
 
@@ -385,7 +369,15 @@ class MockupBuilder {
   handleResize() {
     if (!this.stage) return;
 
-    const container = document.getElementById(this.containerId);
+    // Handle both ID and CSS selector
+    const containerId = this.containerId.replace('#', '');
+    const container = document.getElementById(containerId);
+    
+    if (!container) {
+      console.warn('Container not found for resize:', containerId);
+      return;
+    }
+    
     const rect = container.getBoundingClientRect();
     
     this.stage.width(rect.width);
