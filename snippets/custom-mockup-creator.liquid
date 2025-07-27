@@ -58,6 +58,11 @@
       canvasElement.style.width = '100%';
       canvasElement.style.height = '100%';
       
+      // Ensure canvas has proper styling
+      canvasElement.style.display = 'block';
+      canvasElement.style.background = '#f8f9fa';
+      canvasElement.style.border = '1px solid #dee2e6';
+      
       setupCanvasEventListeners();
 
       // Load initial background image
@@ -84,19 +89,30 @@
         // Center the image
         img.set({
           left: (canvasWidth - img.getScaledWidth()) / 2,
-          top: (canvasHeight - img.getScaledHeight()) / 2
+          top: (canvasHeight - img.getScaledHeight()) / 2,
+          selectable: false,
+          evented: false
         });
         
         console.log('Scaled image dimensions:', img.getScaledWidth(), 'x', img.getScaledHeight());
         console.log('Image position:', img.left, img.top);
         
-        canvas.setBackgroundImage(img, function() {
+        // Clear any existing background
+        canvas.setBackgroundImage(null, function() {
+          // Set the new background image
+          canvas.setBackgroundImage(img, function() {
           console.log('Background image set, rendering canvas');
           console.log('Canvas background image:', canvas.backgroundImage);
           console.log('Canvas background image dimensions:', canvas.backgroundImage ? `${canvas.backgroundImage.getScaledWidth()} x ${canvas.backgroundImage.getScaledHeight()}` : 'none');
           console.log('Canvas background image position:', canvas.backgroundImage ? `${canvas.backgroundImage.left}, ${canvas.backgroundImage.top}` : 'none');
           canvas.renderAll();
           console.log('Canvas rendered successfully');
+          
+          // Force a refresh to ensure the background is visible
+          setTimeout(() => {
+            canvas.requestRenderAll();
+            console.log('Canvas force refreshed');
+          }, 100);
           
           // Check canvas visibility after rendering
           const canvasElement = document.getElementById('canvas');
@@ -376,19 +392,30 @@
           // Center the image
           img.set({
             left: (canvasWidth - img.getScaledWidth()) / 2,
-            top: (canvasHeight - img.getScaledHeight()) / 2
+            top: (canvasHeight - img.getScaledHeight()) / 2,
+            selectable: false,
+            evented: false
           });
           
           console.log('Scaled image dimensions:', img.getScaledWidth(), 'x', img.getScaledHeight());
           console.log('Image position:', img.left, img.top);
           
-          canvas.setBackgroundImage(img, function() {
+          // Clear any existing background
+          canvas.setBackgroundImage(null, function() {
+            // Set the new background image
+            canvas.setBackgroundImage(img, function() {
             console.log('Variant background image set, rendering canvas');
             console.log('Canvas background image:', canvas.backgroundImage);
             console.log('Canvas background image dimensions:', canvas.backgroundImage ? `${canvas.backgroundImage.getScaledWidth()} x ${canvas.backgroundImage.getScaledHeight()}` : 'none');
             console.log('Canvas background image position:', canvas.backgroundImage ? `${canvas.backgroundImage.left}, ${canvas.backgroundImage.top}` : 'none');
             canvas.renderAll();
             console.log('Canvas rendered successfully');
+            
+            // Force a refresh to ensure the background is visible
+            setTimeout(() => {
+              canvas.requestRenderAll();
+              console.log('Canvas force refreshed');
+            }, 100);
             
             // Check canvas visibility after rendering
             const canvasElement = document.getElementById('canvas');
