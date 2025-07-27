@@ -1,0 +1,334 @@
+/**
+ * Mockup Builder Styles
+ * Modern, responsive design with smooth animations
+ */
+
+.mockup-builder {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.mockup-builder__header {
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+}
+
+.mockup-builder__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.mockup-builder__subtitle {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.mockup-builder__canvas-container {
+  position: relative;
+  width: 100%;
+  height: 700px;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  margin: 20px;
+  overflow: hidden;
+}
+
+.mockup-builder__canvas {
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.mockup-builder__upload-area {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #6c757d;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.mockup-builder__upload-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.mockup-builder__upload-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.mockup-builder__controls {
+  padding: 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+}
+
+.mockup-builder__file-input {
+  display: none;
+}
+
+.mockup-builder__upload-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mockup-builder__upload-button:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.mockup-builder__upload-button:active {
+  transform: translateY(0);
+}
+
+.mockup-builder__file-info {
+  margin-top: 12px;
+  padding: 12px;
+  background: #e9ecef;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+.mockup-builder__file-info--valid {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.mockup-builder__file-info--invalid {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.mockup-builder__loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+.mockup-builder__spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.mockup-builder__error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #dc3545;
+  z-index: 10;
+}
+
+.mockup-builder__error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.mockup-builder__error-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Notification animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .mockup-builder {
+    margin: 10px;
+    border-radius: 8px;
+  }
+  
+  .mockup-builder__header {
+    padding: 15px;
+  }
+  
+  .mockup-builder__title {
+    font-size: 1.2rem;
+  }
+  
+  .mockup-builder__canvas-container {
+    height: 500px;
+    margin: 15px;
+  }
+  
+  .mockup-builder__controls {
+    padding: 15px;
+  }
+  
+  .mockup-builder__upload-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .mockup-builder__canvas-container {
+    height: 400px;
+    margin: 10px;
+  }
+  
+  .mockup-builder__upload-icon {
+    font-size: 2rem;
+  }
+  
+  .mockup-builder__upload-text {
+    font-size: 1rem;
+  }
+}
+
+/* Konva.js customizations */
+.konvajs-content {
+  border-radius: 8px;
+}
+
+/* Transform controls styling */
+.konva-transformer {
+  border: 2px solid #007bff;
+  border-radius: 4px;
+}
+
+.konva-transformer__handle {
+  background: #007bff;
+  border: 2px solid white;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+}
+
+/* Touch-friendly controls on mobile */
+@media (max-width: 768px) {
+  .konva-transformer__handle {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Loading overlay */
+.mockup-builder__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+/* Success state */
+.mockup-builder--success .mockup-builder__canvas-container {
+  border-color: #28a745;
+  border-style: solid;
+}
+
+/* Error state */
+.mockup-builder--error .mockup-builder__canvas-container {
+  border-color: #dc3545;
+  border-style: solid;
+}
+
+/* Accessibility improvements */
+.mockup-builder__upload-button:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.mockup-builder__canvas:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .mockup-builder {
+    border: 2px solid #000;
+  }
+  
+  .mockup-builder__upload-button {
+    border: 2px solid #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .mockup-builder__upload-button {
+    transition: none;
+  }
+  
+  .mockup-builder__spinner {
+    animation: none;
+  }
+  
+  @keyframes slideIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+} 

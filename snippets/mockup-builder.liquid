@@ -1,0 +1,105 @@
+{% comment %}
+  Mockup Builder Template
+  Renders the mockup builder interface for personalized products
+{% endcomment %}
+
+{%- liquid
+  assign show_mockup_builder = false
+  
+  # Check if this product supports personalization
+  if product.tags contains 'personalization' or product.tags contains 'ppt-'
+    assign show_mockup_builder = true
+  endif
+  
+  # Check if we're on a personalization template
+  if template contains 'product-personalization'
+    assign show_mockup_builder = true
+  endif
+-%}
+
+{%- if show_mockup_builder -%}
+  <div class="mockup-builder" id="mockup-builder">
+    <div class="mockup-builder__header">
+      <h3 class="mockup-builder__title">Customize Your Product</h3>
+      <p class="mockup-builder__subtitle">Upload your design and position it on the product</p>
+    </div>
+    
+    <div class="mockup-builder__canvas-container">
+      <div id="mockup-canvas" class="mockup-builder__canvas"></div>
+      
+      <div class="mockup-builder__upload-area" id="upload-area">
+        <div class="mockup-builder__upload-icon">📁</div>
+        <div class="mockup-builder__upload-text">Click "Browse Design" to upload your image</div>
+      </div>
+      
+      <div class="mockup-builder__loading" id="loading" style="display: none;">
+        <div class="mockup-builder__spinner"></div>
+      </div>
+      
+      <div class="mockup-builder__error" id="error" style="display: none;">
+        <div class="mockup-builder__error-icon">⚠️</div>
+        <div class="mockup-builder__error-text" id="error-text"></div>
+      </div>
+    </div>
+    
+    <div class="mockup-builder__controls">
+      <input 
+        type="file" 
+        id="upload-input" 
+        name="properties[Uploaded Design]" 
+        accept="image/jpeg,image/png,image/webp" 
+        class="mockup-builder__file-input"
+        style="display: none;"
+      />
+      
+      <button 
+        type="button" 
+        class="mockup-builder__upload-button" 
+        onclick="document.getElementById('upload-input').click()"
+      >
+        <span>📁</span>
+        Browse Design
+      </button>
+      
+      <div class="mockup-builder__instructions">
+        <p style="margin: 12px 0 0 0; font-size: 0.9rem; color: #6c757d;">
+          <strong>Requirements:</strong> JPEG, PNG, or WebP format • Maximum 5MB • Recommended size: 1000×1000px
+        </p>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} Load the mockup builder scripts {%- endcomment -%}
+  {{ 'mockup-init.js' | asset_url | script_tag }}
+  
+  <style>
+    /* Hide upload area when design is loaded */
+    .mockup-builder--has-design .mockup-builder__upload-area {
+      display: none;
+    }
+    
+    /* Show loading state */
+    .mockup-builder--loading .mockup-builder__loading {
+      display: flex;
+    }
+    
+    /* Show error state */
+    .mockup-builder--error .mockup-builder__error {
+      display: block;
+    }
+  </style>
+
+  <script>
+    // Product data for the mockup builder
+    window.productData = {
+      id: {{ product.id | json }},
+      title: {{ product.title | json }},
+      handle: {{ product.handle | json }},
+      tags: {{ product.tags | json }},
+      featured_image: {{ product.featured_image | json }},
+      images: {{ product.images | json }},
+      variants: {{ product.variants | json }},
+      selected_or_first_available_variant: {{ product.selected_or_first_available_variant | json }}
+    };
+  </script>
+{%- endif -%} 
