@@ -98,30 +98,79 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Set initial product image as background
-    const initialImageUrl = imageElement.src;
-    if (initialImageUrl) {
-      fabric.Image.fromURL(initialImageUrl, function(bgImg) {
-        const canvasWidth = fabricCanvas.getWidth();
-        const canvasHeight = fabricCanvas.getHeight();
+    function setInitialBackground() {
+      const initialImageUrl = imageElement.src;
+      console.log('Initial image URL:', initialImageUrl);
+      
+      if (initialImageUrl && initialImageUrl !== '' && initialImageUrl !== 'data:,' && !initialImageUrl.includes('undefined')) {
+        fabric.Image.fromURL(initialImageUrl, function(bgImg) {
+          const canvasWidth = fabricCanvas.getWidth();
+          const canvasHeight = fabricCanvas.getHeight();
+          
+          const scaleX = canvasWidth / bgImg.width;
+          const scaleY = canvasHeight / bgImg.height;
+          const bgScale = Math.min(scaleX, scaleY);
+          
+          bgImg.scale(bgScale);
+          bgImg.set({
+            left: (canvasWidth - bgImg.width * bgScale) / 2,
+            top: (canvasHeight - bgImg.height * bgScale) / 2
+          });
+          
+          fabricCanvas.setBackgroundImage(bgImg, function() {
+            fabricCanvas.renderAll();
+            console.log('Initial product image set as canvas background');
+          }, {
+            crossOrigin: 'anonymous'
+          });
+        }, { crossOrigin: 'anonymous' });
+      } else {
+        console.log('No valid initial image URL found, trying to get from product data');
         
-        const scaleX = canvasWidth / bgImg.width;
-        const scaleY = canvasHeight / bgImg.height;
-        const bgScale = Math.min(scaleX, scaleY);
+        // Fallback: try to get image from product data
+        const productData = window.productData || {};
+        const currentVariant = productData.selected_or_first_available_variant;
+        const variantImageMap = productData.variantImageMap || {};
         
-        bgImg.scale(bgScale);
-        bgImg.set({
-          left: (canvasWidth - bgImg.width * bgScale) / 2,
-          top: (canvasHeight - bgImg.height * bgScale) / 2
-        });
-        
-        fabricCanvas.setBackgroundImage(bgImg, fabricCanvas.renderAll.bind(fabricCanvas), {
-          crossOrigin: 'anonymous'
-        });
-        
-        console.log('Initial product image set as canvas background');
-      }, { crossOrigin: 'anonymous' });
+        if (currentVariant && variantImageMap[currentVariant.id]) {
+          const fallbackUrl = variantImageMap[currentVariant.id];
+          console.log('Using fallback URL:', fallbackUrl);
+          
+          fabric.Image.fromURL(fallbackUrl, function(bgImg) {
+            const canvasWidth = fabricCanvas.getWidth();
+            const canvasHeight = fabricCanvas.getHeight();
+            
+            const scaleX = canvasWidth / bgImg.width;
+            const scaleY = canvasHeight / bgImg.height;
+            const bgScale = Math.min(scaleX, scaleY);
+            
+            bgImg.scale(bgScale);
+            bgImg.set({
+              left: (canvasWidth - bgImg.width * bgScale) / 2,
+              top: (canvasHeight - bgImg.height * bgScale) / 2
+            });
+            
+            fabricCanvas.setBackgroundImage(bgImg, function() {
+              fabricCanvas.renderAll();
+              console.log('Fallback product image set as canvas background');
+            }, {
+              crossOrigin: 'anonymous'
+            });
+          }, { crossOrigin: 'anonymous' });
+        } else {
+          console.log('No fallback image available');
+          fabricCanvas.renderAll();
+        }
+      }
+    }
+
+    // Wait for image to load if needed
+    if (imageElement.complete) {
+      setInitialBackground();
     } else {
-      fabricCanvas.renderAll();
+      imageElement.addEventListener('load', setInitialBackground);
+      // Fallback timeout
+      setTimeout(setInitialBackground, 1000);
     }
   }
 
