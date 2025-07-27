@@ -237,9 +237,52 @@
       const selectedVariant = productData.variants.find(v => v.id.toString() === selectedVariantId.toString());
       console.log('Selected variant:', selectedVariant);
       
-      if (selectedVariant && selectedVariant.featured_image) {
-        console.log('Loading variant image from:', selectedVariant.featured_image.src);
-        fabric.Image.fromURL(selectedVariant.featured_image.src, function(img) {
+      // Try multiple ways to get the variant image URL
+      let imageUrl = null;
+      
+      if (selectedVariant) {
+        // Method 1: Check if variant has featured_image with src
+        if (selectedVariant.featured_image && selectedVariant.featured_image.src) {
+          imageUrl = selectedVariant.featured_image.src;
+          console.log('Method 1 - variant featured_image.src:', imageUrl);
+        }
+        // Method 2: Check if variant has featured_image as direct URL
+        else if (selectedVariant.featured_image && typeof selectedVariant.featured_image === 'string') {
+          imageUrl = selectedVariant.featured_image;
+          console.log('Method 2 - variant featured_image (string):', imageUrl);
+        }
+        // Method 3: Check if variant has image property
+        else if (selectedVariant.image) {
+          imageUrl = selectedVariant.image;
+          console.log('Method 3 - variant image:', imageUrl);
+        }
+        // Method 4: Try to get from product images array based on variant position
+        else if (productData.images && productData.images.length > 0) {
+          // Try to find image that matches the variant
+          const variantIndex = productData.variants.indexOf(selectedVariant);
+          if (variantIndex >= 0 && productData.images[variantIndex]) {
+            imageUrl = productData.images[variantIndex];
+            console.log('Method 4 - product images array:', imageUrl);
+          } else {
+            // Fallback to first image
+            imageUrl = productData.images[0];
+            console.log('Method 4 - fallback to first image:', imageUrl);
+          }
+        }
+      }
+      
+      // Method 5: If no variant image found, try to get from DOM
+      if (!imageUrl) {
+        const visibleImage = document.querySelector('.product__media img[src*="cdn.shopify.com"]');
+        if (visibleImage) {
+          imageUrl = visibleImage.src;
+          console.log('Method 5 - visible DOM image:', imageUrl);
+        }
+      }
+      
+      if (imageUrl) {
+        console.log('Loading variant image from:', imageUrl);
+        fabric.Image.fromURL(imageUrl, function(img) {
           console.log('Variant image loaded:', img);
           img.scaleToWidth(700);
           canvas.setBackgroundImage(img, function() {
@@ -250,27 +293,65 @@
           crossOrigin: 'anonymous',
           onError: function(err) {
             console.error('Error loading variant image:', err);
+            // Fallback to original product image
+            const fallbackUrl = '{{ product.featured_image | image_url: width: 700 }}';
+            console.log('Trying fallback URL:', fallbackUrl);
+            fabric.Image.fromURL(fallbackUrl, function(fallbackImg) {
+              fallbackImg.scaleToWidth(700);
+              canvas.setBackgroundImage(fallbackImg, function() {
+                canvas.renderAll();
+              });
+            }, { crossOrigin: 'anonymous' });
           }
         });
       } else {
-        console.error('No variant or featured image found');
+        console.error('No variant image found, using fallback');
+        // Fallback to original product image
+        const fallbackUrl = '{{ product.featured_image | image_url: width: 700 }}';
+        console.log('Using fallback URL:', fallbackUrl);
+        fabric.Image.fromURL(fallbackUrl, function(fallbackImg) {
+          fallbackImg.scaleToWidth(700);
+          canvas.setBackgroundImage(fallbackImg, function() {
+            canvas.renderAll();
+          });
+        }, { crossOrigin: 'anonymous' });
       }
     }
 
     // Event listeners for variant changes
     document.addEventListener('variant:update', function(event) {
-      setTimeout(() => updateCanvasBackground(), 50);
+      console.log('Variant update event detected');
+      setTimeout(() => updateCanvasBackground(), 100);
     });
 
     document.addEventListener('change', function(e) {
+      console.log('Change event detected:', e.target);
       if (e.target.type === 'radio' && e.target.hasAttribute('data-variant-id')) {
+        console.log('Radio variant change detected');
+        setTimeout(() => updateCanvasBackground(), 100);
+      }
+      // Also check for color swatch changes
+      if (e.target.closest('[data-color-swatch]') || e.target.closest('[data-variant-option]')) {
+        console.log('Color swatch change detected');
         setTimeout(() => updateCanvasBackground(), 100);
       }
     });
 
     document.addEventListener('click', function(e) {
       const target = e.target;
+      console.log('Click event detected:', target);
       if (target.tagName === 'LABEL' || target.closest('label')) {
+        console.log('Label click detected');
+        setTimeout(() => updateCanvasBackground(), 150);
+      }
+      // Check for color swatch clicks
+      if (target.closest('[data-color-swatch]') || target.closest('[data-variant-option]')) {
+        console.log('Color swatch click detected');
+        setTimeout(() => updateCanvasBackground(), 150);
+      }
+      // Check for product media clicks
+      if (target.closest('.product__media') || target.closest('.product__media-gallery')) {
+        console.log('Product media click detected');
         setTimeout(() => updateCanvasBackground(), 150);
       }
     });
