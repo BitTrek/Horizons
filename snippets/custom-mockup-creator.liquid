@@ -44,21 +44,22 @@
       setupCanvasEventListeners();
 
       // Load initial background image
-      fabric.Image.fromURL('{{ closest.product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}', function (img) {
-        img.scaleToWidth(700);
-        canvas.setBackgroundImage(img, function() {
-          canvas.renderAll();
+      const initialImageUrl = '{{ closest.product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}';
+      if (initialImageUrl && initialImageUrl !== '') {
+        fabric.Image.fromURL(initialImageUrl, function (img) {
+          img.scaleToWidth(700);
+          canvas.setBackgroundImage(img, function() {
+            canvas.renderAll();
+          });
+        }, { 
+          crossOrigin: 'anonymous',
+          onError: function(err) {
+            console.error('Error loading initial image:', err);
+          }
         });
-      }, { 
-        crossOrigin: 'anonymous',
-        onError: function(err) {
-          console.error('Error loading initial image:', err);
-        }
-      });
+      }
       
-      setTimeout(() => {
-        updateCanvasBackground();
-      }, 100);
+      // Don't call updateCanvasBackground immediately - let it load naturally
     }
 
     // Setup canvas event listeners
@@ -214,13 +215,9 @@
 
     // Update canvas background
     function updateCanvasBackground() {
-      if (!checkCanvasHealth()) {
-        reinitializeCanvas();
+      if (!canvas || !canvas.getElement()) {
         return;
       }
-      
-      const canvasElement = canvas.getElement();
-      const canvasStyle = window.getComputedStyle(canvasElement);
       
       // Get selected variant ID
       let selectedVariantId = null;
@@ -239,14 +236,6 @@
         }
       }
       
-      // Method 3: Check any radio button (fallback)
-      if (!selectedVariantId) {
-        const anyRadio = document.querySelector('input[type="radio"][data-variant-id]');
-        if (anyRadio) {
-          selectedVariantId = anyRadio.getAttribute('data-variant-id');
-        }
-      }
-      
       if (!selectedVariantId) {
         return;
       }
@@ -259,12 +248,12 @@
         selectedVariant = productData.variants.find(v => v.id.toString() === selectedVariantId.toString());
       }
       
-      if (!selectedVariant) {
+      if (!selectedVariant || !selectedVariant.featured_image) {
         return;
       }
       
       // Load variant image
-      let imageUrl = selectedVariant.featured_image ? selectedVariant.featured_image.src : null;
+      let imageUrl = selectedVariant.featured_image.src;
       
       if (imageUrl) {
         // Fix protocol if needed
@@ -276,30 +265,8 @@
           img.scaleToWidth(700);
           canvas.setBackgroundImage(img, function() {
             canvas.renderAll();
-            
-            // Force additional renders
-            setTimeout(() => canvas.renderAll(), 50);
-            setTimeout(() => canvas.renderAll(), 100);
           });
         }, { crossOrigin: 'anonymous' });
-      } else {
-        // Fallback to first available image
-        if (productData.images && productData.images.length > 0) {
-          imageUrl = productData.images[0];
-          if (imageUrl.startsWith('//')) {
-            imageUrl = window.location.protocol + imageUrl;
-          }
-          
-          fabric.Image.fromURL(imageUrl, function(img) {
-            img.scaleToWidth(700);
-            canvas.setBackgroundImage(img, function() {
-              canvas.renderAll();
-              
-              setTimeout(() => canvas.renderAll(), 50);
-              setTimeout(() => canvas.renderAll(), 100);
-            });
-          }, { crossOrigin: 'anonymous' });
-        }
       }
     }
 
