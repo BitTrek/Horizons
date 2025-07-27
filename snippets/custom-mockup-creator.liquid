@@ -427,11 +427,15 @@
     // Add to cart handling - SIMPLIFIED APPROACH
     function rebindEvents() {
       document.addEventListener('submit', function (e) {
+        console.log('Form submission detected:', e.target.action);
+        
         const isProductForm = e.target.action && e.target.action.includes('/cart/add');
         if (!isProductForm) {
+          console.log('Not a product form, skipping');
           return;
         }
         
+        console.log('Product form detected, preventing default and processing...');
         e.preventDefault();
         
         const form = e.target;
