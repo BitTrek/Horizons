@@ -81,7 +81,20 @@
         
         canvas.setBackgroundImage(img, function() {
           console.log('Background image set, rendering canvas');
+          console.log('Canvas background image:', canvas.backgroundImage);
+          console.log('Canvas background image dimensions:', canvas.backgroundImage ? `${canvas.backgroundImage.getScaledWidth()} x ${canvas.backgroundImage.getScaledHeight()}` : 'none');
+          console.log('Canvas background image position:', canvas.backgroundImage ? `${canvas.backgroundImage.left}, ${canvas.backgroundImage.top}` : 'none');
           canvas.renderAll();
+          console.log('Canvas rendered successfully');
+          
+          // Add a visual indicator that the image was loaded
+          const canvasElement = document.getElementById('canvas');
+          if (canvasElement) {
+            canvasElement.style.border = '3px solid #00ff00';
+            setTimeout(() => {
+              canvasElement.style.border = '1px solid #ccc';
+            }, 1000);
+          }
         });
       }, { 
         crossOrigin: 'anonymous',
@@ -243,7 +256,15 @@
     }
 
     // Update canvas background
+    let lastUpdateTime = 0;
     function updateCanvasBackground() {
+      const now = Date.now();
+      if (now - lastUpdateTime < 100) {
+        console.log('Skipping update - too soon since last update');
+        return;
+      }
+      lastUpdateTime = now;
+      
       console.log('=== UPDATE CANVAS BACKGROUND ===');
       const productData = {{ product | json }};
       
@@ -346,7 +367,20 @@
           
           canvas.setBackgroundImage(img, function() {
             console.log('Variant background image set, rendering canvas');
+            console.log('Canvas background image:', canvas.backgroundImage);
+            console.log('Canvas background image dimensions:', canvas.backgroundImage ? `${canvas.backgroundImage.getScaledWidth()} x ${canvas.backgroundImage.getScaledHeight()}` : 'none');
+            console.log('Canvas background image position:', canvas.backgroundImage ? `${canvas.backgroundImage.left}, ${canvas.backgroundImage.top}` : 'none');
             canvas.renderAll();
+            console.log('Canvas rendered successfully');
+            
+            // Add a visual indicator that the image was loaded
+            const canvasElement = document.getElementById('canvas');
+            if (canvasElement) {
+              canvasElement.style.border = '3px solid #00ff00';
+              setTimeout(() => {
+                canvasElement.style.border = '1px solid #ccc';
+              }, 1000);
+            }
           });
         }, { 
           crossOrigin: 'anonymous',
