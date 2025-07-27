@@ -71,18 +71,24 @@
   function loadAssets() {
     const promises = [];
     
+    // Get asset URLs from window object (set by Liquid template)
+    const assetUrls = window.mockupAssetUrls || {};
+    
     // Load CSS if not already loaded
     if (!document.querySelector('link[href*="mockup-builder.css"]')) {
-      promises.push(loadCSS('/assets/mockup-builder.css'));
+      const cssUrl = assetUrls.css || '/assets/mockup-builder.css';
+      promises.push(loadCSS(cssUrl));
     }
     
     // Load JS modules if not already loaded
     if (!window.MockupBuilder) {
-      promises.push(loadJS('/assets/mockup-builder.js'));
+      const builderUrl = assetUrls.builder || '/assets/mockup-builder.js';
+      promises.push(loadJS(builderUrl));
     }
     
     if (!window.MockupCart) {
-      promises.push(loadJS('/assets/mockup-cart.js'));
+      const cartUrl = assetUrls.cart || '/assets/mockup-cart.js';
+      promises.push(loadJS(cartUrl));
     }
     
     return Promise.all(promises);

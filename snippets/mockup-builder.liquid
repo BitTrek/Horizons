@@ -61,6 +61,14 @@
   </div>
 
   {%- comment -%} Load the mockup builder scripts {%- endcomment -%}
+  <script>
+    // Asset URLs for mockup builder
+    window.mockupAssetUrls = {
+      css: {{ 'mockup-builder.css' | asset_url | json }},
+      builder: {{ 'mockup-builder.js' | asset_url | json }},
+      cart: {{ 'mockup-cart.js' | asset_url | json }}
+    };
+  </script>
   {{ 'mockup-init.js' | asset_url | script_tag }}
   
   <style>
