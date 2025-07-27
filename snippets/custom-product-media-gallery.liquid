@@ -1,0 +1,81 @@
+<media-gallery
+  class="spacing-style sticky-content media-gallery--one-column media-gallery--grid"
+  style="--media-radius: 0px; --image-gap: 0px;"
+  data-presentation="grid"
+>
+  <div
+    class="product-media-container product-media-container--image constrain-height media-fit-contain product-media-container--zoomable"
+    style="--media-preview-ratio: 1.0;"
+  >
+    <div class="canvas-wrapper">
+      <canvas id="canvas"></canvas>
+    </div>
+  </div>
+</media-gallery>
+
+<style>
+  /* Match default Shopify product media gallery structure exactly */
+  .canvas-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #canvas {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    object-fit: contain;
+  }
+
+  /* Inherit all default Shopify media gallery styles */
+  .product-media-container {
+    --slide-width: round(up, 100%, 1px);
+    display: flex;
+    aspect-ratio: var(--gallery-aspect-ratio, var(--media-preview-ratio));
+    max-height: var(--constrained-height);
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .product-media-container.constrain-height {
+    --viewport-offset: 400px;
+    --constrained-min-height: 300px;
+    --constrained-height: max(var(--constrained-min-height), calc(100vh - var(--viewport-offset)));
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  /* Mobile responsive behavior */
+  @media screen and (max-width: 749px) {
+    .product-media-container.constrain-height {
+      max-height: none;
+    }
+  }
+
+  /* Desktop responsive behavior */
+  @media screen and (min-width: 750px) {
+    .product-media-container.constrain-height {
+      --viewport-offset: var(--header-height, 100px);
+      --constrained-min-height: 500px;
+    }
+  }
+
+  /* Ensure proper touch behavior */
+  .canvas-wrapper,
+  #canvas {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+
+</style>

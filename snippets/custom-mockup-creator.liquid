@@ -1,0 +1,568 @@
+{% if template contains 'ppt-' %}
+<!-- Last updated: 2025-07-27 15:10:20 (Latvia time) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded - Custom mockup creator script started');
+    
+    // Global variables
+    let canvas;
+    let uploadedImageData = null;
+    let uploadedImage = null;
+    window.uploadedImage = null;
+
+    // Initialize canvas
+    function initCanvas() {
+      console.log('initCanvas called');
+      const canvasElement = document.getElementById("canvas");
+      if (!canvasElement) {
+        console.error('Canvas element not found');
+        return;
+      }
+      console.log('Canvas element found:', canvasElement);
+      
+      canvas = new fabric.Canvas("canvas");
+      console.log('Fabric canvas created:', canvas);
+      
+      // Configure global object properties for better handles
+      fabric.Object.prototype.setControlsVisibility({ 
+        mt: false, 
+        mb: false, 
+        ml: false, 
+        mr: false 
+      });
+      fabric.Object.prototype.cornerSize = 60;
+      fabric.Object.prototype.cornerStyle = 'circle';
+      fabric.Object.prototype.transparentCorners = false;
+      fabric.Object.prototype.cornerColor = '#b2ccff';
+      fabric.Object.prototype.cornerStrokeColor = '#000';
+      fabric.Object.prototype.borderColor = '#b2ccff';
+      fabric.Object.prototype.borderScaleFactor = 2;
+      fabric.Object.prototype.rotatingPointOffset = 60;
+      fabric.Object.prototype.padding = 20;
+      
+      canvas.setWidth(700);
+      canvas.setHeight(700);
+      canvasElement.style.width = '100%';
+      canvasElement.style.height = '100%';
+      
+      setupCanvasEventListeners();
+
+      // Load initial background image
+      const imageUrl = '{{ product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}';
+      console.log('Loading initial image from URL:', imageUrl);
+      
+      fabric.Image.fromURL(imageUrl, function (img) {
+        console.log('Image loaded successfully:', img);
+        img.scaleToWidth(700);
+        canvas.setBackgroundImage(img, function() {
+          console.log('Background image set, rendering canvas');
+          canvas.renderAll();
+        });
+      }, { 
+        crossOrigin: 'anonymous',
+        onError: function(err) {
+          console.error('Error loading initial image:', err);
+        }
+      });
+    }
+
+    // Setup canvas event listeners
+    function setupCanvasEventListeners() {
+      let isPinching = false;
+      let startDistance = 0;
+      let startScale = 1;
+
+      canvas.on('mouse:down', function(e) {
+        if (e.e.touches && e.e.touches.length === 2) {
+          isPinching = true;
+          const touch1 = e.e.touches[0];
+          const touch2 = e.e.touches[1];
+          startDistance = Math.sqrt(
+            Math.pow(touch2.clientX - touch1.clientX, 2) +
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+          );
+          if (e.target) {
+            startScale = e.target.scaleX;
+          }
+        }
+      });
+
+      canvas.on('mouse:move', function(e) {
+        if (isPinching && e.e.touches && e.e.touches.length === 2 && e.target) {
+          const touch1 = e.e.touches[0];
+          const touch2 = e.e.touches[1];
+          const currentDistance = Math.sqrt(
+            Math.pow(touch2.clientX - touch1.clientX, 2) +
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+          );
+          const scale = currentDistance / startDistance;
+          e.target.scaleX = startScale * scale;
+          e.target.scaleY = startScale * scale;
+          canvas.renderAll();
+        }
+      });
+
+      canvas.on('mouse:up', function() {
+        isPinching = false;
+      });
+    }
+
+    // Update uploaded image data
+    function updateUploadedImageData() {
+      if (uploadedImageData && window.uploadedImage) {
+        uploadedImageData = {
+          src: uploadedImageData.src,
+          left: window.uploadedImage.left,
+          top: window.uploadedImage.top,
+          scaleX: window.uploadedImage.scaleX,
+          scaleY: window.uploadedImage.scaleY,
+          angle: window.uploadedImage.angle,
+          width: window.uploadedImage.width,
+          height: window.uploadedImage.height
+        };
+      }
+    }
+
+    // Ensure canvas is ready
+    function ensureCanvasReady() {
+      if (!canvas) {
+        return false;
+      }
+      
+      let attempts = 0;
+      while (!canvas.getContext() && attempts < 10) {
+        attempts++;
+        setTimeout(() => {}, 50);
+      }
+      
+      return canvas.getContext() !== null;
+    }
+
+    // Check canvas health
+    function checkCanvasHealth() {
+      if (!canvas) {
+        return false;
+      }
+      
+      try {
+        const canvasElement = canvas.getElement();
+        if (!canvasElement) {
+          return false;
+        }
+        
+        const rect = canvasElement.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // Reinitialize canvas
+    function reinitializeCanvas() {
+      if (canvas) {
+        canvas.dispose();
+      }
+      
+      canvas = new fabric.Canvas("canvas");
+      
+      // Re-apply global settings
+      fabric.Object.prototype.setControlsVisibility({ 
+        mt: false, 
+        mb: false, 
+        ml: false, 
+        mr: false 
+      });
+      fabric.Object.prototype.cornerSize = 60;
+      fabric.Object.prototype.cornerStyle = 'circle';
+      fabric.Object.prototype.transparentCorners = false;
+      fabric.Object.prototype.cornerColor = '#b2ccff';
+      fabric.Object.prototype.cornerStrokeColor = '#000';
+      fabric.Object.prototype.borderColor = '#b2ccff';
+      fabric.Object.prototype.borderScaleFactor = 2;
+      fabric.Object.prototype.rotatingPointOffset = 60;
+      fabric.Object.prototype.padding = 20;
+      
+      canvas.setWidth(700);
+      canvas.setHeight(700);
+      
+      setupCanvasEventListeners();
+      
+      // Restore uploaded image if exists
+      if (uploadedImageData) {
+        fabric.Image.fromURL(uploadedImageData.src, function(fabricImg) {
+          fabricImg.set({
+            left: uploadedImageData.left,
+            top: uploadedImageData.top,
+            scaleX: uploadedImageData.scaleX,
+            scaleY: uploadedImageData.scaleY,
+            angle: uploadedImageData.angle,
+            hasBorders: true,
+            hasControls: true,
+            hasRotatingPoint: true
+          });
+          
+          canvas.add(fabricImg);
+          window.uploadedImage = fabricImg;
+          canvas.renderAll();
+          
+          // Add event listeners for real-time updates
+          fabricImg.on('modified', updateUploadedImageData);
+          fabricImg.on('moving', updateUploadedImageData);
+          fabricImg.on('scaling', updateUploadedImageData);
+          fabricImg.on('rotating', updateUploadedImageData);
+        });
+      }
+      
+      // Load current variant image
+      updateCanvasBackground();
+    }
+
+    // Update canvas background
+    function updateCanvasBackground() {
+      console.log('updateCanvasBackground called');
+      const productData = {{ product | json }};
+      console.log('Product data:', productData);
+      
+      const variantInput = document.querySelector('input[name="id"]');
+      if (!variantInput) {
+        console.error('Variant input not found');
+        return;
+      }
+      
+      const selectedVariantId = variantInput.value;
+      console.log('Selected variant ID:', selectedVariantId);
+      
+      const selectedVariant = productData.variants.find(v => v.id.toString() === selectedVariantId.toString());
+      console.log('Selected variant:', selectedVariant);
+      
+      if (selectedVariant && selectedVariant.featured_image) {
+        console.log('Loading variant image from:', selectedVariant.featured_image.src);
+        fabric.Image.fromURL(selectedVariant.featured_image.src, function(img) {
+          console.log('Variant image loaded:', img);
+          img.scaleToWidth(700);
+          canvas.setBackgroundImage(img, function() {
+            console.log('Variant background image set, rendering canvas');
+            canvas.renderAll();
+          });
+        }, { 
+          crossOrigin: 'anonymous',
+          onError: function(err) {
+            console.error('Error loading variant image:', err);
+          }
+        });
+      } else {
+        console.error('No variant or featured image found');
+      }
+    }
+
+    // Event listeners for variant changes
+    document.addEventListener('variant:update', function(event) {
+      setTimeout(() => updateCanvasBackground(), 50);
+    });
+
+    document.addEventListener('change', function(e) {
+      if (e.target.type === 'radio' && e.target.hasAttribute('data-variant-id')) {
+        setTimeout(() => updateCanvasBackground(), 100);
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      const target = e.target;
+      if (target.tagName === 'LABEL' || target.closest('label')) {
+        setTimeout(() => updateCanvasBackground(), 150);
+      }
+    });
+
+    // Setup MutationObserver for hidden variant input
+    const hiddenVariantInput = document.querySelector('input[name="id"]');
+    if (hiddenVariantInput) {
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+            setTimeout(() => updateCanvasBackground(), 50);
+          }
+        });
+      });
+      
+      observer.observe(hiddenVariantInput, { attributes: true });
+      
+      hiddenVariantInput.addEventListener('input', function(e) {
+        setTimeout(() => updateCanvasBackground(), 50);
+      });
+      
+      hiddenVariantInput.addEventListener('change', function(e) {
+        setTimeout(() => updateCanvasBackground(), 50);
+      });
+    }
+
+    // File upload handling
+    document.getElementById('upload-input')?.addEventListener('change', function (e) {
+      const label = document.querySelector('label#message');
+      if (!label) return;
+      
+      const file = e.target.files[0];
+      if (!file) {
+        if (uploadedImage) {
+          canvas.remove(uploadedImage);
+          canvas.renderAll();
+          uploadedImage = null;
+          window.uploadedImage = null;
+        }
+        
+        uploadedImageData = null;
+        
+        const existingScreenshotInput = document.getElementById('mockup-screenshot-url');
+        if (existingScreenshotInput) {
+          existingScreenshotInput.remove();
+        }
+        
+        label.innerHTML = `Minimum recommended size: 1000 × 1000px`;
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const img = new Image();
+        img.onload = function () {
+          const width = img.naturalWidth;
+          const height = img.naturalHeight;
+          const isValid = width >= 1000 && height >= 1000;
+          label.innerHTML = `Uploaded size: <span style="color:${isValid ? 'green' : 'red'}">${width} × ${height}px</span>`;
+          
+          fabric.Image.fromURL(event.target.result, function (fabricImg) {
+            if (uploadedImage) canvas.remove(uploadedImage);
+            
+            const maxWidth = canvas.getWidth() * 0.5;
+            const maxHeight = canvas.getHeight() * 0.5;
+            if (fabricImg.width > maxWidth || fabricImg.height > maxHeight) {
+              fabricImg.scaleToWidth(maxWidth);
+            }
+            
+            fabricImg.set({
+              left: (canvas.getWidth() - fabricImg.getScaledWidth()) / 2,
+              top: (canvas.getHeight() - fabricImg.getScaledHeight()) / 2,
+              hasBorders: true,
+              hasControls: true,
+              hasRotatingPoint: true
+            });
+            
+            canvas.add(fabricImg);
+            uploadedImage = fabricImg;
+            window.uploadedImage = fabricImg;
+            canvas.renderAll();
+            
+            // Save uploaded image data for restoration
+            uploadedImageData = {
+              src: event.target.result,
+              left: fabricImg.left,
+              top: fabricImg.top,
+              scaleX: fabricImg.scaleX,
+              scaleY: fabricImg.scaleY,
+              angle: fabricImg.angle,
+              width: fabricImg.width,
+              height: fabricImg.height
+            };
+            
+            // Add event listeners to track changes
+            fabricImg.on('modified', updateUploadedImageData);
+            fabricImg.on('moving', updateUploadedImageData);
+            fabricImg.on('scaling', updateUploadedImageData);
+            fabricImg.on('rotating', updateUploadedImageData);
+          });
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+
+
+    // Add to cart handling - SIMPLIFIED APPROACH
+    function rebindEvents() {
+      // Listen for form submissions
+      document.addEventListener('submit', function (e) {
+        console.log('Form submission detected:', e.target.action);
+        
+        const isProductForm = e.target.action && e.target.action.includes('/cart/add');
+        if (!isProductForm) {
+          console.log('Not a product form, skipping');
+          return;
+        }
+        
+        console.log('Product form detected, preventing default and processing...');
+        e.preventDefault();
+        
+        processAddToCart(e.target);
+      });
+      
+      // Also listen for button clicks as backup
+      document.addEventListener('click', function (e) {
+        const target = e.target;
+        const button = target.closest('button[name="add"], button[type="submit"], input[type="submit"]');
+        
+        if (button) {
+          console.log('Add to cart button clicked:', button);
+          const form = button.closest('form');
+          if (form && form.action && form.action.includes('/cart/add')) {
+            console.log('Add to cart button in product form detected');
+            e.preventDefault();
+            e.stopPropagation();
+            processAddToCart(form);
+          }
+        }
+      });
+      
+      function processAddToCart(form) {
+        const designInput = document.getElementById('upload-input');
+        
+        // Let Shopify handle the file upload normally - no additional logic needed
+        
+        // Screenshot process
+        const mockup = document.querySelector('.canvas-wrapper');
+        if (!mockup || !form) {
+          return;
+        }
+        
+        // Clear existing screenshot URL
+        const existingScreenshotInput = document.getElementById('mockup-screenshot-url');
+        if (existingScreenshotInput) {
+          existingScreenshotInput.remove();
+        }
+        
+        // Test server connectivity
+        console.log('Testing server connectivity...');
+        fetch('https://artshop.lv/upload.php', { method: 'HEAD' })
+          .then(res => {
+            console.log('Server test response:', res.status);
+            if (res.ok) {
+              console.log('Server accessible, taking screenshot...');
+              // Take screenshot
+              const objects = canvas.getObjects();
+              const originalStates = [];
+              
+              // Hide handles
+              objects.forEach(obj => {
+                originalStates.push({
+                  hasControls: obj.hasControls,
+                  hasBorders: obj.hasBorders
+                });
+                obj.set({ hasControls: false, hasBorders: false });
+              });
+              
+              canvas.renderAll();
+              
+              // Create screenshot
+              const dataUrl = canvas.toDataURL();
+              console.log('Screenshot created, uploading...');
+              const img = new Image();
+              img.onload = function() {
+                const squareCanvas = document.createElement('canvas');
+                squareCanvas.width = 250;
+                squareCanvas.height = 250;
+                const ctx = squareCanvas.getContext('2d');
+                
+                // Calculate dimensions to maintain aspect ratio
+                const scale = Math.min(250 / img.width, 250 / img.height);
+                const scaledWidth = img.width * scale;
+                const scaledHeight = img.height * scale;
+                const x = (250 - scaledWidth) / 2;
+                const y = (250 - scaledHeight) / 2;
+                
+                ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+                
+                // Convert to blob and upload
+                squareCanvas.toBlob(function(blob) {
+                  if (!blob) {
+                    console.log('Failed to create blob');
+                    restoreHandles(originalStates);
+                    submitViaAjax(form);
+                    return;
+                  }
+                  
+                  console.log('Blob created, uploading to server...');
+                  const formData = new FormData();
+                  formData.append('image', blob, 'mockup-screenshot.png');
+                  
+                  fetch('https://artshop.lv/upload.php', {
+                    method: 'POST',
+                    body: formData
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                    console.log('Upload response:', data);
+                    if (data.url) {
+                      console.log('Screenshot uploaded successfully:', data.url);
+                      const screenshotInput = document.createElement('input');
+                      screenshotInput.type = 'hidden';
+                      screenshotInput.name = 'properties[Mockup Screenshot URL]';
+                      screenshotInput.value = data.url;
+                      form.appendChild(screenshotInput);
+                    } else {
+                      console.log('No URL in upload response');
+                    }
+                    restoreHandles(originalStates);
+                    submitViaAjax(form);
+                  })
+                  .catch(error => {
+                    console.error('Upload error:', error);
+                    restoreHandles(originalStates);
+                    submitViaAjax(form);
+                  });
+                }, 'image/png', 0.9);
+              };
+              img.src = dataUrl;
+            } else {
+              console.log('Server not accessible, skipping screenshot');
+              submitViaAjax(form);
+            }
+          })
+          .catch((error) => {
+            console.error('Server connectivity test failed:', error);
+            submitViaAjax(form);
+          });
+      }
+    }
+    
+    function restoreHandles(originalStates) {
+      const objects = canvas.getObjects();
+      objects.forEach((obj, index) => {
+        if (originalStates[index]) {
+          obj.set({
+            hasControls: originalStates[index].hasControls,
+            hasBorders: originalStates[index].hasBorders
+          });
+        }
+      });
+      canvas.renderAll();
+    }
+    
+    function submitViaAjax(form) {
+      const formData = new FormData(form);
+      
+      fetch('/cart/add.js', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        const cartDrawer = document.querySelector('cart-drawer');
+        if (cartDrawer) {
+          cartDrawer.renderContents({ key: data.key });
+        } else {
+          window.location.reload();
+        }
+      })
+      .catch(error => {
+        console.error('Error adding to cart:', error);
+        window.location.reload();
+      });
+    }
+
+    // Initialize
+    initCanvas();
+    rebindEvents();
+  });
+</script>
+{% endif %} 
