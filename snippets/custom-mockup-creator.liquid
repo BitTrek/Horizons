@@ -134,6 +134,7 @@
             canvas.remove(uploadedImage);
             canvas.renderAll();
             uploadedImage = null;
+        window.uploadedImage = null;
           }
                   // Clear uploaded image data
         uploadedImageData = null;
@@ -180,6 +181,7 @@
         canvas.add(fabricImg);
         canvas.renderAll();
         uploadedImage = fabricImg;
+        window.uploadedImage = fabricImg;
         
         // Save uploaded image data for restoration
         uploadedImageData = {
@@ -314,6 +316,7 @@
           canvas.add(fabricImg);
           canvas.renderAll();
           uploadedImage = fabricImg;
+          window.uploadedImage = fabricImg;
           console.log('[PPT DEBUG] Uploaded image restored successfully');
           
           // Add event listeners to track changes on restored image
@@ -670,10 +673,8 @@
     }
 
     function rebindEvents(canvas) {
-      // Ensure uploadedImage is accessible in this scope
-      if (typeof uploadedImage === 'undefined') {
-        let uploadedImage = null;
-      }
+      // Access the global uploadedImage variable
+      const globalUploadedImage = window.uploadedImage || null;
       document.body.addEventListener('click', function (e) {
         const button = e.target.closest('button[name="add"]');
         if (!button) return;
@@ -715,8 +716,8 @@
         console.log('[PPT DEBUG] === SCREENSHOT PROCESS START ===');
         console.log('[PPT DEBUG] Canvas objects count:', canvas.getObjects().length);
         console.log('[PPT DEBUG] Uploaded image data exists:', !!uploadedImageData);
-        console.log('[PPT DEBUG] Uploaded image object exists:', !!uploadedImage);
-        console.log('[PPT DEBUG] Uploaded image object type:', uploadedImage ? uploadedImage.type : 'null');
+        console.log('[PPT DEBUG] Uploaded image object exists:', !!globalUploadedImage);
+        console.log('[PPT DEBUG] Uploaded image object type:', globalUploadedImage ? globalUploadedImage.type : 'null');
         console.log('[PPT DEBUG] Canvas objects:', canvas.getObjects().map(obj => ({ type: obj.type, visible: obj.visible, left: obj.left, top: obj.top })));
         
 
