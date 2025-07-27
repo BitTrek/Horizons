@@ -29,6 +29,9 @@
   // Initialize when DOM is ready
   function init() {
     console.log('Initializing Mockup Builder...');
+    console.log('Template:', document.body.getAttribute('data-template'));
+    console.log('Body classes:', document.body.className);
+    console.log('Product data:', window.productData);
     
     // Check if we're on a product page with personalization
     if (!isPersonalizationPage()) {
@@ -71,6 +74,19 @@
     // Check for personalization product tag
     const productTags = window.productData?.tags || [];
     if (productTags.some(tag => tag.toLowerCase().includes('personalization'))) {
+      return true;
+    }
+    
+    // Check for ppt- template types
+    const template = document.body.getAttribute('data-template');
+    if (template && (template.includes('ppt-') || template.includes('personalization'))) {
+      return true;
+    }
+    
+    // Check for specific template classes
+    if (document.body.classList.contains('template-product-ppt-tshirt') || 
+        document.body.classList.contains('template-product-ppt-hoodie') ||
+        document.body.classList.contains('template-product-ppt-mug')) {
       return true;
     }
     

@@ -12,7 +12,12 @@
   endif
   
   # Check if we're on a personalization template
-  if template contains 'product-personalization'
+  if template contains 'product-personalization' or template contains 'ppt-'
+    assign show_mockup_builder = true
+  endif
+  
+  # Check for specific template types
+  if template == 'product.ppt-tshirt' or template == 'product.ppt-hoodie' or template == 'product.ppt-mug'
     assign show_mockup_builder = true
   endif
 -%}
