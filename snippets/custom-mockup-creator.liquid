@@ -751,8 +751,18 @@
         // Test server connectivity
         console.log('[PPT DEBUG] Testing server connectivity...');
         fetch('https://artshop.lv/uploads/upload.php', { method: 'HEAD' })
-          .then(res =>         console.log('[PPT DEBUG] Server test response:', res.status))
-          .catch(err => console.log('[PPT DEBUG] Server test failed:', err));
+          .then(res => {
+            console.log('[PPT DEBUG] Server test response:', res.status);
+            if (res.status !== 200) {
+              console.error('[PPT DEBUG] Server not responding correctly');
+            }
+          })
+          .catch(err => {
+            console.error('[PPT DEBUG] Server test failed:', err);
+            console.log('[PPT DEBUG] Proceeding without screenshot upload');
+            submitViaAjax(form);
+            return;
+          });
         
         // Check if we should proceed with screenshot
         if (!tempUploadedImageData) {
@@ -760,6 +770,23 @@
           submitViaAjax(form);
           return;
         }
+        
+        // Check if server is accessible
+        console.log('[PPT DEBUG] Checking server accessibility before screenshot');
+        fetch('https://artshop.lv/uploads/upload.php', { method: 'HEAD' })
+          .then(res => {
+            if (res.status !== 200) {
+              console.error('[PPT DEBUG] Server not accessible, skipping screenshot');
+              submitViaAjax(form);
+              return;
+            }
+            console.log('[PPT DEBUG] Server accessible, proceeding with screenshot');
+          })
+          .catch(err => {
+            console.error('[PPT DEBUG] Server not accessible:', err);
+            submitViaAjax(form);
+            return;
+          });
         
         // Force canvas render before screenshot
         canvas.renderAll();
@@ -895,6 +922,10 @@
             const formDataUpload = new FormData();
             formDataUpload.append('file', blob, mockupScreenshotName);
             console.log('[PPT DEBUG] Attempting upload to: https://artshop.lv/uploads/upload.php');
+            console.log('[PPT DEBUG] FormData entries:');
+            for (let [key, value] of formDataUpload.entries()) {
+              console.log('[PPT DEBUG] Upload field:', key, '=', value instanceof File ? `File: ${value.name} (${value.size} bytes)` : value);
+            }
             fetch('https://artshop.lv/uploads/upload.php', {
               method: 'POST',
               body: formDataUpload
