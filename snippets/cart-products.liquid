@@ -4,18 +4,6 @@
   fetchpriority="low"
 ></script>
 
-<script>
-// Function to download design - uses Shopify's built-in file handling
-function downloadDesign(designUrl) {
-  if (designUrl) {
-    // Open the design file URL directly - Shopify handles the file
-    window.open(designUrl, '_blank');
-  } else {
-    alert('Design file not found. Please try uploading the design again.');
-  }
-}
-</script>
-
 <div
   {{ block.shopify_attributes }}
   class="cart-items__wrapper"
@@ -111,24 +99,37 @@ function downloadDesign(designUrl) {
                 role="row"
                 class="cart-items__table-row{% if item.parent_relationship.parent != null %} cart-items__nested-line{% endif %}"
                 ref="cartItemRows[]"
-                data-variant-id="{{ item.variant.id }}"
               >
                 <td
                   class="cart-items__media"
                   role="cell"
                   headers="productImage"
                 >
-                  {%- assign mockup_url = item.properties['Mockup Screenshot URL'] -%}
-                  <a href="{{ item.url }}" class="cart-items__media-container" style="--ratio:0.8;">
-                    <img
-                      src="{% if mockup_url %}{{ mockup_url }}{% else %}{{ item.image | image_url: width: 250 }}{% endif %}"
-                      alt="{% if mockup_url %}Custom Mockup Screenshot{% else %}{{ item.image.alt | escape }}{% endif %}"
-                      width="250"
-                      height="250"
-                      class="cart-items__media-image border-style"
-                      style="--border-width: 1px; --border-style: none; --border-color: rgb(var(--color-border-rgb) / 0.5); --border-radius: 0px;"
+                  {% if item.image -%}
+                    {% liquid
+                      assign ratio = 1
+                      assign border_opacity = settings.cart_thumbnail_border_opacity | divided_by: 100.0
+                      assign border_override = '--border-width: [cart_thumbnail_border_width]px; --border-style: [cart_thumbnail_border_style]; --border-color: rgb(var(--color-border-rgb) / [cart_thumbnail_border_opacity]); --border-radius: [cart_thumbnail_border_radius]px;' | replace: '[cart_thumbnail_border_width]', settings.cart_thumbnail_border_width | replace: '[cart_thumbnail_border_style]', settings.cart_thumbnail_border | replace: '[cart_thumbnail_border_opacity]', border_opacity | replace: '[cart_thumbnail_border_radius]', settings.cart_thumbnail_border_radius
+
+                      if settings.cart_thumbnail_border_radius > 0
+                        assign border_override = border_override | append: ' overflow: hidden;'
+                      endif
+                      if block.settings.image_ratio == 'portrait'
+                        assign ratio = 0.8
+                      elsif block.settings.image_ratio == 'adapt'
+                        assign ratio = item.image.aspect_ratio
+                      endif
+                    %}
+                    <a
+                      href="{{ item.url }}"
+                      class="cart-items__media-container"
+                      style="--ratio:{{ ratio }};"
                     >
-                  </a>
+                      {%- liquid
+                        echo item.image | image_url: width: 250 | image_tag: class: 'cart-items__media-image border-style', style: border_override
+                      -%}
+                    </a>
+                  {%- endif %}
                 </td>
                 <td
                   class="cart-items__details cart-primary-typography"
@@ -182,47 +183,21 @@ function downloadDesign(designUrl) {
                         {%- endfor -%}
                       {%- endif -%}
 
-                      {%- assign has_uploaded_design = false -%}
                       {%- for property in item.properties -%}
                         {%- assign property_first_char = property.first | slice: 0 -%}
                         {%- if property.last != blank and property_first_char != '_' -%}
                           <div class="cart-items__properties">
-                            {%- if property.first == 'Uploaded Design' -%}
-                              {%- assign has_uploaded_design = true -%}
-                              <dd>
-                                <a href="#" onclick="downloadDesign('{{ property.last }}')" style="color: #0066cc; text-decoration: underline;">Download Design</a>
-                              </dd>
-                            {%- elsif property.first == 'Mockup Screenshot URL' and property.last contains 'mockup-screenshot' -%}
-                              {%- assign screenshot_filename = property.last | split: '/' | last -%}
-                              <dd>
-                                <a href="https://artshop.lv/download.php?file={{ screenshot_filename }}" target="_blank" style="color: #0066cc; text-decoration: underline;">Download Mockup</a>
-                              </dd>
-                            {%- else -%}
-                              <dt>{{ property.first }}</dt>
-                              <dd>{{ property.last }}</dd>
-                            {%- endif -%}
+                            <dt>{{ property.first }}:</dt>
+                            <dd>
+                              {%- if property.last contains '/uploads/' -%}
+                                <a href="{{ property.last }}">{{ property.last | split: '/' | last }}</a>
+                              {%- else -%}
+                                {{ property.last }}
+                              {%- endif -%}
+                            </dd>
                           </div>
                         {%- endif -%}
                       {%- endfor -%}
-                      
-                      <!-- Show "No design file available" if no Uploaded Design property found -->
-                      {%- unless has_uploaded_design -%}
-                        <div class="cart-items__properties">
-                          <dd style="color: #999; font-style: italic;">No design file available</dd>
-                        </div>
-                      {%- endunless -%}
-                      
-                      <!-- DEBUG: Show all properties -->
-                      {%- if item.properties.size > 0 -%}
-                        <div style="background: #f0f0f0; padding: 5px; margin: 5px 0; font-size: 12px;">
-                          <strong>DEBUG - All properties:</strong><br>
-                          {%- for property in item.properties -%}
-                            {{ property.first }}: {{ property.last }}<br>
-                          {%- endfor -%}
-                        </div>
-                      {%- endif -%}
-                      
-
                     </dl>
 
                     {% if item.selling_plan_allocation %}
@@ -774,13 +749,3 @@ function downloadDesign(designUrl) {
     display: inline;
   }
 {% endstylesheet %}
-
-<style>
-.cart-items__properties a {
-  color: #1a73e8; /* industry standard blue */
-
-}
-.cart-items__properties a:visited {
-  color: #1a73e8; /* do not change color after visit */
-}
-</style>

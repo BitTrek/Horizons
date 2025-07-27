@@ -55,24 +55,17 @@
     class="{{ product_grid_class }}"
     data-product-grid-content
   >
-    {% if template contains 'ppt-' %}
-      {% render 'custom-mockup-creator' %}
-    {% endif %}
     {% assign render_order_array = render_order | split: ',' %}
     {% capture media %}
       <div
         class="product-information__media"
         data-testid="product-information-media"
       >
-        {% if template contains 'ppt-' %}
-          {% render 'custom-product-media-gallery' %}
-        {% else %}
-          {%- content_for 'block',
-            type: '_product-media-gallery',
-            id: 'media-gallery',
-            closest.product: closest.product
-          -%}
-        {% endif %}
+        {%- content_for 'block',
+          type: '_product-media-gallery',
+          id: 'media-gallery',
+          closest.product: closest.product
+        -%}
       </div>
     {% endcapture %}
 
@@ -121,21 +114,12 @@
 
   /* Mobile styles */
   @media screen and (max-width: 749px) {
-    .product-information__grid {
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 1rem !important;
-    }
-
     .product-information__media {
-      order: 1 !important;
-      width: 100% !important;
-      min-width: 100% !important;
+      grid-column: 1 / -1;
     }
 
     .product-details {
-      order: 2 !important;
-      width: 100% !important;
+      grid-column: 2 / 3;
     }
   }
 
