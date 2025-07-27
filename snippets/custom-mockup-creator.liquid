@@ -124,7 +124,7 @@
         updateCanvasBackground();
       }, 100);
 
-      let uploadedImage;
+      let uploadedImage = null;
       document.getElementById('upload-input')?.addEventListener('change', function (e) {
         const label = document.querySelector('label#message');
         if (!label) return;
@@ -702,8 +702,8 @@
           .catch(err => console.log('[PPT DEBUG] Server test failed:', err));
         
         // Check if we should proceed with screenshot
-        if (!uploadedImageData) {
-          console.log('[PPT DEBUG] No uploaded image data, skipping screenshot');
+        if (!uploadedImageData || !uploadedImage) {
+          console.log('[PPT DEBUG] No uploaded image data or object, skipping screenshot');
           submitViaAjax(form);
           return;
         }
@@ -712,6 +712,7 @@
         console.log('[PPT DEBUG] Canvas objects count:', canvas.getObjects().length);
         console.log('[PPT DEBUG] Uploaded image data exists:', !!uploadedImageData);
         console.log('[PPT DEBUG] Uploaded image object exists:', !!uploadedImage);
+        console.log('[PPT DEBUG] Uploaded image object type:', uploadedImage ? uploadedImage.type : 'null');
         
 
         // Hide all handles and controls before taking screenshot
