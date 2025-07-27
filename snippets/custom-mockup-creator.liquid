@@ -707,6 +707,11 @@
           console.log('[PPT DEBUG] Cleared existing design input');
         }
         
+        // Clear uploaded image data after cart submission
+        uploadedImageData = null;
+        window.uploadedImage = null;
+        console.log('[PPT DEBUG] Cleared uploaded image data and object');
+        
         // Test server connectivity
         console.log('[PPT DEBUG] Testing server connectivity...');
         fetch('https://artshop.lv/uploads/upload.php', { method: 'HEAD' })
@@ -719,6 +724,10 @@
           submitViaAjax(form);
           return;
         }
+        
+        // Force canvas render before screenshot
+        canvas.renderAll();
+        console.log('[PPT DEBUG] Forced canvas render before screenshot');
         
         // If we have data but no object, try to restore it
         if (!window.uploadedImage && uploadedImageData) {
