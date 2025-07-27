@@ -56,16 +56,16 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateProductImage(variantId) {
     console.log('Updating product image for variant:', variantId);
     
-    // Find the variant data
+    // Get the image URL from our variant image map
     const productData = window.productData || {};
-    const variants = productData.variants || [];
-    const variant = variants.find(v => v.id === variantId);
+    const variantImageMap = productData.variantImageMap || {};
+    const imageUrl = variantImageMap[variantId];
     
-    if (variant && variant.featured_image) {
-      console.log('Found variant image:', variant.featured_image);
+    if (imageUrl) {
+      console.log('Found image URL:', imageUrl);
       
       // Update the image source
-      imageElement.src = variant.featured_image;
+      imageElement.src = imageUrl;
       imageElement.setAttribute('data-variant-id', variantId);
       
       // Add a subtle fade effect
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
         imageElement.style.opacity = '1';
       }, 150);
     } else {
-      console.log('No variant image found for variant:', variantId);
+      console.log('No image URL found for variant:', variantId);
     }
   }
 

@@ -40,6 +40,15 @@
     variants: {{ closest.product.variants | json }},
     selected_or_first_available_variant: {{ closest.product.selected_or_first_available_variant | json }}
   };
+  
+  // Add variant image URLs to the DOM for easy access
+  const variantImageMap = {};
+  {% for variant in closest.product.variants %}
+    {% if variant.featured_image %}
+      variantImageMap[{{ variant.id }}] = '{{ variant.featured_image | image_url: width: 2000 }}';
+    {% endif %}
+  {% endfor %}
+  window.productData.variantImageMap = variantImageMap;
 </script>
 
 {% stylesheet %}
