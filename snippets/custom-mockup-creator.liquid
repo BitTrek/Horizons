@@ -686,6 +686,9 @@
           return;
         }
         
+        e.preventDefault();
+        const form = button.closest('form');
+        
         // If we have uploaded image data but no file input, create a hidden input for the design
         if (!designInput.files.length && uploadedImageData && form) {
           console.log('[PPT DEBUG] Creating hidden input for uploaded design');
@@ -714,8 +717,6 @@
           designPropertyInput.value = 'Design uploaded successfully';
           console.log('[PPT DEBUG] Design property set:', designPropertyInput.value);
         }
-        e.preventDefault();
-        const form = button.closest('form');
         const mockup = document.querySelector('.canvas-wrapper');
         if (!mockup || !form) {
           console.log('[PPT DEBUG] Mockup or form not found', { mockup, form });
