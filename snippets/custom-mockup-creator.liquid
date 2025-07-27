@@ -44,7 +44,7 @@
       setupCanvasEventListeners();
 
       // Load initial background image
-      fabric.Image.fromURL('{{ closest.product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}', function (img) {
+      fabric.Image.fromURL('{{ product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}', function (img) {
         img.scaleToWidth(700);
         canvas.setBackgroundImage(img, function() {
           canvas.renderAll();
