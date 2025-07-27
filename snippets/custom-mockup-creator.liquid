@@ -698,13 +698,20 @@
         // Test server connectivity
         console.log('[PPT DEBUG] Testing server connectivity...');
         fetch('https://artshop.lv/uploads/upload.php', { method: 'HEAD' })
-          .then(res => console.log('[PPT DEBUG] Server test response:', res.status))
+          .then(res =>         console.log('[PPT DEBUG] Server test response:', res.status))
           .catch(err => console.log('[PPT DEBUG] Server test failed:', err));
+        
+        // Check if we should proceed with screenshot
+        if (!uploadedImageData) {
+          console.log('[PPT DEBUG] No uploaded image data, skipping screenshot');
+          submitViaAjax(form);
+          return;
+        }
         
         console.log('[PPT DEBUG] === SCREENSHOT PROCESS START ===');
         console.log('[PPT DEBUG] Canvas objects count:', canvas.getObjects().length);
-        console.log('[PPT DEBUG] Uploaded image exists:', !!uploadedImage);
         console.log('[PPT DEBUG] Uploaded image data exists:', !!uploadedImageData);
+        console.log('[PPT DEBUG] Uploaded image object exists:', !!uploadedImage);
         
 
         // Hide all handles and controls before taking screenshot
@@ -723,6 +730,7 @@
         console.log('[PPT DEBUG] Handles hidden, taking screenshot');
         console.log('[PPT DEBUG] Canvas background image exists:', !!canvas.backgroundImage);
         console.log('[PPT DEBUG] Canvas objects after hiding handles:', canvas.getObjects().length);
+        console.log('[PPT DEBUG] Canvas objects details:', canvas.getObjects().map(obj => ({ type: obj.type, visible: obj.visible })));
         
         // Use Fabric.js canvas directly for screenshot
         const canvasScreenshot = canvas.toDataURL({
