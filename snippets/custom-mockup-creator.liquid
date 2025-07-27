@@ -680,7 +680,7 @@
         if (!button) return;
         console.log('[PPT DEBUG] Add to cart button clicked');
         const designInput = document.getElementById('upload-input');
-        if (!designInput.files.length) {
+        if (!designInput.files.length && !uploadedImageData) {
           e.preventDefault();
           alert('Please upload a design and wait for the mockup screenshot before adding to cart.');
           return;
@@ -698,6 +698,13 @@
         if (existingScreenshotInput) {
           existingScreenshotInput.remove();
           console.log('[PPT DEBUG] Cleared existing screenshot URL');
+        }
+        
+        // Clear any existing uploaded design input
+        const existingDesignInput = document.getElementById('upload-input');
+        if (existingDesignInput) {
+          existingDesignInput.value = '';
+          console.log('[PPT DEBUG] Cleared existing design input');
         }
         
         // Test server connectivity
@@ -725,6 +732,13 @@
               return;
             }
           }, 100);
+        }
+        
+        // Check if canvas has objects after restoration attempt
+        if (canvas.getObjects().length === 0) {
+          console.log('[PPT DEBUG] Canvas has no objects, skipping screenshot');
+          submitViaAjax(form);
+          return;
         }
         
         console.log('[PPT DEBUG] === SCREENSHOT PROCESS START ===');
