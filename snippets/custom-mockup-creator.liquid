@@ -44,22 +44,14 @@
       setupCanvasEventListeners();
 
       // Load initial background image
-      const initialImageUrl = '{{ closest.product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}';
-      if (initialImageUrl && initialImageUrl !== '') {
-        fabric.Image.fromURL(initialImageUrl, function (img) {
-          img.scaleToWidth(700);
-          canvas.setBackgroundImage(img, function() {
-            canvas.renderAll();
-          });
-        }, { 
-          crossOrigin: 'anonymous',
-          onError: function(err) {
-            console.error('Error loading initial image:', err);
-          }
+      fabric.Image.fromURL('{{ closest.product.selected_or_first_available_variant.featured_image | image_url: width: 700 }}', function (img) {
+        img.scaleToWidth(700);
+        canvas.setBackgroundImage(img, function() {
+          canvas.renderAll();
         });
-      }
-      
-      // Don't call updateCanvasBackground immediately - let it load naturally
+      }, { 
+        crossOrigin: 'anonymous'
+      });
     }
 
     // Setup canvas event listeners
@@ -215,53 +207,12 @@
 
     // Update canvas background
     function updateCanvasBackground() {
-      if (!canvas || !canvas.getElement()) {
-        return;
-      }
-      
-      // Get selected variant ID
-      let selectedVariantId = null;
-      
-      // Method 1: Check hidden input
-      const hiddenInput = document.querySelector('input[name="id"]');
-      if (hiddenInput) {
-        selectedVariantId = hiddenInput.value;
-      }
-      
-      // Method 2: Check checked radio buttons
-      if (!selectedVariantId) {
-        const checkedRadio = document.querySelector('input[type="radio"]:checked[data-variant-id]');
-        if (checkedRadio) {
-          selectedVariantId = checkedRadio.getAttribute('data-variant-id');
-        }
-      }
-      
-      if (!selectedVariantId) {
-        return;
-      }
-      
-      // Get product data
       const productData = {{ product | json }};
-      let selectedVariant = null;
+      const selectedVariantId = document.querySelector('input[name="id"]').value;
+      const selectedVariant = productData.variants.find(v => v.id.toString() === selectedVariantId.toString());
       
-      if (productData && productData.variants) {
-        selectedVariant = productData.variants.find(v => v.id.toString() === selectedVariantId.toString());
-      }
-      
-      if (!selectedVariant || !selectedVariant.featured_image) {
-        return;
-      }
-      
-      // Load variant image
-      let imageUrl = selectedVariant.featured_image.src;
-      
-      if (imageUrl) {
-        // Fix protocol if needed
-        if (imageUrl.startsWith('//')) {
-          imageUrl = window.location.protocol + imageUrl;
-        }
-        
-        fabric.Image.fromURL(imageUrl, function(img) {
+      if (selectedVariant && selectedVariant.featured_image) {
+        fabric.Image.fromURL(selectedVariant.featured_image.src, function(img) {
           img.scaleToWidth(700);
           canvas.setBackgroundImage(img, function() {
             canvas.renderAll();
