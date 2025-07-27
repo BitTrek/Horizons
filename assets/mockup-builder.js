@@ -133,12 +133,17 @@ class MockupBuilder {
 
   async loadProductImage() {
     try {
+      console.log('=== LOAD PRODUCT IMAGE ===');
+      
       // Don't load if already loaded
       if (this.state.productImage) {
+        console.log('Product image already loaded, skipping');
         return;
       }
 
       let productImageUrl = this.getProductImageUrl();
+      console.log('Product image URL:', productImageUrl);
+      
       if (!productImageUrl) {
         throw new Error('No product image URL available');
       }
@@ -146,9 +151,12 @@ class MockupBuilder {
       // Fix protocol-relative URLs
       if (productImageUrl.startsWith('//')) {
         productImageUrl = 'https:' + productImageUrl;
+        console.log('Fixed protocol-relative URL:', productImageUrl);
       }
 
+      console.log('Loading image from:', productImageUrl);
       const image = await this.loadImage(productImageUrl);
+      console.log('Image loaded successfully:', image);
       
       // Create Konva image
       const konvaImage = new Konva.Image({
@@ -166,6 +174,10 @@ class MockupBuilder {
         maxHeight / image.height
       );
       
+      console.log('Image dimensions:', image.width, 'x', image.height);
+      console.log('Canvas dimensions:', this.options.width, 'x', this.options.height);
+      console.log('Scale factor:', scale);
+      
       konvaImage.scale({ x: scale, y: scale });
       
       // Center the image
@@ -173,12 +185,16 @@ class MockupBuilder {
       const scaledHeight = image.height * scale;
       konvaImage.x((this.options.width - scaledWidth) / 2);
       konvaImage.y((this.options.height - scaledHeight) / 2);
+      
+      console.log('Image positioned at:', konvaImage.x(), konvaImage.y());
 
       // Add to product layer
       this.productLayer.add(konvaImage);
       this.productLayer.draw();
+      console.log('Image added to product layer');
 
       this.state.setState({ productImage: konvaImage });
+      console.log('Product image state updated');
       
     } catch (error) {
       console.error('Failed to load product image:', error);
@@ -187,46 +203,111 @@ class MockupBuilder {
   }
 
   getProductImageUrl() {
+    console.log('=== GET PRODUCT IMAGE URL ===');
+    console.log('window.productData:', window.productData);
+    
     // Try multiple methods to get product image URL
     const methods = [
-      () => window.productData?.featured_image, // Direct string URL
-      () => window.productData?.featured_image?.src, // Object with src property
-      () => window.productData?.images?.[0]?.src, // First image from images array
-      () => window.productData?.images?.[0], // Direct URL from images array
-      () => document.querySelector('[data-product-image]')?.src,
-      () => document.querySelector('.product__media img')?.src,
-      () => document.querySelector('.product__media-gallery img')?.src,
-      () => document.querySelector('img[alt*="product"]')?.src,
-      () => document.querySelector('.product__image img')?.src
+      () => {
+        console.log('Method 0 - featured_image:', window.productData?.featured_image);
+        return window.productData?.featured_image;
+      },
+      () => {
+        console.log('Method 1 - featured_image.src:', window.productData?.featured_image?.src);
+        return window.productData?.featured_image?.src;
+      },
+      () => {
+        console.log('Method 2 - images[0].src:', window.productData?.images?.[0]?.src);
+        return window.productData?.images?.[0]?.src;
+      },
+      () => {
+        console.log('Method 3 - images[0]:', window.productData?.images?.[0]);
+        return window.productData?.images?.[0];
+      },
+      () => {
+        const selector = '[data-product-image]';
+        const element = document.querySelector(selector);
+        console.log('Method 4 - data-product-image:', element?.src);
+        return element?.src;
+      },
+      () => {
+        const selector = '.product__media img';
+        const element = document.querySelector(selector);
+        console.log('Method 5 - .product__media img:', element?.src);
+        return element?.src;
+      },
+      () => {
+        const selector = '.product__media-gallery img';
+        const element = document.querySelector(selector);
+        console.log('Method 6 - .product__media-gallery img:', element?.src);
+        return element?.src;
+      },
+      () => {
+        const selector = 'img[alt*="product"]';
+        const element = document.querySelector(selector);
+        console.log('Method 7 - img[alt*="product"]:', element?.src);
+        return element?.src;
+      },
+      () => {
+        const selector = '.product__image img';
+        const element = document.querySelector(selector);
+        console.log('Method 8 - .product__image img:', element?.src);
+        return element?.src;
+      }
     ];
 
-    for (const method of methods) {
+    for (let i = 0; i < methods.length; i++) {
       try {
-        const url = method();
-        if (url) return url;
+        const url = methods[i]();
+        if (url) {
+          console.log(`Found product image URL (method ${i}):`, url);
+          return url;
+        }
       } catch (e) {
+        console.log(`Method ${i} failed:`, e);
         continue;
       }
     }
 
+    console.log('No product image URL found');
     return null;
   }
 
   async loadImage(url, retries = 3) {
+    console.log('=== LOAD IMAGE ===');
+    console.log('URL:', url);
+    console.log('Retries:', retries);
+    
     for (let i = 0; i < retries; i++) {
       try {
+        console.log(`Attempt ${i + 1}/${retries}`);
         const response = await fetch(url);
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
         const blob = await response.blob();
+        console.log('Blob size:', blob.size);
+        console.log('Blob type:', blob.type);
+        
         return new Promise((resolve, reject) => {
           const img = new Image();
-          img.onload = () => resolve(img);
-          img.onerror = reject;
+          img.onload = () => {
+            console.log('Image loaded successfully');
+            console.log('Image natural dimensions:', img.naturalWidth, 'x', img.naturalHeight);
+            resolve(img);
+          };
+          img.onerror = (error) => {
+            console.error('Image load error:', error);
+            reject(error);
+          };
           img.src = URL.createObjectURL(blob);
         });
       } catch (error) {
+        console.error(`Attempt ${i + 1} failed:`, error);
         if (i === retries - 1) throw error;
+        console.log(`Waiting ${1000 * (i + 1)}ms before retry...`);
         await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
       }
     }
