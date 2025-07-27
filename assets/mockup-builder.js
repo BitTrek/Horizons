@@ -208,50 +208,58 @@ class MockupBuilder {
     
     // Try multiple methods to get product image URL
     const methods = [
+      // First, try to get the currently selected variant image
       () => {
-        console.log('Method 0 - featured_image:', window.productData?.featured_image);
+        const selectedVariant = window.productData?.selected_or_first_available_variant;
+        console.log('Method 0 - selected variant:', selectedVariant);
+        if (selectedVariant?.featured_image) {
+          console.log('Method 0 - selected variant featured_image:', selectedVariant.featured_image);
+          return selectedVariant.featured_image;
+        }
+        return null;
+      },
+      // Try to get the currently visible product image from the DOM
+      () => {
+        const selector = '.product__media img[src*="cdn.shopify.com"]';
+        const element = document.querySelector(selector);
+        console.log('Method 1 - visible product image:', element?.src);
+        return element?.src;
+      },
+      () => {
+        const selector = '.product__media-gallery img[src*="cdn.shopify.com"]';
+        const element = document.querySelector(selector);
+        console.log('Method 2 - gallery product image:', element?.src);
+        return element?.src;
+      },
+      // Try featured image from product data
+      () => {
+        console.log('Method 3 - featured_image:', window.productData?.featured_image);
         return window.productData?.featured_image;
       },
+      // Try first image from images array
       () => {
-        console.log('Method 1 - featured_image.src:', window.productData?.featured_image?.src);
-        return window.productData?.featured_image?.src;
-      },
-      () => {
-        console.log('Method 2 - images[0].src:', window.productData?.images?.[0]?.src);
-        return window.productData?.images?.[0]?.src;
-      },
-      () => {
-        console.log('Method 3 - images[0]:', window.productData?.images?.[0]);
+        console.log('Method 4 - images[0]:', window.productData?.images?.[0]);
         return window.productData?.images?.[0];
       },
+      // Try any image with product in alt text
       () => {
-        const selector = '[data-product-image]';
+        const selector = 'img[alt*="product"][src*="cdn.shopify.com"]';
         const element = document.querySelector(selector);
-        console.log('Method 4 - data-product-image:', element?.src);
+        console.log('Method 5 - product alt image:', element?.src);
         return element?.src;
       },
+      // Try any image with hoodie in alt text
       () => {
-        const selector = '.product__media img';
+        const selector = 'img[alt*="hoodie"][src*="cdn.shopify.com"]';
         const element = document.querySelector(selector);
-        console.log('Method 5 - .product__media img:', element?.src);
+        console.log('Method 6 - hoodie alt image:', element?.src);
         return element?.src;
       },
+      // Fallback to any Shopify CDN image
       () => {
-        const selector = '.product__media-gallery img';
+        const selector = 'img[src*="cdn.shopify.com"]';
         const element = document.querySelector(selector);
-        console.log('Method 6 - .product__media-gallery img:', element?.src);
-        return element?.src;
-      },
-      () => {
-        const selector = 'img[alt*="product"]';
-        const element = document.querySelector(selector);
-        console.log('Method 7 - img[alt*="product"]:', element?.src);
-        return element?.src;
-      },
-      () => {
-        const selector = '.product__image img';
-        const element = document.querySelector(selector);
-        console.log('Method 8 - .product__image img:', element?.src);
+        console.log('Method 7 - any Shopify image:', element?.src);
         return element?.src;
       }
     ];
@@ -340,11 +348,34 @@ class MockupBuilder {
   }
 
   isVariantChangeEvent(event) {
-    return (
+    // Check for variant change events
+    const isVariantEvent = (
       event.type === 'variant:update' ||
       (event.target.type === 'radio' && event.target.hasAttribute('data-variant-id')) ||
       (event.target.tagName === 'LABEL' || event.target.closest('label'))
     );
+    
+    // Also check for color swatch clicks
+    const isColorSwatch = (
+      event.target.closest('[data-color-swatch]') ||
+      event.target.closest('[data-variant-option]') ||
+      event.target.closest('.product-form__input--color')
+    );
+    
+    // Check for any click on product media
+    const isProductMedia = (
+      event.target.closest('.product__media') ||
+      event.target.closest('.product__media-gallery')
+    );
+    
+    console.log('Variant change check:', {
+      isVariantEvent,
+      isColorSwatch,
+      isProductMedia,
+      target: event.target
+    });
+    
+    return isVariantEvent || isColorSwatch || isProductMedia;
   }
 
   async updateProductImage() {
