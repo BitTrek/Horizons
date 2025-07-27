@@ -6,8 +6,8 @@
 
 <script>
 // Function to download design from localStorage
-function downloadDesign(itemKey) {
-  const designData = localStorage.getItem('ppt_design_' + itemKey);
+function downloadDesign(designKey) {
+  const designData = localStorage.getItem(designKey);
   if (designData) {
     const link = document.createElement('a');
     link.href = designData;
@@ -195,7 +195,7 @@ function downloadDesign(itemKey) {
                             {%- if property.first == 'Uploaded Design' -%}
                               {%- assign has_uploaded_design = true -%}
                               <dd>
-                                <a href="#" onclick="downloadDesign('{{ item.key }}')" style="color: #0066cc; text-decoration: underline;">Download Design</a>
+                                <a href="#" onclick="downloadDesign('{{ property.last }}')" style="color: #0066cc; text-decoration: underline;">Download Design</a>
                               </dd>
                             {%- elsif property.first == 'Mockup Screenshot URL' and property.last contains 'mockup-screenshot' -%}
                               {%- assign screenshot_filename = property.last | split: '/' | last -%}
