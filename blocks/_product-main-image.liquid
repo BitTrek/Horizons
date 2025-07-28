@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">20</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">21</span></div>
         </div>
       </div>
       
@@ -335,6 +335,9 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
+    // Store the file globally for cart submission
+    window.uploadedDesignFile = file;
+
     const reader = new FileReader();
     reader.onload = function(e) {
       const imageUrl = e.target.result;
@@ -427,10 +430,56 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         console.log('Uploaded design loaded and positioned on canvas');
+        
+        // Generate thumbnail for cart
+        generateThumbnail();
       });
     };
     
     reader.readAsDataURL(file);
+  }
+
+  // Generate compressed thumbnail for cart
+  function generateThumbnail() {
+    if (!fabricCanvas) return;
+    
+    // Create a temporary canvas for thumbnail
+    const thumbnailCanvas = document.createElement('canvas');
+    const thumbnailWidth = 400;
+    const thumbnailHeight = 300;
+    
+    thumbnailCanvas.width = thumbnailWidth;
+    thumbnailCanvas.height = thumbnailHeight;
+    
+    const ctx = thumbnailCanvas.getContext('2d');
+    
+    // Scale the fabric canvas to fit thumbnail
+    const scaleX = thumbnailWidth / fabricCanvas.getWidth();
+    const scaleY = thumbnailHeight / fabricCanvas.getHeight();
+    const scale = Math.min(scaleX, scaleY);
+    
+    // Calculate centering offset
+    const offsetX = (thumbnailWidth - fabricCanvas.getWidth() * scale) / 2;
+    const offsetY = (thumbnailHeight - fabricCanvas.getHeight() * scale) / 2;
+    
+    // Draw the fabric canvas content to thumbnail
+    ctx.save();
+    ctx.translate(offsetX, offsetY);
+    ctx.scale(scale, scale);
+    
+    // Get the fabric canvas as image data
+    const fabricCanvasElement = fabricCanvas.getElement();
+    ctx.drawImage(fabricCanvasElement, 0, 0);
+    
+    ctx.restore();
+    
+    // Convert to compressed JPEG
+    const thumbnailDataUrl = thumbnailCanvas.toDataURL('image/jpeg', 0.8);
+    
+    // Store thumbnail globally
+    window.designThumbnail = thumbnailDataUrl;
+    
+    console.log('Thumbnail generated, size:', thumbnailDataUrl.length, 'characters');
   }
 
   // Add X button to remove design

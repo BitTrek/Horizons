@@ -169,6 +169,12 @@ class ProductFormComponent extends Component {
 
     const formData = new FormData(form);
 
+    // Add design thumbnail if available
+    if (window.designThumbnail) {
+      formData.append('properties[Design Thumbnail]', window.designThumbnail);
+      console.log('Design thumbnail added to cart, size:', window.designThumbnail.length, 'characters');
+    }
+
     const cartItemsComponents = document.querySelectorAll('cart-items-component');
     let cartItemComponentsSectionIds = [];
     cartItemsComponents.forEach((item) => {
