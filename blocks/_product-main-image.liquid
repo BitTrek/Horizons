@@ -319,6 +319,20 @@ document.addEventListener('DOMContentLoaded', function() {
           borderColor: '#007bff'
         });
 
+        // Only show corners, rotate, and custom X handle
+        img.setControlsVisibility({
+          tl: true, // top-left
+          tr: true, // top-right
+          bl: true, // bottom-left
+          br: true, // bottom-right
+          mt: false, // middle top
+          mb: false, // middle bottom
+          ml: false, // middle left
+          mr: false, // middle right
+          mtr: true, // rotation
+          removeX: true // custom X handle
+        });
+
         // Add custom X removal handle at 6 o'clock
         img.controls = img.controls || { ...fabric.Object.prototype.controls };
         img.controls.removeX = new fabric.Control({
