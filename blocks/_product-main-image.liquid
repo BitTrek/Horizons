@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-          <div class="upload-design-text">Add your design here <span class="upload-design-number">3</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">4</span></div>
         </div>
       </div>
       
@@ -251,12 +251,29 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (!uploadButton || !fileInput) return;
 
-    // Handle upload button click
+    // Handle upload button click - trigger the Shopify form file input
     uploadButton.addEventListener('click', function() {
-      fileInput.click();
+      const shopifyFileInput = document.querySelector('input[name="properties[Uploaded Design]"]');
+      if (shopifyFileInput) {
+        shopifyFileInput.click();
+      } else {
+        // Fallback to local file input if Shopify input doesn't exist
+        fileInput.click();
+      }
     });
 
-    // Handle file selection
+    // Listen for changes on the Shopify form file input
+    const shopifyFileInput = document.querySelector('input[name="properties[Uploaded Design]"]');
+    if (shopifyFileInput) {
+      shopifyFileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          handleFileUpload(file);
+        }
+      });
+    }
+
+    // Keep the local file input as fallback
     fileInput.addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (file) {
