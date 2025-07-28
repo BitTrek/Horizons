@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">10</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">11</span></div>
         </div>
       </div>
       
@@ -253,6 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle upload button click - trigger the Shopify form file input
     uploadButton.addEventListener('click', function() {
+      // Try to find file input in main form first, then accelerated checkout form
       const shopifyFileInput = document.querySelector('input[name="properties[Uploaded Design]"]');
       if (shopifyFileInput) {
         shopifyFileInput.click();
@@ -262,16 +263,16 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
 
-    // Listen for changes on the Shopify form file input
-    const shopifyFileInput = document.querySelector('input[name="properties[Uploaded Design]"]');
-    if (shopifyFileInput) {
-      shopifyFileInput.addEventListener('change', function(e) {
+    // Listen for changes on all Shopify form file inputs (main form and accelerated checkout)
+    const shopifyFileInputs = document.querySelectorAll('input[name="properties[Uploaded Design]"]');
+    shopifyFileInputs.forEach(function(input) {
+      input.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
           handleFileUpload(file);
         }
       });
-    }
+    });
 
     // Keep the local file input as fallback
     fileInput.addEventListener('change', function(e) {
