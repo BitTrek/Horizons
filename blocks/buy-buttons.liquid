@@ -67,7 +67,13 @@
           class="product-form-buttons spacing-style{% if block.settings.stacking %} product-form-buttons--stacked{% endif %}"
           style="{% render 'spacing-style', settings: block.settings %}"
         >
-
+          <!-- File Upload Field for Shopify Form -->
+          <input 
+            type="file" 
+            name="properties[Uploaded Design]" 
+            accept="image/*"
+            style="display: none;"
+          >
 
           {% content_for 'block', type: 'quantity', id: 'quantity' %}
 
