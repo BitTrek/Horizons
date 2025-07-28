@@ -196,6 +196,10 @@
                         <div class="design-thumbnail-label">Design Preview</div>
                       </div>
                     </dd>
+                  {%- elsif property.first == 'Design Screenshot' or property.first contains 'Design Screenshot' -%}
+                    <dd>
+                      <a href="{{ property.last }}" download="design-screenshot.png" class="download-design-link">Download Full Screenshot</a>
+                    </dd>
                   {%- else -%}
                     <dt>{{ property.first }}:</dt>
                     <dd>

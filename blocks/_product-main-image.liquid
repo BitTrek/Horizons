@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">21</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">22</span></div>
         </div>
       </div>
       
@@ -433,6 +433,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Generate thumbnail for cart
         generateThumbnail();
+        
+        // Also generate full screenshot for download
+        const fullScreenshot = generateFullScreenshot();
+        if (fullScreenshot) {
+          window.designScreenshot = fullScreenshot;
+        }
       });
     };
     
@@ -473,13 +479,38 @@ document.addEventListener('DOMContentLoaded', function() {
     
     ctx.restore();
     
-    // Convert to compressed JPEG
-    const thumbnailDataUrl = thumbnailCanvas.toDataURL('image/jpeg', 0.8);
+    // Convert to PNG for better quality and transparency
+    const thumbnailDataUrl = thumbnailCanvas.toDataURL('image/png');
     
     // Store thumbnail globally
     window.designThumbnail = thumbnailDataUrl;
     
     console.log('Thumbnail generated, size:', thumbnailDataUrl.length, 'characters');
+  }
+
+  // Generate full-size PNG screenshot
+  function generateFullScreenshot() {
+    if (!fabricCanvas) return null;
+    
+    // Create a temporary canvas for full screenshot
+    const screenshotCanvas = document.createElement('canvas');
+    const canvasWidth = fabricCanvas.getWidth();
+    const canvasHeight = fabricCanvas.getHeight();
+    
+    screenshotCanvas.width = canvasWidth;
+    screenshotCanvas.height = canvasHeight;
+    
+    const ctx = screenshotCanvas.getContext('2d');
+    
+    // Draw the fabric canvas content to screenshot
+    const fabricCanvasElement = fabricCanvas.getElement();
+    ctx.drawImage(fabricCanvasElement, 0, 0);
+    
+    // Convert to PNG
+    const screenshotDataUrl = screenshotCanvas.toDataURL('image/png');
+    
+    console.log('Full screenshot generated, size:', screenshotDataUrl.length, 'characters');
+    return screenshotDataUrl;
   }
 
   // Add X button to remove design

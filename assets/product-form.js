@@ -175,6 +175,12 @@ class ProductFormComponent extends Component {
       console.log('Design thumbnail added to cart, size:', window.designThumbnail.length, 'characters');
     }
 
+    // Add full screenshot if available (optional - can be large)
+    if (window.designScreenshot) {
+      formData.append('properties[Design Screenshot]', window.designScreenshot);
+      console.log('Design screenshot added to cart, size:', window.designScreenshot.length, 'characters');
+    }
+
     const cartItemsComponents = document.querySelectorAll('cart-items-component');
     let cartItemComponentsSectionIds = [];
     cartItemsComponents.forEach((item) => {
