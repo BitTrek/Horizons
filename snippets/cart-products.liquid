@@ -189,17 +189,17 @@
                 <div class="cart-items__properties">
                   {%- if property.first == 'Uploaded Design' or property.first contains 'Uploaded Design' -%}
                     <dd><a href="{{ property.last }}" download="uploaded-design.png" class="download-design-link">Download Design</a></dd>
-                  {%- elsif property.first == 'Design Screenshot' or property.first contains 'Design Screenshot' -%}
+                                    {%- elsif property.first == 'Download Mockup' or property.first contains 'Download Mockup' -%}
                     <dd>
                       {%- if property.last contains 'data:' -%}
                         <!-- Data URL screenshot -->
                         <div class="design-thumbnail-container">
-                          <img src="{{ property.last }}" alt="Design Screenshot" class="design-thumbnail" style="max-width: 100px; max-height: 75px; border: 1px solid #ddd; border-radius: 4px;">
-                                                  <div class="design-thumbnail-label">Design Screenshot</div>
-                      </div>
-                    {%- else -%}
-                      <!-- File URL screenshot -->
-                      <a href="{{ property.last }}" download="design-screenshot.png" class="download-design-link">Download Mockup</a>
+                          <img src="{{ property.last }}" alt="Design Mockup" class="design-thumbnail" style="max-width: 100px; max-height: 75px; border: 1px solid #ddd; border-radius: 4px;">
+                          <div class="design-thumbnail-label">Design Mockup</div>
+                        </div>
+                      {%- else -%}
+                        <!-- File URL screenshot -->
+                        <a href="{{ property.last }}" download="design-mockup.png" class="download-design-link">Download Mockup</a>
                       {%- endif -%}
                     </dd>
                   {%- else -%}

@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">27</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">29</span></div>
         </div>
       </div>
       
@@ -244,6 +244,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initFabricCanvas();
     setupFileUpload();
     setupVariantChangeListener();
+    disableButtons(); // Start with buttons disabled
   } else {
     // Wait for Fabric.js to load
     const checkFabric = setInterval(() => {
@@ -252,6 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
         initFabricCanvas();
         setupFileUpload();
         setupVariantChangeListener();
+        disableButtons(); // Start with buttons disabled
       }
     }, 100);
   }
@@ -330,6 +332,52 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // Disable Add to Cart and Buy Now buttons
+  function disableButtons() {
+    // Disable Add to Cart button
+    const addToCartButton = document.querySelector('button[name="add"]');
+    if (addToCartButton) {
+      addToCartButton.disabled = true;
+      addToCartButton.style.opacity = '0.5';
+      addToCartButton.style.cursor = 'not-allowed';
+      addToCartButton.title = 'Please upload a design first';
+    }
+    
+    // Disable Buy Now (Fast Track) button
+    const buyNowButton = document.querySelector('.custom-buy-now-button');
+    if (buyNowButton) {
+      buyNowButton.disabled = true;
+      buyNowButton.style.opacity = '0.5';
+      buyNowButton.style.cursor = 'not-allowed';
+      buyNowButton.title = 'Please upload a design first';
+    }
+    
+    console.log('Buttons disabled - no design uploaded');
+  }
+
+  // Enable Add to Cart and Buy Now buttons
+  function enableButtons() {
+    // Enable Add to Cart button
+    const addToCartButton = document.querySelector('button[name="add"]');
+    if (addToCartButton) {
+      addToCartButton.disabled = false;
+      addToCartButton.style.opacity = '1';
+      addToCartButton.style.cursor = 'pointer';
+      addToCartButton.title = '';
+    }
+    
+    // Enable Buy Now (Fast Track) button
+    const buyNowButton = document.querySelector('.custom-buy-now-button');
+    if (buyNowButton) {
+      buyNowButton.disabled = false;
+      buyNowButton.style.opacity = '1';
+      buyNowButton.style.cursor = 'pointer';
+      buyNowButton.title = '';
+    }
+    
+    console.log('Buttons enabled - design uploaded');
+  }
+
   // Custom Buy Now function that adds to cart first, then redirects to checkout
   window.handleCustomBuyNow = function() {
     // Find the main product form
@@ -352,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Add screenshot to form data if available
       if (window.designThumbnailFile) {
-        formData.append('properties[Design Screenshot]', window.designThumbnailFile);
+        formData.append('properties[Download Mockup]', window.designThumbnailFile);
         console.log('Design screenshot added to Buy Now cart:', window.designThumbnailFile.name, 'Size:', window.designThumbnailFile.size, 'bytes');
       }
       
@@ -396,6 +444,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Store the file globally for cart submission
     window.uploadedDesignFile = file;
+    
+    // Enable buttons when design is uploaded
+    enableButtons();
 
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -607,6 +658,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (uploadButton) {
       uploadButton.classList.remove('hidden');
     }
+    
+    // Disable buttons when design is removed
+    disableButtons();
     
     fabricCanvas.renderAll();
     console.log('Design removed, upload button restored');

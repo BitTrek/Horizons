@@ -171,7 +171,7 @@ class ProductFormComponent extends Component {
 
     // Add design thumbnail file if available
     if (window.designThumbnailFile) {
-      formData.append('properties[Design Screenshot]', window.designThumbnailFile);
+      formData.append('properties[Download Mockup]', window.designThumbnailFile);
       console.log('Design screenshot file added to cart:', window.designThumbnailFile.name, 'Size:', window.designThumbnailFile.size, 'bytes');
     }
 
