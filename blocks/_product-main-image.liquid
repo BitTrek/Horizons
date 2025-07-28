@@ -265,25 +265,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- Pinch-to-zoom for mobile ---
-    let lastDistance = null;
-    let startScale = null;
+    let pinchStartDistance = null;
+    let pinchStartScale = null;
     let pinchObject = null;
 
     fabricCanvas.on('touch:gesture', function(opt) {
       if (!uploadedDesign) return;
-      if (!fabricCanvas.getActiveObject()) return;
+      const activeObj = fabricCanvas.getActiveObject();
+      if (!activeObj) return;
       if (opt.e.touches && opt.e.touches.length === 2) {
         const touch1 = opt.e.touches[0];
         const touch2 = opt.e.touches[1];
         const dx = touch2.clientX - touch1.clientX;
         const dy = touch2.clientY - touch1.clientY;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        if (lastDistance === null) {
-          lastDistance = distance;
-          startScale = uploadedDesign.scaleX;
-          pinchObject = uploadedDesign;
+        if (pinchStartDistance === null) {
+          pinchStartDistance = distance;
+          pinchStartScale = activeObj.scaleX;
+          pinchObject = activeObj;
         } else {
-          const scale = (distance / lastDistance) * startScale;
+          const scale = pinchStartScale * (distance / pinchStartDistance);
           pinchObject.scaleX = scale;
           pinchObject.scaleY = scale;
           fabricCanvas.requestRenderAll();
@@ -299,8 +300,8 @@ document.addEventListener('DOMContentLoaded', function() {
     fabricCanvas.on('touch:orientation', function() {});
     fabricCanvas.on('touch:longpress', function() {});
     fabricCanvas.on('touch:up', function(opt) {
-      lastDistance = null;
-      startScale = null;
+      pinchStartDistance = null;
+      pinchStartScale = null;
       pinchObject = null;
     });
   }
@@ -388,7 +389,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.save();
             ctx.beginPath();
             ctx.arc(left, top, 16, 0, 2 * Math.PI, false);
-            ctx.fillStyle = 'rgba(255,0,0,0.85)';
+            ctx.fillStyle = '#007bff'; // Blue color
             ctx.fill();
             ctx.font = 'bold 18px Arial';
             ctx.fillStyle = '#fff';
