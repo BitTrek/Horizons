@@ -318,9 +318,32 @@ document.addEventListener('DOMContentLoaded', function() {
           cornerColor: '#007bff',
           borderColor: '#007bff'
         });
-        
-        // Add X button to remove design
-        addRemoveButton(img);
+
+        // Add custom X removal handle at 6 o'clock
+        img.controls = img.controls || { ...fabric.Object.prototype.controls };
+        img.controls.removeX = new fabric.Control({
+          x: 0,
+          y: 0.5,
+          offsetY: 28,
+          cursorStyle: 'pointer',
+          mouseUpHandler: function(eventData, transform) {
+            removeDesign();
+            return true;
+          },
+          render: function(ctx, left, top, styleOverride, fabricObject) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(left, top, 16, 0, 2 * Math.PI, false);
+            ctx.fillStyle = 'rgba(255,0,0,0.85)';
+            ctx.fill();
+            ctx.font = 'bold 18px Arial';
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('✕', left, top+1);
+            ctx.restore();
+          }
+        });
         
         fabricCanvas.add(img);
         // Make handles visible immediately
