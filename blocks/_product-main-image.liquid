@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">11</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">12</span></div>
         </div>
       </div>
       
@@ -270,6 +270,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const file = e.target.files[0];
         if (file) {
           handleFileUpload(file);
+          
+          // Ensure the file is properly attached to all forms
+          const allFileInputs = document.querySelectorAll('input[name="properties[Uploaded Design]"]');
+          allFileInputs.forEach(function(formInput) {
+            if (formInput !== input) {
+              // Create a new FileList-like object and assign it
+              const dataTransfer = new DataTransfer();
+              dataTransfer.items.add(file);
+              formInput.files = dataTransfer.files;
+            }
+          });
         }
       });
     });
