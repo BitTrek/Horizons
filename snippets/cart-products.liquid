@@ -191,6 +191,8 @@
                             <dd>
                               {%- if property.last contains '/uploads/' -%}
                                 <a href="{{ property.last }}">{{ property.last | split: '/' | last }}</a>
+                              {%- elsif property.first == 'Uploaded Design' -%}
+                                <a href="{{ property.last }}" download="uploaded-design.png" class="download-design-link">Uploaded Design</a>
                               {%- else -%}
                                 {{ property.last }}
                               {%- endif -%}
@@ -747,5 +749,16 @@
   .cart-items__properties dt,
   .cart-items__properties dd {
     display: inline;
+  }
+
+  .download-design-link {
+    color: #87CEEB;
+    text-decoration: underline;
+    font-weight: 500;
+    transition: color var(--animation-speed) ease;
+  }
+
+  .download-design-link:hover {
+    color: #5F9EA0;
   }
 {% endstylesheet %}
