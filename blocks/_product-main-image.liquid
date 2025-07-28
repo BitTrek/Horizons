@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">18</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">19</span></div>
         </div>
       </div>
       
@@ -291,14 +291,11 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    // Check if we have a design uploaded
-    const fileInput = document.querySelector('.design-upload-input');
-    if (fileInput && fileInput.files.length > 0) {
+    // Check if we have a design uploaded in the Shopify form
+    const shopifyFileInput = document.querySelector('input[name="properties[Uploaded Design]"]');
+    if (shopifyFileInput && shopifyFileInput.files.length > 0) {
       // Create a temporary form data with the file
       const formData = new FormData(productForm);
-      
-      // Add the file to the form data
-      formData.append('properties[Uploaded Design]', fileInput.files[0]);
       
       // Add to cart via AJAX
       fetch('/cart/add.js', {
