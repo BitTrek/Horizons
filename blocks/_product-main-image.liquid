@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const canvasWidth = fabricCanvas.getWidth();
         const canvasHeight = fabricCanvas.getHeight();
         
-        // Scale design to fit nicely on the product
+        // Scale design to fit nicely on the product (similar to logo)
         const scale = Math.min(canvasWidth * 0.4 / img.width, canvasHeight * 0.4 / img.height);
         img.scale(scale);
         
@@ -323,6 +323,8 @@ document.addEventListener('DOMContentLoaded', function() {
         addRemoveButton(img);
         
         fabricCanvas.add(img);
+        // Make handles visible immediately
+        fabricCanvas.setActiveObject(img);
         fabricCanvas.renderAll();
         
         // Hide the upload button
