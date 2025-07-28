@@ -191,10 +191,16 @@
                     <dd><a href="{{ property.last }}" download="uploaded-design.png" class="download-design-link">Uploaded Design</a></dd>
                   {%- elsif property.first == 'Design Thumbnail' or property.first contains 'Design Thumbnail' -%}
                     <dd>
-                      <div class="design-thumbnail-container">
-                        <img src="{{ property.last }}" alt="Design Preview" class="design-thumbnail" style="max-width: 100px; max-height: 75px; border: 1px solid #ddd; border-radius: 4px;">
-                        <div class="design-thumbnail-label">Design Preview</div>
-                      </div>
+                      {%- if property.last contains 'data:' -%}
+                        <!-- Data URL thumbnail -->
+                        <div class="design-thumbnail-container">
+                          <img src="{{ property.last }}" alt="Design Preview" class="design-thumbnail" style="max-width: 100px; max-height: 75px; border: 1px solid #ddd; border-radius: 4px;">
+                          <div class="design-thumbnail-label">Design Preview</div>
+                        </div>
+                      {%- else -%}
+                        <!-- File URL thumbnail -->
+                        <a href="{{ property.last }}" download="design-thumbnail.png" class="download-design-link">Download Thumbnail</a>
+                      {%- endif -%}
                     </dd>
                   {%- elsif property.first == 'Design Screenshot' or property.first contains 'Design Screenshot' -%}
                     <dd>

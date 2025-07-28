@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">22</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">23</span></div>
         </div>
       </div>
       
@@ -435,10 +435,11 @@ document.addEventListener('DOMContentLoaded', function() {
         generateThumbnail();
         
         // Also generate full screenshot for download
-        const fullScreenshot = generateFullScreenshot();
-        if (fullScreenshot) {
-          window.designScreenshot = fullScreenshot;
-        }
+        generateFullScreenshot().then(function(screenshotFile) {
+          if (screenshotFile) {
+            window.designScreenshotFile = screenshotFile;
+          }
+        });
       });
     };
     
@@ -479,13 +480,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     ctx.restore();
     
-    // Convert to PNG for better quality and transparency
-    const thumbnailDataUrl = thumbnailCanvas.toDataURL('image/png');
-    
-    // Store thumbnail globally
-    window.designThumbnail = thumbnailDataUrl;
-    
-    console.log('Thumbnail generated, size:', thumbnailDataUrl.length, 'characters');
+    // Convert to blob and then to file
+    thumbnailCanvas.toBlob(function(blob) {
+      const thumbnailFile = new File([blob], 'design-thumbnail.png', { type: 'image/png' });
+      window.designThumbnailFile = thumbnailFile;
+      console.log('Thumbnail file created:', thumbnailFile.name, 'Size:', thumbnailFile.size, 'bytes');
+    }, 'image/png');
   }
 
   // Generate full-size PNG screenshot
@@ -506,11 +506,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const fabricCanvasElement = fabricCanvas.getElement();
     ctx.drawImage(fabricCanvasElement, 0, 0);
     
-    // Convert to PNG
-    const screenshotDataUrl = screenshotCanvas.toDataURL('image/png');
-    
-    console.log('Full screenshot generated, size:', screenshotDataUrl.length, 'characters');
-    return screenshotDataUrl;
+    // Convert to blob and then to file
+    return new Promise((resolve) => {
+      screenshotCanvas.toBlob(function(blob) {
+        const screenshotFile = new File([blob], 'design-screenshot.png', { type: 'image/png' });
+        console.log('Full screenshot file created:', screenshotFile.name, 'Size:', screenshotFile.size, 'bytes');
+        resolve(screenshotFile);
+      }, 'image/png');
+    });
   }
 
   // Add X button to remove design
