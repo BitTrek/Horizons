@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">24</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">25</span></div>
         </div>
       </div>
       
@@ -443,6 +443,16 @@ document.addEventListener('DOMContentLoaded', function() {
   function generateThumbnail() {
     if (!fabricCanvas) return;
     
+    // Temporarily hide all handles and controls
+    const activeObject = fabricCanvas.getActiveObject();
+    if (activeObject) {
+      activeObject.hasControls = false;
+      activeObject.hasBorders = false;
+    }
+    
+    // Render canvas without handles
+    fabricCanvas.renderAll();
+    
     // Create a temporary canvas for thumbnail
     const thumbnailCanvas = document.createElement('canvas');
     const thumbnailWidth = 400;
@@ -472,6 +482,13 @@ document.addEventListener('DOMContentLoaded', function() {
     ctx.drawImage(fabricCanvasElement, 0, 0);
     
     ctx.restore();
+    
+    // Restore handles and controls
+    if (activeObject) {
+      activeObject.hasControls = true;
+      activeObject.hasBorders = true;
+    }
+    fabricCanvas.renderAll();
     
     // Convert to blob and then to file
     thumbnailCanvas.toBlob(function(blob) {
