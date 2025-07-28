@@ -67,17 +67,7 @@
           class="product-form-buttons spacing-style{% if block.settings.stacking %} product-form-buttons--stacked{% endif %}"
           style="{% render 'spacing-style', settings: block.settings %}"
         >
-          <!-- File Upload Field -->
-          <div class="file-upload-field">
-            <input 
-              type="file" 
-              id="file-upload-{{ block.id }}"
-              name="properties[Uploaded Design]" 
-              accept="image/*"
-              class="file-upload-input"
-              style="position: absolute; left: -9999px; opacity: 0;"
-            >
-          </div>
+
 
           {% content_for 'block', type: 'quantity', id: 'quantity' %}
 

@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">15</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">16</span></div>
         </div>
       </div>
       
@@ -251,87 +251,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (!uploadButton || !fileInput) return;
 
-    // Handle upload button click - trigger the Shopify form file input
+    // Handle upload button click - trigger the local file input
     uploadButton.addEventListener('click', function() {
-      // Try to find file input in main form first, then accelerated checkout form
-      const shopifyFileInput = document.querySelector('input[name="properties[Uploaded Design]"]');
-      if (shopifyFileInput) {
-        shopifyFileInput.click();
-      } else {
-        // Fallback to local file input if Shopify input doesn't exist
-        fileInput.click();
-      }
-    });
-
-    // Listen for changes on all Shopify form file inputs (main form and accelerated checkout)
-    const shopifyFileInputs = document.querySelectorAll('input[name="properties[Uploaded Design]"]');
-    shopifyFileInputs.forEach(function(input) {
-      input.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-          handleFileUpload(file);
-          
-          // Ensure the file is properly attached to all forms
-          const allFileInputs = document.querySelectorAll('input[name="properties[Uploaded Design]"]');
-          allFileInputs.forEach(function(formInput) {
-            if (formInput !== input) {
-              // Create a new FileList-like object and assign it
-              const dataTransfer = new DataTransfer();
-              dataTransfer.items.add(file);
-              formInput.files = dataTransfer.files;
-            }
-          });
-        }
-      });
-    });
-
-    // Intercept form submissions to ensure file is included
-    const forms = document.querySelectorAll('form[data-type="add-to-cart-form"]');
-    forms.forEach(function(form) {
-      form.addEventListener('submit', function(e) {
-        // Check if we have a file to upload
-        const fileInput = form.querySelector('input[name="properties[Uploaded Design]"]');
-        if (fileInput && fileInput.files.length === 0) {
-          // Try to get file from other inputs
-          const otherFileInputs = document.querySelectorAll('input[name="properties[Uploaded Design]"]');
-          for (let otherInput of otherFileInputs) {
-            if (otherInput.files.length > 0) {
-              const dataTransfer = new DataTransfer();
-              dataTransfer.items.add(otherInput.files[0]);
-              fileInput.files = dataTransfer.files;
-              break;
-            }
-          }
-        }
-        
-        // If we have a file, force traditional form submission
-        if (fileInput && fileInput.files.length > 0) {
-          console.log('File found in form submission:', fileInput.files[0].name);
-          
-          // Prevent the AJAX submission and let the form submit normally
-          e.stopImmediatePropagation();
-          e.preventDefault();
-          
-          // Remove the product-form-component event listener
-          const productFormComponent = form.closest('product-form-component');
-          if (productFormComponent) {
-            const originalSubmit = productFormComponent.handleSubmit;
-            productFormComponent.handleSubmit = function(e) {
-              // Allow normal form submission for file uploads
-              return true;
-            };
-            
-            // Submit the form normally
-            setTimeout(() => {
-              form.submit();
-              // Restore the original handler
-              productFormComponent.handleSubmit = originalSubmit;
-            }, 10);
-          }
-        } else {
-          console.log('No file found in form submission');
-        }
-      });
+      fileInput.click();
     });
 
     // Keep the local file input as fallback
