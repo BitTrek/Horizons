@@ -29,9 +29,12 @@
   {% endunless %}
 >
   {% if product != blank %}
-    {%- form 'product', product -%}
-      {{ form | payment_button }}
-    {%- endform -%}
+    <!-- Original Buy it now button hidden -->
+    <div style="display: none;">
+      {%- form 'product', product -%}
+        {{ form | payment_button }}
+      {%- endform -%}
+    </div>
     
     <!-- Custom Buy Now button that adds to cart first -->
     <button 
