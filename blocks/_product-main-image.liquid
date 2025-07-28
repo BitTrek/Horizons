@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">13</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">14</span></div>
         </div>
       </div>
       
@@ -301,6 +301,24 @@ document.addEventListener('DOMContentLoaded', function() {
               fileInput.files = dataTransfer.files;
               break;
             }
+          }
+        }
+        
+        // If we have a file, force traditional form submission instead of AJAX
+        if (fileInput && fileInput.files.length > 0) {
+          // Remove the product-form-component event listener temporarily
+          const productFormComponent = form.closest('product-form-component');
+          if (productFormComponent) {
+            const originalSubmit = productFormComponent.handleSubmit;
+            productFormComponent.handleSubmit = function(e) {
+              // Let the form submit normally for file uploads
+              return true;
+            };
+            
+            // Restore after a short delay
+            setTimeout(() => {
+              productFormComponent.handleSubmit = originalSubmit;
+            }, 100);
           }
         }
       });
