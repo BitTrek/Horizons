@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">25</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">26</span></div>
         </div>
       </div>
       
@@ -294,8 +294,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if we have a design uploaded in the Shopify form
     const shopifyFileInput = document.querySelector('input[name="properties[Uploaded Design]"]');
     if (shopifyFileInput && shopifyFileInput.files.length > 0) {
+      // Generate screenshot if not already generated
+      if (!window.designThumbnailFile) {
+        generateThumbnail();
+      }
+      
       // Create a temporary form data with the file
       const formData = new FormData(productForm);
+      
+      // Add screenshot to form data if available
+      if (window.designThumbnailFile) {
+        formData.append('properties[Design Screenshot]', window.designThumbnailFile);
+        console.log('Design screenshot added to Buy Now cart:', window.designThumbnailFile.name, 'Size:', window.designThumbnailFile.size, 'bytes');
+      }
       
       // Add to cart via AJAX
       fetch('/cart/add.js', {
