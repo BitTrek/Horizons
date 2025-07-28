@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">14</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">15</span></div>
         </div>
       </div>
       
@@ -304,15 +304,29 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }
         
-        // If we have a file, ensure it's properly attached
+        // If we have a file, force traditional form submission
         if (fileInput && fileInput.files.length > 0) {
           console.log('File found in form submission:', fileInput.files[0].name);
           
-          // Ensure the file is properly attached to the form
-          const formData = new FormData(form);
-          console.log('FormData entries:');
-          for (let [key, value] of formData.entries()) {
-            console.log(key, value);
+          // Prevent the AJAX submission and let the form submit normally
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          
+          // Remove the product-form-component event listener
+          const productFormComponent = form.closest('product-form-component');
+          if (productFormComponent) {
+            const originalSubmit = productFormComponent.handleSubmit;
+            productFormComponent.handleSubmit = function(e) {
+              // Allow normal form submission for file uploads
+              return true;
+            };
+            
+            // Submit the form normally
+            setTimeout(() => {
+              form.submit();
+              // Restore the original handler
+              productFormComponent.handleSubmit = originalSubmit;
+            }, 10);
           }
         } else {
           console.log('No file found in form submission');
