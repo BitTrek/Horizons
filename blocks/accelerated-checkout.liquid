@@ -32,6 +32,16 @@
     {%- form 'product', product -%}
       {{ form | payment_button }}
     {%- endform -%}
+    
+    <!-- Custom Buy Now button that adds to cart first -->
+    <button 
+      type="button" 
+      class="button button--primary custom-buy-now-button"
+      onclick="handleCustomBuyNow()"
+      style="width: 100%; margin-top: 10px;"
+    >
+      Buy Now (Fast Track)
+    </button>
   {% endif %}
 </div>
 
