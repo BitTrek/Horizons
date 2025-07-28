@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">26</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">27</span></div>
         </div>
       </div>
       
@@ -211,7 +211,17 @@ document.addEventListener('DOMContentLoaded', function() {
           });
           
           // Set as background image instead of object
-          fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas), {
+          fabricCanvas.setBackgroundImage(img, function() {
+            fabricCanvas.renderAll();
+            
+            // Regenerate screenshot after background update if design exists
+            if (uploadedDesign) {
+              console.log('Regenerating screenshot after color change');
+              setTimeout(() => {
+                generateThumbnail();
+              }, 200); // Small delay to ensure rendering is complete
+            }
+          }, {
             crossOrigin: 'anonymous'
           });
           
@@ -233,6 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (typeof fabric !== 'undefined') {
     initFabricCanvas();
     setupFileUpload();
+    setupVariantChangeListener();
   } else {
     // Wait for Fabric.js to load
     const checkFabric = setInterval(() => {
@@ -240,6 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
         clearInterval(checkFabric);
         initFabricCanvas();
         setupFileUpload();
+        setupVariantChangeListener();
       }
     }, 100);
   }
@@ -280,6 +292,42 @@ document.addEventListener('DOMContentLoaded', function() {
         handleFileUpload(file);
       }
     });
+  }
+
+  // Setup variant change listener
+  function setupVariantChangeListener() {
+    // Listen for variant changes using MutationObserver
+    const variantInput = document.querySelector('input[name="id"]');
+    if (variantInput) {
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+            const newVariantId = variantInput.value;
+            console.log('Variant changed to:', newVariantId);
+            
+            // Update product image with new variant
+            updateProductImage(newVariantId);
+          }
+        });
+      });
+      
+      observer.observe(variantInput, {
+        attributes: true,
+        attributeFilter: ['value']
+      });
+      
+      console.log('Variant change listener set up');
+    } else {
+      console.log('Variant input not found, trying alternative method');
+      
+      // Alternative: Listen for custom variant change events
+      document.addEventListener('variant:update', function(event) {
+        if (event.detail && event.detail.variant) {
+          console.log('Variant update event received:', event.detail.variant);
+          updateProductImage(event.detail.variant.id);
+        }
+      });
+    }
   }
 
   // Custom Buy Now function that adds to cart first, then redirects to checkout
