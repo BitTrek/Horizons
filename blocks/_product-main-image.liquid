@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-          <div class="upload-design-text">Add your design here <span class="upload-design-number">2</span></div>
+          <div class="upload-design-text">Add your design here <span class="upload-design-number">3</span></div>
         </div>
       </div>
       
@@ -262,47 +262,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (file) {
         handleFileUpload(file);
       }
-    });
-
-    // --- Pinch-to-zoom for mobile ---
-    let pinchStartDistance = null;
-    let pinchStartScale = null;
-    let pinchObject = null;
-
-    fabricCanvas.on('touch:gesture', function(opt) {
-      if (!uploadedDesign) return;
-      const activeObj = fabricCanvas.getActiveObject();
-      if (!activeObj) return;
-      if (opt.e.touches && opt.e.touches.length === 2) {
-        const touch1 = opt.e.touches[0];
-        const touch2 = opt.e.touches[1];
-        const dx = touch2.clientX - touch1.clientX;
-        const dy = touch2.clientY - touch1.clientY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (pinchStartDistance === null) {
-          pinchStartDistance = distance;
-          pinchStartScale = activeObj.scaleX;
-          pinchObject = activeObj;
-        } else {
-          const scale = pinchStartScale * (distance / pinchStartDistance);
-          pinchObject.scaleX = scale;
-          pinchObject.scaleY = scale;
-          fabricCanvas.requestRenderAll();
-        }
-      }
-    });
-    fabricCanvas.on('touch:drag', function(opt) {
-      // Prevent scrolling while dragging
-      if (opt.e.touches && opt.e.touches.length === 2) {
-        opt.e.preventDefault();
-      }
-    });
-    fabricCanvas.on('touch:orientation', function() {});
-    fabricCanvas.on('touch:longpress', function() {});
-    fabricCanvas.on('touch:up', function(opt) {
-      pinchStartDistance = null;
-      pinchStartScale = null;
-      pinchObject = null;
     });
   }
 
