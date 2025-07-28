@@ -171,14 +171,8 @@ class ProductFormComponent extends Component {
 
     // Add design thumbnail file if available
     if (window.designThumbnailFile) {
-      formData.append('properties[Design Thumbnail]', window.designThumbnailFile);
-      console.log('Design thumbnail file added to cart:', window.designThumbnailFile.name, 'Size:', window.designThumbnailFile.size, 'bytes');
-    }
-
-    // Add full screenshot file if available
-    if (window.designScreenshotFile) {
-      formData.append('properties[Design Screenshot]', window.designScreenshotFile);
-      console.log('Design screenshot file added to cart:', window.designScreenshotFile.name, 'Size:', window.designScreenshotFile.size, 'bytes');
+      formData.append('properties[Design Screenshot]', window.designThumbnailFile);
+      console.log('Design screenshot file added to cart:', window.designThumbnailFile.name, 'Size:', window.designThumbnailFile.size, 'bytes');
     }
 
     const cartItemsComponents = document.querySelectorAll('cart-items-component');

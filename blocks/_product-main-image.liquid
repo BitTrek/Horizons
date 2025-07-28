@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">23</span></div>
+                            <div class="upload-design-text">Add your design here <span class="upload-design-number">24</span></div>
         </div>
       </div>
       
@@ -433,13 +433,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Generate thumbnail for cart
         generateThumbnail();
-        
-        // Also generate full screenshot for download
-        generateFullScreenshot().then(function(screenshotFile) {
-          if (screenshotFile) {
-            window.designScreenshotFile = screenshotFile;
-          }
-        });
       });
     };
     
@@ -488,33 +481,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 'image/png');
   }
 
-  // Generate full-size PNG screenshot
-  function generateFullScreenshot() {
-    if (!fabricCanvas) return null;
-    
-    // Create a temporary canvas for full screenshot
-    const screenshotCanvas = document.createElement('canvas');
-    const canvasWidth = fabricCanvas.getWidth();
-    const canvasHeight = fabricCanvas.getHeight();
-    
-    screenshotCanvas.width = canvasWidth;
-    screenshotCanvas.height = canvasHeight;
-    
-    const ctx = screenshotCanvas.getContext('2d');
-    
-    // Draw the fabric canvas content to screenshot
-    const fabricCanvasElement = fabricCanvas.getElement();
-    ctx.drawImage(fabricCanvasElement, 0, 0);
-    
-    // Convert to blob and then to file
-    return new Promise((resolve) => {
-      screenshotCanvas.toBlob(function(blob) {
-        const screenshotFile = new File([blob], 'design-screenshot.png', { type: 'image/png' });
-        console.log('Full screenshot file created:', screenshotFile.name, 'Size:', screenshotFile.size, 'bytes');
-        resolve(screenshotFile);
-      }, 'image/png');
-    });
-  }
+
 
   // Add X button to remove design
   function addRemoveButton(designObject) {
