@@ -12,13 +12,6 @@
     "main": {
               "type": "product-information",
         "blocks": {
-          "mockup-builder": {
-            "type": "_product-main-image",
-            "settings": {
-              "border_radius": 8
-            },
-            "blocks": {}
-          },
           "media-gallery": {
           "type": "_product-media-gallery",
           "static": true,
@@ -271,12 +264,8 @@
         "color_scheme": "",
         "padding-block-start": 0,
         "padding-block-end": 0
-      },
-      "block_order": [
-        "mockup-builder",
-        "media-gallery",
-        "product-details"
-      ]
+      }
+
     },
     "product_recommendations_qggXJq": {
       "type": "product-recommendations",
