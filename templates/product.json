@@ -10,9 +10,16 @@
 {
   "sections": {
     "main": {
-      "type": "product-information",
-      "blocks": {
-        "media-gallery": {
+              "type": "product-information",
+        "blocks": {
+          "mockup-builder": {
+            "type": "_product-main-image",
+            "settings": {
+              "border_radius": 8
+            },
+            "blocks": {}
+          },
+          "media-gallery": {
           "type": "_product-media-gallery",
           "static": true,
           "settings": {
@@ -218,14 +225,7 @@
               },
               "block_order": []
             },
-            "product_main_image_block": {
-              "type": "_product-main-image",
-              "name": "Product Main Image",
-              "settings": {
-                "border_radius": 8
-              },
-              "blocks": {}
-            },
+
             "text_aEtTtq": {
               "type": "text",
               "name": "Product description",
@@ -256,7 +256,6 @@
           "block_order": [
             "group_icgrde",
             "divider_VJhene",
-            "product_main_image_block",
             "variant_picker_R3rGDr",
             "buy_buttons_eYQEYi",
             "text_aEtTtq"
@@ -272,7 +271,12 @@
         "color_scheme": "",
         "padding-block-start": 0,
         "padding-block-end": 0
-      }
+      },
+      "block_order": [
+        "mockup-builder",
+        "media-gallery",
+        "product-details"
+      ]
     },
     "product_recommendations_qggXJq": {
       "type": "product-recommendations",
