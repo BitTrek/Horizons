@@ -86,7 +86,12 @@
     {% endfor %}
   </div>
 
-  {% content_for 'blocks' %}
+  {% comment %} Render all blocks except mockup-builder since it's handled in the media section {% endcomment %}
+  {% for block in section.blocks %}
+    {% unless block.type == '_product-main-image' %}
+      {% render block %}
+    {% endunless %}
+  {% endfor %}
 </div>
 
 {% stylesheet %}
