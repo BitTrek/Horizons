@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-                            <div class="upload-design-text">Add your design here <span class="upload-design-number">29</span></div>
+          <div class="upload-design-text">Add your design here <span class="upload-design-number">29</span></div>
         </div>
       </div>
       
@@ -78,6 +78,19 @@ document.addEventListener('DOMContentLoaded', function() {
   let fabricCanvas = null;
   let euroHoodieLogo = null;
   let uploadedDesign = null;
+  let isMobile = window.innerWidth < 750;
+
+  // Get responsive canvas dimensions
+  function getCanvasDimensions() {
+    const container = productMainImage.querySelector('.product-main-image-container');
+    const containerWidth = container.offsetWidth;
+    
+    // Mobile: use container width, Desktop: max 600px
+    const canvasWidth = isMobile ? containerWidth : Math.min(600, containerWidth);
+    const canvasHeight = canvasWidth; // Square aspect ratio
+    
+    return { width: canvasWidth, height: canvasHeight };
+  }
 
   // Initialize Fabric.js canvas
   function initFabricCanvas() {
@@ -85,11 +98,15 @@ document.addEventListener('DOMContentLoaded', function() {
       fabricCanvas.dispose();
     }
 
+    const dimensions = getCanvasDimensions();
+    
     fabricCanvas = new fabric.Canvas(canvasElement, {
-      width: 600,
-      height: 600,
+      width: dimensions.width,
+      height: dimensions.height,
       backgroundColor: 'transparent',
-      preserveObjectStacking: true
+      preserveObjectStacking: true,
+      enableRetinaScaling: true,
+      selection: false
     });
 
     // Set canvas background to transparent
@@ -482,10 +499,12 @@ document.addEventListener('DOMContentLoaded', function() {
           selectable: true,
           hasControls: true,
           hasBorders: true,
-          cornerSize: 10,
+          cornerSize: isMobile ? 15 : 10, // Larger corners on mobile
           transparentCorners: false,
           cornerColor: '#007bff',
-          borderColor: '#007bff'
+          borderColor: '#007bff',
+          cornerStrokeColor: '#fff',
+          cornerStyle: 'circle'
         });
 
         // Only show corners, rotate, and custom X handle
@@ -507,7 +526,7 @@ document.addEventListener('DOMContentLoaded', function() {
         img.controls.removeX = new fabric.Control({
           x: 0,
           y: 0.5,
-          offsetY: 28,
+          offsetY: isMobile ? 35 : 28, // Larger offset on mobile
           cursorStyle: 'pointer',
           mouseUpHandler: function(eventData, transform) {
             removeDesign();
@@ -516,10 +535,11 @@ document.addEventListener('DOMContentLoaded', function() {
           render: function(ctx, left, top, styleOverride, fabricObject) {
             ctx.save();
             ctx.beginPath();
-            ctx.arc(left, top, 16, 0, 2 * Math.PI, false);
+            const radius = isMobile ? 20 : 16; // Larger button on mobile
+            ctx.arc(left, top, radius, 0, 2 * Math.PI, false);
             ctx.fillStyle = '#007bff'; // Blue color
             ctx.fill();
-            ctx.font = 'bold 18px Arial';
+            ctx.font = isMobile ? 'bold 22px Arial' : 'bold 18px Arial'; // Larger font on mobile
             ctx.fillStyle = '#fff';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -608,16 +628,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 'image/png');
   }
 
-
-
   // Add X button to remove design
   function addRemoveButton(designObject) {
     // Create X button text
     const xButton = new fabric.Text('✕', {
-      fontSize: 20,
+      fontSize: isMobile ? 24 : 20, // Larger font on mobile
       fill: '#ff0000',
       backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      padding: 8,
+      padding: isMobile ? 12 : 8, // Larger padding on mobile
       borderRadius: 50,
       selectable: false,
       hasControls: false,
@@ -628,8 +646,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Position X button at top-right corner of design
     xButton.set({
-      left: designObject.left + designObject.width * designObject.scaleX - 15,
-      top: designObject.top - 15
+      left: designObject.left + designObject.width * designObject.scaleX - (isMobile ? 20 : 15),
+      top: designObject.top - (isMobile ? 20 : 15)
     });
 
     // Add click event to X button
@@ -665,6 +683,24 @@ document.addEventListener('DOMContentLoaded', function() {
     fabricCanvas.renderAll();
     console.log('Design removed, upload button restored');
   }
+
+  // Handle window resize for responsive canvas
+  window.addEventListener('resize', function() {
+    const wasMobile = isMobile;
+    isMobile = window.innerWidth < 750;
+    
+    // Only reinitialize if mobile state changed or significant resize
+    if (wasMobile !== isMobile || Math.abs(window.innerWidth - fabricCanvas.getWidth()) > 50) {
+      console.log('Window resized, reinitializing canvas');
+      setTimeout(() => {
+        initFabricCanvas();
+        // Restore uploaded design if it exists
+        if (uploadedDesign) {
+          handleFileUpload(window.uploadedDesignFile);
+        }
+      }, 100);
+    }
+  });
 
   // Listen for variant changes
   document.addEventListener('variant:update', function(event) {
@@ -841,11 +877,67 @@ document.addEventListener('DOMContentLoaded', function() {
     .product-main-image--placeholder {
       min-height: 200px;
     }
+
+    /* Mobile-specific upload button */
+    .upload-design-circle {
+      width: 180px;
+      height: 180px;
+    }
+
+    .upload-design-icon {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+    }
+
+    .upload-design-text {
+      font-size: 1rem;
+      max-width: 120px;
+    }
+
+    /* Improve touch targets */
+    .product-main-canvas {
+      cursor: pointer;
+    }
+
+    /* Larger touch areas for Fabric.js controls */
+    .product-main-canvas .canvas-container {
+      touch-action: manipulation;
+    }
+  }
+
+  /* Extra small mobile devices */
+  @media screen and (max-width: 480px) {
+    .upload-design-circle {
+      width: 150px;
+      height: 150px;
+    }
+
+    .upload-design-icon {
+      font-size: 2rem;
+      margin-bottom: 6px;
+    }
+
+    .upload-design-text {
+      font-size: 0.9rem;
+      max-width: 100px;
+    }
   }
 
   /* Loading state */
   .product-main-image--loading {
     opacity: 0.7;
+  }
+
+  /* Touch-friendly improvements */
+  @media (hover: none) and (pointer: coarse) {
+    .upload-design-button:hover {
+      transform: translate(-50%, -50%) scale(1);
+    }
+    
+    .upload-design-button:hover .upload-design-circle {
+      background: rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
   }
 {% endstylesheet %}
 
