@@ -105,15 +105,57 @@
                   role="cell"
                   headers="productImage"
                 >
-                  {% if item.image -%}
+                  {%- comment -%} Check if we have a mockup to display instead of product image {%- endcomment -%}
+                  {%- assign has_mockup = false -%}
+                  {%- assign mockup_url = '' -%}
+                  {%- for property in item.properties -%}
+                    {%- if property.first == 'Download Mockup' or property.first contains 'Download Mockup' -%}
+                      {%- if property.last != blank -%}
+                        {%- assign has_mockup = true -%}
+                        {%- assign mockup_url = property.last -%}
+                        {%- break -%}
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+
+                  {%- if has_mockup and mockup_url != blank -%}
+                    {%- comment -%} Display mockup instead of product image {%- endcomment -%}
                     {% liquid
                       assign ratio = 1
-                      assign border_opacity = settings.cart_thumbnail_border_opacity | divided_by: 100.0
-                      assign border_override = '--border-width: [cart_thumbnail_border_width]px; --border-style: [cart_thumbnail_border_style]; --border-color: rgb(var(--color-border-rgb) / [cart_thumbnail_border_opacity]); --border-radius: [cart_thumbnail_border_radius]px;' | replace: '[cart_thumbnail_border_width]', settings.cart_thumbnail_border_width | replace: '[cart_thumbnail_border_style]', settings.cart_thumbnail_border | replace: '[cart_thumbnail_border_opacity]', border_opacity | replace: '[cart_thumbnail_border_radius]', settings.cart_thumbnail_border_radius
-
-                      if settings.cart_thumbnail_border_radius > 0
-                        assign border_override = border_override | append: ' overflow: hidden;'
+                      if block.settings.image_ratio == 'portrait'
+                        assign ratio = 0.8
+                      elsif block.settings.image_ratio == 'adapt'
+                        assign ratio = 1
                       endif
+                    %}
+                    <div
+                      class="cart-items__media-container cart-items__mockup-container"
+                      style="--ratio:{{ ratio }};"
+                    >
+                      {%- if mockup_url contains 'data:' -%}
+                        <!-- Data URL mockup -->
+                        <img 
+                          src="{{ mockup_url }}" 
+                          alt="Design Mockup for {{ item.product.title }}" 
+                          class="cart-items__media-image cart-items__mockup-image" 
+                          style="object-fit: cover; background: #f8f8f8;"
+                          loading="lazy"
+                        >
+                      {%- else -%}
+                        <!-- File URL mockup -->
+                        <img 
+                          src="{{ mockup_url }}" 
+                          alt="Design Mockup for {{ item.product.title }}" 
+                          class="cart-items__media-image cart-items__mockup-image" 
+                          style="object-fit: cover; background: #f8f8f8;"
+                          loading="lazy"
+                        >
+                      {%- endif -%}
+                    </div>
+                  {%- elsif item.image -%}
+                    {%- comment -%} Fallback to original product image {%- endcomment -%}
+                    {% liquid
+                      assign ratio = 1
                       if block.settings.image_ratio == 'portrait'
                         assign ratio = 0.8
                       elsif block.settings.image_ratio == 'adapt'
@@ -126,10 +168,10 @@
                       style="--ratio:{{ ratio }};"
                     >
                       {%- liquid
-                        echo item.image | image_url: width: 250 | image_tag: class: 'cart-items__media-image border-style', style: border_override
+                        echo item.image | image_url: width: 250 | image_tag: class: 'cart-items__media-image'
                       -%}
                     </a>
-                  {%- endif %}
+                  {%- endif -%}
                 </td>
                 <td
                   class="cart-items__details cart-primary-typography"
@@ -774,5 +816,32 @@
 
   .download-design-link:hover {
     color: #0056b3;
+  }
+
+  /* Mockup display styles */
+  .cart-items__mockup-container {
+    position: relative;
+    border: 2px solid var(--color-border);
+    border-radius: var(--style-border-radius);
+    overflow: hidden;
+  }
+
+  .cart-items__mockup-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: linear-gradient(135deg, #f8f8f8 0%, #f0f0f0 100%);
+    transition: transform var(--animation-speed) ease;
+  }
+
+  .cart-items__mockup-container:hover .cart-items__mockup-image {
+    transform: scale(1.05);
+  }
+
+  /* Ensure mockup images fill the full container */
+  .cart-items__mockup-container .cart-items__media-image {
+    aspect-ratio: inherit;
+    object-fit: cover;
+    object-position: center center;
   }
 {% endstylesheet %}
