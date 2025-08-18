@@ -80,6 +80,18 @@ document.addEventListener('DOMContentLoaded', function() {
   let uploadedDesign = null;
   let isMobile = window.innerWidth < 750;
 
+  // Debounce for thumbnail regeneration
+  function debounce(fn, wait) {
+      let t;
+      return function(...args) {
+          clearTimeout(t);
+          t = setTimeout(() => fn.apply(null, args), wait);
+      };
+  }
+
+  // Debounced thumbnail generator
+  const generateThumbnailDebounced = debounce(() => generateThumbnail(), 200);
+
   // Get responsive canvas dimensions
   function getCanvasDimensions() {
     const container = productMainImage.querySelector('.product-main-image-container');
@@ -536,6 +548,20 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.save();
             ctx.beginPath();
             const radius = isMobile ? 20 : 16; // Larger button on mobile
+
+            // Updates thumbnail on the mockup changes
+            if (fabricCanvas && uploadedDesign) {
+              const schedule = () => generateThumbnailDebounced();
+              uploadedDesign.on('modified', schedule);
+              uploadedDesign.on('scaled', schedule);
+              uploadedDesign.on('rotating', schedule);
+              uploadedDesign.on('skewing', schedule);
+              uploadedDesign.on('moving', schedule);
+              fabricCanvas.on('mouse:up', schedule);
+              fabricCanvas.on('selection:updated', schedule);
+              fabricCanvas.on('selection:created', schedule);
+            }
+
             ctx.arc(left, top, radius, 0, 2 * Math.PI, false);
             ctx.fillStyle = '#007bff'; // Blue color
             ctx.fill();
@@ -592,27 +618,20 @@ document.addEventListener('DOMContentLoaded', function() {
     thumbnailCanvas.height = thumbnailHeight;
     
     const ctx = thumbnailCanvas.getContext('2d');
-    
-    // Scale the fabric canvas to fit thumbnail
-    const scaleX = thumbnailWidth / fabricCanvas.getWidth();
-    const scaleY = thumbnailHeight / fabricCanvas.getHeight();
-    const scale = Math.min(scaleX, scaleY);
-    
-    // Calculate centering offset
-    const offsetX = (thumbnailWidth - fabricCanvas.getWidth() * scale) / 2;
-    const offsetY = (thumbnailHeight - fabricCanvas.getHeight() * scale) / 2;
-    
-    // Draw the fabric canvas content to thumbnail
-    ctx.save();
-    ctx.translate(offsetX, offsetY);
-    ctx.scale(scale, scale);
-    
-    // Get the fabric canvas as image data
-    const fabricCanvasElement = fabricCanvas.getElement();
-    ctx.drawImage(fabricCanvasElement, 0, 0);
-    
-    ctx.restore();
-    
+
+    // Resolves issue with thumbnail image not being full
+    const srcCanvas = fabricCanvas.getElement(),
+      srcW = srcCanvas.width,
+      srcH = srcCanvas.height,
+      scale = Math.min(thumbnailWidth / srcW, thumbnailHeight / srcH),
+      drawW = Math.floor(srcW * scale),
+      drawH = Math.floor(srcH * scale),
+      offsetX = Math.floor((thumbnailWidth - drawW) / 2),
+      offsetY = Math.floor((thumbnailHeight - drawH) / 2);
+
+    ctx.clearRect(0, 0, thumbnailWidth, thumbnailHeight);
+    ctx.drawImage(srcCanvas, 0, 0, srcW, srcH, offsetX, offsetY, drawW, drawH);
+
     // Restore handles and controls
     if (activeObject) {
       activeObject.hasControls = true;
