@@ -43,7 +43,9 @@
       <!-- Upload Button -->
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
-          <div class="upload-design-icon">🎨✨</div>
+          <div class="upload-design-icon">
+            {{ 'icon-plus.svg' | inline_asset_content }}
+          </div>
           <div class="upload-design-text">Add your design here</div>
         </div>
       </div>
@@ -847,6 +849,15 @@ document.addEventListener('DOMContentLoaded', function() {
   .upload-design-icon {
     font-size: 3rem;
     margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .upload-design-icon svg {
+    width: 48px;
+    height: 48px;
+    fill: #0a84ff;
   }
 
   .upload-design-text {
