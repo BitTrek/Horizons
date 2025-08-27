@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">
-            {{ 'icon-plus.svg' | inline_asset_content }}
+            <img src="https://www.svgrepo.com/show/32398/spray.svg" alt="Upload Design" style="width: 48px; height: 48px;">
           </div>
           <div class="upload-design-text">Add your design here</div>
         </div>
@@ -854,10 +854,10 @@ document.addEventListener('DOMContentLoaded', function() {
     justify-content: center;
   }
 
-  .upload-design-icon svg {
+  .upload-design-icon img {
     width: 48px;
     height: 48px;
-    fill: #0a84ff;
+    filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(204deg) brightness(104%) contrast(97%);
   }
 
   .upload-design-text {
