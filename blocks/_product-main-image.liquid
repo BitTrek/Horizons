@@ -539,6 +539,8 @@ document.addEventListener('DOMContentLoaded', function() {
           x: 0,
           y: 0.5,
           offsetY: isMobile ? 35 : 28, // Larger offset on mobile
+          sizeX: isMobile ? 60 : 50, // Bigger hit area width
+          sizeY: isMobile ? 60 : 50, // Bigger hit area height
           cursorStyle: 'pointer',
           mouseUpHandler: function(eventData, transform) {
             removeDesign();
