@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-          <div class="upload-design-text">Add your design here <span class="upload-design-number">21</span></div>
+          <div class="upload-design-text">Add your design here <span class="upload-design-number">22</span></div>
         </div>
       </div>
       
@@ -514,8 +514,8 @@ document.addEventListener('DOMContentLoaded', function() {
           hasBorders: true,
           cornerSize: isMobile ? 15 : 10, // Larger corners on mobile
           transparentCorners: false,
-          cornerColor: '#ff6b35',
-          borderColor: '#ff6b35',
+          cornerColor: '#6f42c1',
+          borderColor: '#6f42c1',
           cornerStrokeColor: '#fff',
           cornerStyle: 'circle'
         });
@@ -566,7 +566,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             ctx.arc(left, top, radius, 0, 2 * Math.PI, false);
-            ctx.fillStyle = '#ff6b35'; // Blue color
+            ctx.fillStyle = '#6f42c1'; // Blue color
             ctx.fill();
             ctx.font = isMobile ? 'bold 22px Arial' : 'bold 18px Arial'; // Larger font on mobile
             ctx.fillStyle = '#fff';
