@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-          <div class="upload-design-text">Add your design here <span class="upload-design-number">8</span></div>
+          <div class="upload-design-text">Add your design here <span class="upload-design-number">9</span></div>
         </div>
       </div>
       
@@ -538,9 +538,9 @@ document.addEventListener('DOMContentLoaded', function() {
         img.controls.removeX = new fabric.Control({
           x: 0,
           y: 0.5,
-          offsetY: isMobile ? 35 : 28, // Larger offset on mobile
-          sizeX: isMobile ? 60 : 50, // Bigger hit area width
-          sizeY: isMobile ? 60 : 50, // Bigger hit area height
+          offsetY: isMobile ? 40 : 28, // Larger offset on mobile
+          sizeX: isMobile ? 60 : 45, // Bigger hit area width
+          sizeY: isMobile ? 60 : 45, // Bigger hit area height
           cursorStyle: 'pointer',
           mouseUpHandler: function(eventData, transform) {
             removeDesign();
