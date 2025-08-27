@@ -44,7 +44,7 @@
       <div class="upload-design-button" id="upload-design-button-{{ block.id }}">
         <div class="upload-design-circle">
           <div class="upload-design-icon">📁</div>
-          <div class="upload-design-text">Add your design here <span class="upload-design-number">14</span></div>
+          <div class="upload-design-text">Add your design here <span class="upload-design-number">12</span></div>
         </div>
       </div>
       
@@ -508,8 +508,7 @@ document.addEventListener('DOMContentLoaded', function() {
         img.set({
           left: (canvasWidth - img.width * scale) / 2,
           top: (canvasHeight - img.height * scale) / 2,
-          originX: 'center', // Scale from center
-          originY: 'center', // Scale from center
+          centeredScaling: true, // Scale from center
           selectable: true,
           hasControls: true,
           hasBorders: true,
