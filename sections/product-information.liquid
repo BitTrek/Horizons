@@ -361,6 +361,10 @@
   }
 {% endstylesheet %}
 
+{% if template.suffix == 'new-t-shirt-custom' %}
+  <script src="{{ 'printify-capture.js' | asset_url }}" defer></script>
+{% endif %}
+
 {% schema %}
 {
   "name": "t:names.product_information",
