@@ -1,3 +1,5 @@
+/* eslint-disable no-redeclare */
+
 /**
  * @fileoverview
  * - Using the 'QRCode for Javascript library'
@@ -1191,8 +1193,6 @@ var svgDrawer = (function () {
     var _htOption = this._htOption;
     var _el = this._el;
     var nCount = oQRCode.getModuleCount();
-    var nWidth = Math.floor(_htOption.width / nCount);
-    var nHeight = Math.floor(_htOption.height / nCount);
 
     this.clear();
 

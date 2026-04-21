@@ -9,6 +9,11 @@
 {% endcapture %}
 
 {% render 'product-card', children: children, product: product %}
+{% render 'buy-buttons-styles' %}
+{% render 'gift-card-recipient-form-styles' %}
+{% render 'quick-add-styles' %}
+{% render 'quick-add-modal-styles' %}
+{% render 'product-badges-styles' %}
 
 {% schema %}
 {
@@ -33,6 +38,9 @@
       "type": "review"
     },
     {
+      "type": "sku"
+    },
+    {
       "type": "swatches"
     },
     {
@@ -40,6 +48,12 @@
     },
     {
       "type": "product-title"
+    },
+    {
+      "type": "custom-liquid"
+    },
+    {
+      "type": "@app"
     }
   ],
   "tag": null,

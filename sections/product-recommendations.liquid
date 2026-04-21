@@ -25,6 +25,9 @@
   endcapture
 %}
 
+{% render 'quick-add-styles' %}
+{% render 'quick-add-modal-styles' %}
+{% render 'product-badges-styles' %}
 <product-recommendations
   id="product-recommendations-{{ section.id }}"
   class="product-recommendations"
@@ -34,6 +37,7 @@
   data-intent="{{ section.settings.recommendation_type }}"
   data-testid="product-recommendations-section"
   data-recommendations-performed="{{ recommendations.performed }}"
+  data-hydration-key="product-recommendations-{{ section.id }}"
   {{ section.shopify_attributes }}
 >
   <div class="section-background color-{{ section.settings.color_scheme }}"></div>
@@ -60,13 +64,11 @@
       {% liquid
         if section.settings.product == blank
           assign products = null
-          if request.design_mode or request.visual_preview_mode
-            # Onboarding mode: Show placeholder products
-            for i in (1..section.settings.max_products)
-              assign products = products | append: ', '
-              assign products = products | split: ','
-            endfor
-          endif
+          # Onboarding mode: Show placeholder products
+          for i in (1..section.settings.max_products)
+            assign products = products | append: ', '
+            assign products = products | split: ','
+          endfor
         elsif recommendations.performed and recommendations.products_count == 0
           # No recommendations found, pull from catalog
           if section.settings.recommendation_type == 'related'
@@ -169,25 +171,6 @@
     {%- endif -%}
   </div>
 </product-recommendations>
-
-{% stylesheet %}
-  .product-recommendations__skeleton-item {
-    aspect-ratio: 3 / 4;
-    background-color: var(--color-foreground);
-    opacity: var(--skeleton-opacity);
-    border-radius: 4px;
-  }
-
-  @media screen and (max-width: 749px) {
-    .product-recommendations__skeleton-item:nth-child(2n + 1) {
-      display: none;
-    }
-  }
-
-  product-recommendations:has([data-has-recommendations='false']) {
-    display: none;
-  }
-{% endstylesheet %}
 
 {% schema %}
 {
@@ -480,7 +463,8 @@
           "type": "text",
           "name": "t:names.header",
           "settings": {
-            "text": "<h3>Related products</h3>"
+            "text": "t:html_defaults.related_product",
+            "type_preset": "h3"
           }
         },
         "static-product-card": {
@@ -495,7 +479,7 @@
               "type": "_product-card-gallery",
               "name": "t:names.product_card_media",
               "settings": {
-                "image_ratio": "portrait",
+                "image_ratio": "adapt",
                 "border": "none",
                 "border_width": 1,
                 "border_opacity": 100,
@@ -513,7 +497,7 @@
                 "width": "fit-content",
                 "max_width": "normal",
                 "alignment": "left",
-                "type_preset": "rte",
+                "type_preset": "paragraph",
                 "font": "var(--font-body--family)",
                 "font_size": "1rem",
                 "line_height": "normal",

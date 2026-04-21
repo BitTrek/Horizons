@@ -17,7 +17,7 @@
           "settings": {
             "title": "Cart",
             "show_count": true,
-            "type_preset": "h3",
+            "type_preset": "h4",
             "alignment": "left",
             "padding-block-start": 0,
             "padding-block-end": 0,
@@ -108,7 +108,7 @@
                 "width": "fit-content",
                 "max_width": "normal",
                 "alignment": "left",
-                "type_preset": "rte",
+                "type_preset": "h4",
                 "font": "var(--font-body--family)",
                 "font_size": "",
                 "line_height": "normal",
@@ -168,7 +168,7 @@
               "type": "_product-card-gallery",
               "name": "t:names.product_card_media",
               "settings": {
-                "image_ratio": "portrait",
+                "image_ratio": "adapt",
                 "border": "none",
                 "border_width": 1,
                 "border_opacity": 100,
@@ -236,7 +236,7 @@
           ]
         }
       },
-      "name": "t:names.products_grid",
+      "name": "Featured collection",
       "settings": {
         "collection": "all",
         "layout_type": "grid",

@@ -1,41 +1,127 @@
-{%- liquid
-  assign primary_font_bold = settings.type_body_font | font_modify: 'weight', 'bold'
-  assign primary_font_italic = settings.type_body_font | font_modify: 'style', 'italic'
-  assign primary_font_bold_italic = primary_font_bold | font_modify: 'style', 'italic'
-
-  assign secondary_font_bold = settings.type_subheading_font | font_modify: 'weight', 'bold'
-  assign secondary_font_italic = settings.type_subheading_font | font_modify: 'style', 'italic'
-  assign secondary_font_bold_italic = secondary_font_bold | font_modify: 'style', 'italic'
-
-  assign tertiary_font_bold = settings.type_heading_font | font_modify: 'weight', 'bold'
-  assign tertiary_font_italic = settings.type_heading_font | font_modify: 'style', 'italic'
-  assign tertiary_font_bold_italic = tertiary_font_bold | font_modify: 'style', 'italic'
-
-  assign accent_font_bold = settings.type_accent_font | font_modify: 'weight', 'bold'
-  assign accent_font_italic = settings.type_accent_font | font_modify: 'style', 'italic'
-  assign accent_font_bold_italic = accent_font_bold | font_modify: 'style', 'italic'
-%}
-
 {% style %}
-  {{ settings.type_body_font | font_face: font_display: 'swap' }}
-  {{ primary_font_bold | font_face: font_display: 'swap' }}
-  {{ primary_font_italic | font_face: font_display: 'swap' }}
-  {{ primary_font_bold_italic | font_face: font_display: 'swap' }}
+  {%- liquid
+    assign rendered_fonts = ''
 
-  {{ settings.type_subheading_font | font_face: font_display: 'swap' }}
-  {{ secondary_font_bold | font_face: font_display: 'swap' }}
-  {{ secondary_font_italic | font_face: font_display: 'swap' }}
-  {{ secondary_font_bold_italic | font_face: font_display: 'swap' }}
+    assign primary_font = settings.type_body_font
+    assign primary_font_bold = primary_font | font_modify: 'weight', 'bold'
+    assign primary_font_italic = primary_font | font_modify: 'style', 'italic'
+    assign primary_font_bold_italic = primary_font_bold | font_modify: 'style', 'italic'
 
-  {{ settings.type_heading_font | font_face: font_display: 'swap' }}
-  {{ tertiary_font_bold | font_face: font_display: 'swap' }}
-  {{ tertiary_font_italic | font_face: font_display: 'swap' }}
-  {{ tertiary_font_bold_italic | font_face: font_display: 'swap' }}
+    assign primary_font_face_id = '[primary_font_family]-[primary_font_weight]-[primary_font_style]|' | replace: '[primary_font_family]', primary_font.family | replace: '[primary_font_weight]', primary_font.weight | replace: '[primary_font_style]', primary_font.style
+    assign primary_font_bold_face_id = '[primary_font_bold_family]-[primary_font_bold_weight]-[primary_font_bold_style]|' | replace: '[primary_font_bold_family]', primary_font_bold.family | replace: '[primary_font_bold_weight]', primary_font_bold.weight | replace: '[primary_font_bold_style]', primary_font_bold.style
+    assign primary_font_italic_face_id = '[primary_font_italic_family]-[primary_font_italic_weight]-[primary_font_italic_style]|' | replace: '[primary_font_italic_family]', primary_font_italic.family | replace: '[primary_font_italic_weight]', primary_font_italic.weight | replace: '[primary_font_italic_style]', primary_font_italic.style
+    assign primary_font_bold_italic_face_id = '[primary_font_bold_italic_family]-[primary_font_bold_italic_weight]-[primary_font_bold_italic_style]|' | replace: '[primary_font_bold_italic_family]', primary_font_bold_italic.family | replace: '[primary_font_bold_italic_weight]', primary_font_bold_italic.weight | replace: '[primary_font_bold_italic_style]', primary_font_bold_italic.style
 
-  {{ settings.type_accent_font | font_face: font_display: 'swap' }}
-  {{ accent_font_bold | font_face: font_display: 'swap' }}
-  {{ accent_font_italic | font_face: font_display: 'swap' }}
-  {{ accent_font_bold_italic | font_face: font_display: 'swap' }}
+    assign secondary_font = settings.type_subheading_font
+    assign secondary_font_bold = secondary_font | font_modify: 'weight', 'bold'
+    assign secondary_font_italic = secondary_font | font_modify: 'style', 'italic'
+    assign secondary_font_bold_italic = secondary_font_bold | font_modify: 'style', 'italic'
+
+    assign secondary_font_face_id = '[secondary_font_family]-[secondary_font_weight]-[secondary_font_style]|' | replace: '[secondary_font_family]', secondary_font.family | replace: '[secondary_font_weight]', secondary_font.weight | replace: '[secondary_font_style]', secondary_font.style
+    assign secondary_font_bold_face_id = '[secondary_font_bold_family]-[secondary_font_bold_weight]-[secondary_font_bold_style]|' | replace: '[secondary_font_bold_family]', secondary_font_bold.family | replace: '[secondary_font_bold_weight]', secondary_font_bold.weight | replace: '[secondary_font_bold_style]', secondary_font_bold.style
+    assign secondary_font_italic_face_id = '[secondary_font_italic_family]-[secondary_font_italic_weight]-[secondary_font_italic_style]|' | replace: '[secondary_font_italic_family]', secondary_font_italic.family | replace: '[secondary_font_italic_weight]', secondary_font_italic.weight | replace: '[secondary_font_italic_style]', secondary_font_italic.style
+    assign secondary_font_bold_italic_face_id = '[secondary_font_bold_italic_family]-[secondary_font_bold_italic_weight]-[secondary_font_bold_italic_style]|' | replace: '[secondary_font_bold_italic_family]', secondary_font_bold_italic.family | replace: '[secondary_font_bold_italic_weight]', secondary_font_bold_italic.weight | replace: '[secondary_font_bold_italic_style]', secondary_font_bold_italic.style
+
+    assign tertiary_font = settings.type_heading_font
+    assign tertiary_font_bold = tertiary_font | font_modify: 'weight', 'bold'
+    assign tertiary_font_italic = tertiary_font | font_modify: 'style', 'italic'
+    assign tertiary_font_bold_italic = tertiary_font_bold | font_modify: 'style', 'italic'
+
+    assign tertiary_font_face_id = '[tertiary_font_family]-[tertiary_font_weight]-[tertiary_font_style]|' | replace: '[tertiary_font_family]', tertiary_font.family | replace: '[tertiary_font_weight]', tertiary_font.weight | replace: '[tertiary_font_style]', tertiary_font.style
+    assign tertiary_font_bold_face_id = '[tertiary_font_bold_family]-[tertiary_font_bold_weight]-[tertiary_font_bold_style]|' | replace: '[tertiary_font_bold_family]', tertiary_font_bold.family | replace: '[tertiary_font_bold_weight]', tertiary_font_bold.weight | replace: '[tertiary_font_bold_style]', tertiary_font_bold.style
+    assign tertiary_font_italic_face_id = '[tertiary_font_italic_family]-[tertiary_font_italic_weight]-[tertiary_font_italic_style]|' | replace: '[tertiary_font_italic_family]', tertiary_font_italic.family | replace: '[tertiary_font_italic_weight]', tertiary_font_italic.weight | replace: '[tertiary_font_italic_style]', tertiary_font_italic.style
+    assign tertiary_font_bold_italic_face_id = '[tertiary_font_bold_italic_family]-[tertiary_font_bold_italic_weight]-[tertiary_font_bold_italic_style]|' | replace: '[tertiary_font_bold_italic_family]', tertiary_font_bold_italic.family | replace: '[tertiary_font_bold_italic_weight]', tertiary_font_bold_italic.weight | replace: '[tertiary_font_bold_italic_style]', tertiary_font_bold_italic.style
+
+    assign accent_font = settings.type_accent_font
+    assign accent_font_bold = accent_font | font_modify: 'weight', 'bold'
+    assign accent_font_italic = accent_font | font_modify: 'style', 'italic'
+    assign accent_font_bold_italic = accent_font_bold | font_modify: 'style', 'italic'
+
+    assign accent_font_face_id = '[accent_font_family]-[accent_font_weight]-[accent_font_style]|' | replace: '[accent_font_family]', accent_font.family | replace: '[accent_font_weight]', accent_font.weight | replace: '[accent_font_style]', accent_font.style
+    assign accent_font_bold_face_id = '[accent_font_bold_family]-[accent_font_bold_weight]-[accent_font_bold_style]|' | replace: '[accent_font_bold_family]', accent_font_bold.family | replace: '[accent_font_bold_weight]', accent_font_bold.weight | replace: '[accent_font_bold_style]', accent_font_bold.style
+    assign accent_font_italic_face_id = '[accent_font_italic_family]-[accent_font_italic_weight]-[accent_font_italic_style]|' | replace: '[accent_font_italic_family]', accent_font_italic.family | replace: '[accent_font_italic_weight]', accent_font_italic.weight | replace: '[accent_font_italic_style]', accent_font_italic.style
+    assign accent_font_bold_italic_face_id = '[accent_font_bold_italic_family]-[accent_font_bold_italic_weight]-[accent_font_bold_italic_style]|' | replace: '[accent_font_bold_italic_family]', accent_font_bold_italic.family | replace: '[accent_font_bold_italic_weight]', accent_font_bold_italic.weight | replace: '[accent_font_bold_italic_style]', accent_font_bold_italic.style
+
+    unless rendered_fonts contains primary_font_face_id
+      echo primary_font | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: primary_font_face_id
+    endunless
+
+    unless rendered_fonts contains primary_font_bold_face_id
+      echo primary_font_bold | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: primary_font_bold_face_id
+    endunless
+
+    unless rendered_fonts contains primary_font_italic_face_id
+      echo primary_font_italic | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: primary_font_italic_face_id
+    endunless
+
+    unless rendered_fonts contains primary_font_bold_italic_face_id
+      echo primary_font_bold_italic | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: primary_font_bold_italic_face_id
+    endunless
+
+    unless rendered_fonts contains secondary_font_face_id
+      echo secondary_font | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: secondary_font_face_id
+    endunless
+
+    unless rendered_fonts contains secondary_font_bold_face_id
+      echo secondary_font_bold | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: secondary_font_bold_face_id
+    endunless
+
+    unless rendered_fonts contains secondary_font_italic_face_id
+      echo secondary_font_italic | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: secondary_font_italic_face_id
+    endunless
+
+    unless rendered_fonts contains secondary_font_bold_italic_face_id
+      echo secondary_font_bold_italic | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: secondary_font_bold_italic_face_id
+    endunless
+
+    unless rendered_fonts contains tertiary_font_face_id
+      echo tertiary_font | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: tertiary_font_face_id
+    endunless
+
+    unless rendered_fonts contains tertiary_font_bold_face_id
+      echo tertiary_font_bold | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: tertiary_font_bold_face_id
+    endunless
+
+    unless rendered_fonts contains tertiary_font_italic_face_id
+      echo tertiary_font_italic | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: tertiary_font_italic_face_id
+    endunless
+
+    unless rendered_fonts contains tertiary_font_bold_italic_face_id
+      echo tertiary_font_bold_italic | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: tertiary_font_bold_italic_face_id
+    endunless
+
+    unless rendered_fonts contains accent_font_face_id
+      echo accent_font | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: accent_font_face_id
+    endunless
+
+    unless rendered_fonts contains accent_font_bold_face_id
+      echo accent_font_bold | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: accent_font_bold_face_id
+    endunless
+
+    unless rendered_fonts contains accent_font_italic_face_id
+      echo accent_font_italic | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: accent_font_italic_face_id
+    endunless
+
+    unless rendered_fonts contains accent_font_bold_italic_face_id
+      echo accent_font_bold_italic | font_face: font_display: 'swap'
+      assign rendered_fonts = rendered_fonts | append: accent_font_bold_italic_face_id
+    endunless
+  %}
 
   :root {
     /* Page Layout */
@@ -83,12 +169,13 @@
     --font-accent--weight: {{ settings.type_accent_font.weight }};
 
     /* Margin sizes */
-    --font-h1--spacing: 0.25em;
-    --font-h2--spacing: 0.25em;
-    --font-h3--spacing: 0.25em;
-    --font-h4--spacing: 0.25em;
-    --font-h5--spacing: 0.25em;
-    --font-h6--spacing: 0.25em;
+    --font-heading--spacing: 0.25em;
+    --font-h1--spacing: var(--font-heading--spacing);
+    --font-h2--spacing: var(--font-heading--spacing);
+    --font-h3--spacing: var(--font-heading--spacing);
+    --font-h4--spacing: var(--font-heading--spacing);
+    --font-h5--spacing: var(--font-heading--spacing);
+    --font-h6--spacing: var(--font-heading--spacing);
     --font-paragraph--spacing: 0.5em;
 
     /* Heading colors */
@@ -114,15 +201,15 @@
     --layer-temporary: 20;
 
     /* Max-width / Measure */
-    --max-width--body-normal: 50ch;
-    --max-width--body-narrow: 35ch;
+    --max-width--body-normal: 32.5em;
+    --max-width--body-narrow: 22.75em;
 
-    --max-width--heading-normal: 50ch;
-    --max-width--heading-narrow: 30ch;
+    --max-width--heading-normal: 32.5em;
+    --max-width--heading-narrow: 19.5em;
 
-    --max-width--display-normal: 20ch;
-    --max-width--display-narrow: 15ch;
-    --max-width--display-tight: 5ch;
+    --max-width--display-normal: 13em;
+    --max-width--display-narrow: 9.75em;
+    --max-width--display-tight: 3.25em;
 
     /* Letter-spacing / Tracking */
     --letter-spacing--display-tight: -0.03em;
@@ -266,7 +353,8 @@
     %}
 
     /* Hardcoded font sizes */
-    --font-size--2xs: 0.625rem;
+    --font-size--3xs: 0.625rem;
+    --font-size--2xs: 0.75rem;
     --font-size--xs: 0.8125rem;
     --font-size--sm: 0.875rem;
     --font-size--md: 1rem;
@@ -364,7 +452,7 @@
     --spacing-scale-default: 1.0;
 
     /* Checkout buttons gap */
-    --checkout-button-gap: 8px;
+    --checkout-button-gap: 10px;
 
     /* Borders */
     --style-border-width: 1px;
@@ -390,6 +478,7 @@
     /* Animation */
     --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
     --ease-out-quad: cubic-bezier(0.32, 0.72, 0, 1);
+    --ease-in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955);
     --animation-speed-fast: 0.0625s;
     --animation-speed: 0.125s;
     --animation-speed-slow: 0.2s;
@@ -407,6 +496,35 @@
     --animation-timing-default: cubic-bezier(0, 0, 0.2, 1);
     --animation-timing-fade-in: cubic-bezier(0.16, 1, 0.3, 1);
     --animation-timing-fade-out: cubic-bezier(0.4, 0, 0.2, 1);
+    /* Spring definitions suffixed with perceptual duration (d<ms>) and bounce (b<%>)*/
+    --spring-d300-b0-easing: linear(0, 0.0033 0.81%, 0.027 2.42%, 0.0916 4.84%, 0.4745 15.32%, 0.6422 20.97%, 0.7175, 0.7789, 0.8283 30.64%, 0.876, 0.9111 38.71%, 0.941, 0.9611 48.39%, 0.9707, 0.978 54.84%, 0.9885 62.1%, 0.9949 70.97%, 0.9982 82.26%, 0.9997 100%);
+    --spring-d300-b0-duration: 0.4980s;
+    --spring-d280-b0-easing: linear(0, 0.0044, 0.0164 1.85%, 0.085 4.63%, 0.4571 14.81%, 0.575 18.52%, 0.6505, 0.7148 24.07%, 0.7849, 0.8393, 0.8809 35.18%, 0.9189, 0.9453 44.44%, 0.9662, 0.9793 55.55%, 0.9894 62.95%, 0.995 71.28%, 0.9982 82.39%, 0.9997 99.98%);
+    --spring-d280-b0-duration: 0.4648s;
+    --spring-d260-b0-easing: linear(0, 0.0058, 0.0216 2.15%, 0.0748 4.29%, 0.4646 15.03%, 0.5673, 0.655, 0.7279, 0.7872, 0.8349, 0.8727 34.36%, 0.9107, 0.9379 42.95%, 0.9609 48.31%, 0.9778 54.76%, 0.9887 62.27%, 0.9948 70.86%, 0.9983 82.67%, 0.9997 99.85%);
+    --spring-d260-b0-duration: 0.4316s;
+    --spring-d220-b0-easing: linear(
+      0,
+      0.0093 1.37%,
+      0.0696 4.12%,
+      0.4667 15.09%,
+      0.6322 20.58%,
+      0.6986 23.32%,
+      0.7793 27.44%,
+      0.8219 30.18%,
+      0.8721,
+      0.9089 38.42%,
+      0.9427,
+      0.9644,
+      0.978 54.88%,
+      0.9881 61.74%,
+      0.9944 69.97%,
+      0.998 80.95%,
+      0.9996 98.78%
+    );
+    --spring-d220-b0-duration: 0.3818s;
+    --spring-d180-b0-easing: linear(0, 0.0234, 0.0805 4.48%, 0.4865 15.68%, 0.6211 20.16%, 0.7696 26.88%, 0.8064 29.12%, 0.8646, 0.9063, 0.9358, 0.9563 47.04%, 0.9757, 0.9867 60.48%, 0.9941 69.44%, 0.9979 80.64%, 0.9996 98.56%);
+    --spring-d180-b0-duration: 0.2988s;
 
     /* View transitions */
     /* View transition old */
@@ -453,6 +571,18 @@
     --input-disabled-text-color: rgb(var(--color-foreground-rgb) / var(--opacity-50));
     --input-textarea-min-height: 55px;
 
+    /* Checkbox */
+    --checkbox-size: 22px;
+    --checkbox-border-radius: 7px;
+    --checkbox-border: 1px solid rgb(var(--color-foreground-rgb) / var(--opacity-35-55));
+    --checkbox-label-padding: 8px;
+
+    @media screen and (min-width: 750px) {
+      --checkbox-size: 16px;
+      --checkbox-border-radius: 5px;
+      --checkbox-label-padding: 6px;
+    }
+
     /* Button size */
     --button-size-sm: 30px;
     --button-size-md: 36px;
@@ -464,10 +594,6 @@
     --button-font-family-primary: var(--font-{{ settings.type_font_button_primary }}--family);
     --button-font-family-secondary: var(--font-{{ settings.type_font_button_secondary }}--family);
 
-    /* Button font-weight */
-    --button-font-weight-primary: {{ settings.button_font_weight_primary }};
-    --button-font-weight-secondary: {{ settings.button_font_weight_secondary }};
-
     /* Button text case */
     --button-text-case: {{ settings.button_text_case }};
     --button-text-case-primary: {{ settings.button_text_case_primary }};
@@ -478,6 +604,7 @@
     --border-width-sm: 1px;
     --border-width-md: 2px;
     --border-width-lg: 5px;
+    --border-radius-sm: 0.25rem;
 
     /* Drawers */
     --drawer-inline-padding: 25px;
@@ -525,7 +652,9 @@
     /* Buy buttons */
     --height-buy-buttons: calc(var(--padding-lg) * 2 + var(--icon-size-sm));
 
-    /* Card image height variables */
+    /* Card image width and height variables */
+    --card-width-small: 10rem;
+
     --height-small: 10rem;
     --height-medium: 11.5rem;
     --height-large: 13rem;
@@ -539,6 +668,9 @@
 
     /* Modal */
     --modal-max-height: 65dvh;
+    --quick-add-modal-height: min(38.5rem, 96vh);
+    --quick-add-modal-width: min(54rem, 96vw);
+    --quick-add-modal-gallery-width: 24rem;
 
     /* Card styles for search */
     --card-bg-hover: rgb(var(--color-foreground-rgb) / var(--opacity-5));

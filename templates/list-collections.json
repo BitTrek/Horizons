@@ -53,7 +53,7 @@
               "type": "text",
               "name": "t:names.text",
               "settings": {
-                "text": "<h3>Collections</h3>",
+                "text": "<h1>Collections</h1>",
                 "width": "100%",
                 "max_width": "normal",
                 "alignment": "left",
@@ -127,7 +127,7 @@
               "name": "t:names.collection_card_image",
               "static": true,
               "settings": {
-                "image_ratio": "portrait",
+                "image_ratio": "adapt",
                 "toggle_overlay": false,
                 "overlay_color": "#00000026",
                 "overlay_style": "solid",
@@ -148,7 +148,7 @@
       "block_order": [
         "group_4FtiAg"
       ],
-      "name": "t:names.collections_grid",
+      "name": "Collection list",
       "settings": {
         "layout_type": "grid",
         "carousel_on_mobile": false,

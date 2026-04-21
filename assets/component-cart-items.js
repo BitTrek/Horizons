@@ -1,5 +1,12 @@
 import { Component } from '@theme/component';
-import { fetchConfig, debounce, onAnimationEnd, prefersReducedMotion, resetShimmer } from '@theme/utilities';
+import {
+  fetchConfig,
+  debounce,
+  onAnimationEnd,
+  prefersReducedMotion,
+  resetShimmer,
+  startViewTransition,
+} from '@theme/utilities';
 import { morphSection, sectionRenderer } from '@theme/section-renderer';
 import {
   ThemeEvents,
@@ -37,6 +44,7 @@ class CartItemsComponent extends Component {
     super.disconnectedCallback();
 
     document.removeEventListener(ThemeEvents.cartUpdate, this.#handleCartUpdate);
+    document.removeEventListener(ThemeEvents.discountUpdate, this.handleDiscountUpdate);
     document.removeEventListener(ThemeEvents.quantitySelectorUpdate, this.#debouncedOnChange);
   }
 
@@ -45,8 +53,11 @@ class CartItemsComponent extends Component {
    * @param {QuantitySelectorUpdateEvent} event - The event.
    */
   #onQuantityChange(event) {
+    if (!(event.target instanceof Node) || !this.contains(event.target)) return;
+
     const { quantity, cartLine: line } = event.detail;
 
+    // Cart items require a line number
     if (!line) return;
 
     if (quantity === 0) {
@@ -81,16 +92,38 @@ class CartItemsComponent extends Component {
 
     if (!cartItemRowToRemove) return;
 
-    const remove = () => cartItemRowToRemove.remove();
+    const rowsToRemove = [
+      cartItemRowToRemove,
+      // Get all nested lines of the row to remove
+      ...this.refs.cartItemRows.filter((row) => row.dataset.parentKey === cartItemRowToRemove.dataset.key),
+    ];
 
-    if (prefersReducedMotion()) return remove();
+    // If the cart item row is the last row, optimistically trigger the cart empty state
+    const isEmptyCart = rowsToRemove.length == this.refs.cartItemRows.length;
+
+    const template = document.getElementById('empty-cart-template');
+    if (isEmptyCart && template instanceof HTMLTemplateElement) {
+      const clone = document.importNode(template.content, true);
+
+      startViewTransition(() => {
+        this.replaceChildren(clone);
+      }, [this.isDrawer ? 'empty-cart-drawer' : 'empty-cart-page']);
+
+      return;
+    }
 
     // Add class to the row to trigger the animation
-    cartItemRowToRemove.style.setProperty('--row-height', `${cartItemRowToRemove.clientHeight}px`);
-    cartItemRowToRemove.classList.add('removing');
+    rowsToRemove.forEach((row) => {
+      const remove = () => row.remove();
 
-    // Remove the row after the animation ends
-    onAnimationEnd(cartItemRowToRemove, remove);
+      if (prefersReducedMotion()) return remove();
+
+      row.style.setProperty('--row-height', `${row.clientHeight}px`);
+      row.classList.add('removing');
+
+      // Remove the row after the animation ends
+      onAnimationEnd(row, remove);
+    });
   }
 
   /**
@@ -148,15 +181,20 @@ class CartItemsComponent extends Component {
         const newCartHiddenItemCount = newSectionHTML.querySelector('[ref="cartItemCount"]')?.textContent;
         const newCartItemCount = newCartHiddenItemCount ? parseInt(newCartHiddenItemCount, 10) : 0;
 
+        // Update data-cart-quantity for all matching variants
+        this.#updateQuantitySelectors(parsedResponseText);
+
         this.dispatchEvent(
-          new CartUpdateEvent({}, this.sectionId, {
+          new CartUpdateEvent(parsedResponseText, this.sectionId, {
             itemCount: newCartItemCount,
             source: 'cart-items-component',
             sections: parsedResponseText.sections,
           })
         );
 
-        morphSection(this.sectionId, parsedResponseText.sections[this.sectionId]);
+        morphSection(this.sectionId, parsedResponseText.sections[this.sectionId], { mode: this.isDrawer ? 'hydration' : 'full' });
+
+        this.#updateCartQuantitySelectorButtonStates();
       })
       .catch((error) => {
         console.error(error);
@@ -214,6 +252,9 @@ class CartItemsComponent extends Component {
     const cartItemsHtml = event.detail.data.sections?.[this.sectionId];
     if (cartItemsHtml) {
       morphSection(this.sectionId, cartItemsHtml);
+
+      // Update button states for all cart quantity selectors after morph
+      this.#updateCartQuantitySelectorButtonStates();
     } else {
       sectionRenderer.renderSection(this.sectionId, { cache: false });
     }
@@ -234,6 +275,41 @@ class CartItemsComponent extends Component {
   }
 
   /**
+   * Updates quantity selectors for all matching variants in the cart.
+   * @param {Object} updatedCart - The updated cart object.
+   * @param {Array<{variant_id: number, quantity: number}>} [updatedCart.items] - The cart items.
+   */
+  #updateQuantitySelectors(updatedCart) {
+    if (!updatedCart.items) return;
+
+    for (const item of updatedCart.items) {
+      const variantId = item.variant_id.toString();
+      const selectors = document.querySelectorAll(`quantity-selector-component[data-variant-id="${variantId}"]`);
+
+      for (const selector of selectors) {
+        const input = selector.querySelector('input[data-cart-quantity]');
+        if (!input) continue;
+
+        input.setAttribute('data-cart-quantity', item.quantity.toString());
+
+        // Update the quantity selector's internal state
+        if ('updateCartQuantity' in selector && typeof selector.updateCartQuantity === 'function') {
+          selector.updateCartQuantity();
+        }
+      }
+    }
+  }
+
+  /**
+   * Updates button states for all cart quantity selector components.
+   */
+  #updateCartQuantitySelectorButtonStates() {
+    for (const selector of document.querySelectorAll('cart-quantity-selector-component')) {
+      /** @type {any} */ (selector).updateButtonStates?.();
+    }
+  }
+
+  /**
    * Gets the section id.
    * @returns {string} The section id.
    */
@@ -243,6 +319,13 @@ class CartItemsComponent extends Component {
     if (!sectionId) throw new Error('Section id missing');
 
     return sectionId;
+  }
+
+  /**
+   * @returns {boolean} Whether the component is a drawer.
+   */
+  get isDrawer() {
+    return this.dataset.drawer !== undefined;
   }
 }
 

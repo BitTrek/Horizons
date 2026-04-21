@@ -16,7 +16,8 @@
       "comment": "Kommentti",
       "post_success": "Kiitos yhteydenotostasi. Vastaamme sinulle mahdollisimman pian.",
       "error_heading": "Muokkaa seuraavia:"
-    }
+    },
+    "slider_label": "Liukusäädin"
   },
   "accessibility": {
     "play_model": "Toista 3D-malli",
@@ -41,7 +42,7 @@
       "one": "{{ count }} suodatin käytössä",
       "other": "{{ count }} suodatinta käytössä"
     },
-    "account": "Avaa tilivalikko",
+    "account": "Tili",
     "cart": "Ostoskori",
     "cart_count": "Tuotteita ostoskorissa yhteensä",
     "menu": "Valikko",
@@ -50,18 +51,29 @@
     "scroll_to": "Vieritä kohtaan {{ title }}",
     "loading_product_recommendations": "Tuotesuositusten lataaminen",
     "discount": "Käytä alennuskoodia",
+    "discount_menu": "Alennuskoodit",
     "discount_applied": "Käytetty alennuskoodi: {{ code }}",
-    "open_cart_drawer": "Avaa ostoskori",
     "inventory_status": "Varaston tila",
     "pause_video": "Keskeytä video",
     "find_country": "Etsi maa",
-    "localization_region_and_language": "Avaa alueen ja kielen valitsin",
-    "open_search_modal": "Avaa haku",
+    "localization_region_and_language": "Alue- ja kielivalitsin",
     "decrease_quantity": "Pienennä määrää",
     "increase_quantity": "Suurenna määrää",
     "quantity": "Määrä",
     "rating": "Tämän tuoteen tuotearvio on {{ rating }}/5",
-    "nested_product": "{{ product_title }} – {{ parent_title }}"
+    "nested_product": "{{ product_title }} – {{ parent_title }}",
+    "remove": "Poista",
+    "view_pricing_info": "Näytä hinnoittelutiedot",
+    "slideshow": "Diaesitys",
+    "header_navigation_label": "Ensisijainen",
+    "home_logo_alt": "{{ store_name }} – Koti",
+    "active_filters": "AKtiiviset suodattimet:",
+    "product_details": "Tuotetiedot",
+    "show_product_details": "Näytä tuotteen {{ product_name }} tuotetiedot",
+    "featured_product": "Esittelyssä oleva tuote",
+    "search_suggestions_available": "Hakuehdotuksia saatavilla haulle {{ query }}",
+    "price_filter_low": "Halpa hinta",
+    "price_filter_high": "Kallis hinta"
   },
   "actions": {
     "add_to_cart": "Lisää ostoskoriin",
@@ -100,7 +112,10 @@
     "sign_up": "Rekisteröidy",
     "open_image_in_full_screen": "Avaa kuva koko näytön tilassa",
     "sort": "Lajittele",
-    "show_all_options": "Näytä kaikki vaihtoehdot"
+    "show_all_options": "Näytä kaikki vaihtoehdot",
+    "open": "Avaa",
+    "back_to": "Takaisin kohteeseen {{ title }}",
+    "zoom_media": "Lähennä mediasisältö: {{ index }}"
   },
   "content": {
     "reviews": "arvostelua",
@@ -213,7 +228,51 @@
     "store_owner_link_html": "Oletko kaupan omistaja? <a href=\"{{ link }}\">Kirjaudu sisään tästä</a>",
     "shipping_discount_error": "Toimitusalennukset näytetään kassalla osoitteen lisäämisen jälkeen",
     "discount_code_error": "Alennuskoodin lisääminen ostoskoriisi ei onnistu",
-    "shipping_policy": "Toimituskulut lasketaan kassalla."
+    "shipping_policy": "Toimituskulut lasketaan kassalla.",
+    "recipient_form_send_to": "Lähetä:",
+    "recipient_form_email_label": "Vastaanottajan sähköpostiosoite",
+    "recipient_form_email_label_my_email": "Oma sähköpostiosoite",
+    "recipient_form_email_address": "Vastaanottajan sähköpostiosoite",
+    "recipient_form_name_label": "Vastaanottajan sähköpostiosoite (valinnainen)",
+    "recipient_form_message": "Viesti (valinnainen)",
+    "recipient_form_characters_used": "{{ used_chars }}/{{ max_chars }} merkkiä käytetty",
+    "recipient_form_send_on": "VVVV-KK-PP",
+    "recipient_form_send_on_label": "Lähetysajankohta (valinnainen)",
+    "recipient_form_fields_visible": "Vastaanottajalomakekentät ovat nyt näkyvissä",
+    "recipient_form_fields_hidden": "Vastaanottajalomakekentät ovat nyt piilotettuja",
+    "recipient_form_error": "Lomakkeen lähettämisessä tapahtui virhe",
+    "product_custom_property_character_count": "{{ used_chars }}/{{ max_chars }} merkkiä käytetty",
+    "terms_and_policies": "Ehdot ja käytännöt",
+    "item_count_cutoff": "Yli {{ count }} tuotetta",
+    "pagination": {
+      "nav_label": "Sivunumerointi",
+      "previous": "Edellinen",
+      "next": "Seuraava",
+      "page": "Sivu {{ page }}"
+    },
+    "volume_pricing_available": "Volyymihinnoittelu saatavilla",
+    "volume_pricing": "Volyymihinnoittelu",
+    "at_price_each": "{{ price }}/kpl",
+    "each": "{{ price }}/kpl",
+    "each_abbreviation": "kpl",
+    "price_at": "hintaan",
+    "price_range": "Hintahaarukka",
+    "cancel": "Peruuta",
+    "product_subtotal": "Tuotteen välisumma",
+    "quantity_per_item": "/kpl",
+    "remove_all": "Poista kaikki",
+    "remove_all_items_confirmation": "Poistetaanko kaikki {{ count }} tuotetta ostoskorista?",
+    "remove_one_item_confirmation": "Poistetaanko 1 tuote ostoskorista?",
+    "total_items": "Tuotteita yhteensä",
+    "variant": "Versio",
+    "variant_total": "Versioiden summa",
+    "view_cart": "Näytä ostoskori",
+    "your_cart": "Ostoskorisi",
+    "items_added_to_cart": {
+      "one": "Yksi tuote lisätty ostoskoriin",
+      "other": "{{ count }} tuotetta lisätty ostoskoriin"
+    },
+    "quick_order_list": "Pikatilausluettelo"
   },
   "gift_cards": {
     "issued": {
@@ -233,7 +292,12 @@
     "password": "Salasana",
     "search": "Hae",
     "product_title": "Tuotteen nimi",
-    "collection_title": "Kokoelman nimi"
+    "collection_title": "Kokoelman nimi",
+    "blog_posts": "Blogipostaukset",
+    "blog_post_title": "Otsikko",
+    "blog_post_author": "Tekijä",
+    "blog_post_date": "Päivämäärä",
+    "blog_post_description": "Ote blogipostauksesi sisällöstä"
   },
   "products": {
     "product": {
@@ -242,7 +306,15 @@
       "adding_to_cart": "Lisätään...",
       "add_to_cart_error": "Ostoskoriin lisättäessä tapahtui virhe",
       "sold_out": "Loppuunmyyty",
-      "unavailable": "Ei käytettävissä"
+      "unavailable": "Ei käytettävissä",
+      "quantity_error_max": "Tämän tuotteen enimmäismäärä on {{ maximum }}",
+      "quantity": "Määrä",
+      "quantity_increments": "Lisäysten koko: {{ increment }}",
+      "quantity_minimum": "Vähimmäismäärä {{ minimum }}",
+      "quantity_maximum": "Enimmäismäärä {{ maximum }}",
+      "in_cart": "ostoskorissa",
+      "default_title": "Oletusotsikko",
+      "sticky_add_to_cart": "Pikalisäys ostoskoririville"
     }
   },
   "fields": {

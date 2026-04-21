@@ -36,7 +36,7 @@ export class VariantSelectedEvent extends Event {
   /**
    * Creates a new VariantSelectedEvent
    * @param {Object} resource - The new variant object
-   * @param {string} resource.id - The id of the variant
+   * @param {string} resource.id - The option value id
    */
   constructor(resource) {
     super(ThemeEvents.variantSelected, { bubbles: true });
@@ -57,6 +57,7 @@ export class VariantUpdateEvent extends Event {
    * @param {string} resource.id - The id of the variant
    * @param {boolean} resource.available - Whether the variant is available
    * @param {boolean} resource.inventory_management - Whether the variant has inventory management
+   * @param {string} [resource.sku] - The SKU of the variant
    * @param {Object} [resource.featured_media] - The featured media of the variant
    * @param {string} [resource.featured_media.id] - The id of the featured media
    * @param {Object} [resource.featured_media.preview_image] - The preview image of the featured media
@@ -152,13 +153,17 @@ export class CartErrorEvent extends Event {
    * Creates a new CartErrorEvent
    * @param {string} sourceId - The id of the element the action was triggered from
    * @param {string} message - A message from the server response
+   * @param {Object} description - Description from the server response
+   * @param {Object} errors - Errors from the server response
    */
-  constructor(sourceId, message) {
+  constructor(sourceId, message, description, errors) {
     super(ThemeEvents.cartError, { bubbles: true });
     this.detail = {
       sourceId,
       data: {
         message,
+        errors,
+        description,
       },
     };
   }

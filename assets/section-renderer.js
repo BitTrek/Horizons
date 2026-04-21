@@ -1,5 +1,4 @@
-import { morph } from '@theme/morph';
-import { startViewTransition } from '@theme/utilities';
+import { morph, MORPH_OPTIONS } from '@theme/morph';
 
 /**
  * A class to re-render sections using the Section Rendering API
@@ -32,22 +31,24 @@ class SectionRenderer {
    * @param {string} sectionId - The section ID
    * @param {Object} [options] - The options
    * @param {boolean} [options.cache] - Whether to use the cache
+   * @param {'hydration'|'full'} [options.mode] - Which parts of the section to morph into the DOM
+   * @param {URL} [options.url] - The URL to render the section from
    * @returns {Promise<string>} The rendered section HTML
    */
   async renderSection(sectionId, options) {
-    const { cache = !Shopify.designMode } = options ?? {};
-
+    const { cache = !Shopify.designMode, mode = 'full' } = options ?? {};
+    const { url } = options ?? {};
     this.#abortPendingMorph(sectionId);
 
     const abortController = new AbortController();
     this.#abortControllersBySectionId.set(sectionId, abortController);
 
-    const sectionHTML = await this.getSectionHTML(sectionId, cache);
+    const sectionHTML = await this.getSectionHTML(sectionId, cache, url);
 
     if (!abortController.signal.aborted) {
       this.#abortControllersBySectionId.delete(sectionId);
 
-      morphSection(sectionId, sectionHTML);
+      morphSection(sectionId, sectionHTML, { mode });
     }
 
     return sectionHTML;
@@ -130,7 +131,7 @@ function buildSectionRenderingURL(sectionId, url = new URL(window.location.href)
  * @param {string} sectionId - The section ID
  * @returns {string} The section selector
  */
-function buildSectionSelector(sectionId) {
+export function buildSectionSelector(sectionId) {
   return `${SECTION_ID_PREFIX}${sectionId}`;
 }
 
@@ -139,7 +140,7 @@ function buildSectionSelector(sectionId) {
  * @param {string} sectionId - The section ID
  * @returns {string} The normalized section ID
  */
-function normalizeSectionId(sectionId) {
+export function normalizeSectionId(sectionId) {
   return sectionId.replace(new RegExp(`^${SECTION_ID_PREFIX}`), '');
 }
 
@@ -161,8 +162,12 @@ function containsShadowRoot(element) {
  *
  * @param {string} sectionId - The section ID
  * @param {string} html - The new markup the section should morph into
+ * @param {Object} [options] - Additional options
+ * @param {'hydration'|'full'} [options.mode] - Which parts of the section to morph into the DOM. 'hydration' will only morph nodes with `data-hydration-key` attributes.
+ * @param {boolean} [options.injectStylesheet=false] - When true, extracts `style[data-section-stylesheet]` from the response and injects it into the section wrapper.
  */
-export async function morphSection(sectionId, html) {
+export async function morphSection(sectionId, html, options = {}) {
+  const { mode = 'full', injectStylesheet = false } = options;
   const fragment = new DOMParser().parseFromString(html, 'text/html');
   const existingElement = document.getElementById(buildSectionSelector(sectionId));
   const newElement = fragment.getElementById(buildSectionSelector(sectionId));
@@ -175,7 +180,34 @@ export async function morphSection(sectionId, html) {
     throw new Error(`Section ${sectionId} not found in the section rendering response`);
   }
 
-  morph(existingElement, newElement);
+  morph(existingElement, newElement, {
+    ...MORPH_OPTIONS,
+    hydrationMode: mode === 'hydration',
+  });
+
+  if (injectStylesheet) {
+    injectSectionStylesheet(fragment, existingElement);
+  }
+}
+
+/**
+ * Injects a `<style data-section-stylesheet>` from the parsed SFR response
+ * into the live section wrapper. Replaces the existing stylesheet, if it exists.
+ *
+ * @param {Document} fragment - The parsed response document
+ * @param {HTMLElement} sectionElement - The live section wrapper element
+ */
+function injectSectionStylesheet(fragment, sectionElement) {
+  const newStylesheet = fragment.querySelector('style[data-section-stylesheet]');
+  if (!newStylesheet) return;
+
+  const existingStylesheet = sectionElement.querySelector('style[data-section-stylesheet]');
+
+  if (existingStylesheet) {
+    existingStylesheet.textContent = newStylesheet.textContent;
+  } else {
+    sectionElement.prepend(newStylesheet);
+  }
 }
 
 export const sectionRenderer = new SectionRenderer();

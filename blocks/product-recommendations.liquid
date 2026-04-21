@@ -13,7 +13,8 @@
 ></script>
 
 {% liquid
-  case block.settings.layout_type
+  assign block_settings = block.settings
+  case block_settings.layout_type
     when 'grid'
       assign classes = 'resource-list--grid'
     when 'carousel'
@@ -25,14 +26,18 @@
   [data-section-id] {section.id} - used to fetch the product recommendations from the Section Rendering API
 {% endcomment %}
 
+{% render 'quick-add-styles' %}
+{% render 'quick-add-modal-styles' %}
+{% render 'product-badges-styles' %}
 <product-recommendations
   id="product-recommendations-{{ block.id }}"
   class="product-recommendations"
-  data-url="{{ routes.product_recommendations_url }}?limit={{ block.settings.max_products }}"
+  data-url="{{ routes.product_recommendations_url }}?limit={{ block_settings.max_products }}"
   data-section-id="{{ section.id }}"
   data-product-id="{{ closest.product.id }}"
-  data-intent="{{ block.settings.recommendation_type }}"
+  data-intent="{{ block_settings.recommendation_type }}"
   data-recommendations-performed="{{ recommendations.performed }}"
+  data-hydration-key="product-recommendations-{{ block.id }}"
   {% if request.visual_preview_mode %}
     data-shopify-editor-preview
   {% endif %}
@@ -41,17 +46,18 @@
 >
   <div
     class="
-      color-{{ section.settings.color_scheme }}
+      {% if block_settings.inherit_color_scheme == false %}color-{{ block_settings.color_scheme }}{% endif %}
       block-resource-list
       spacing-style
       gap-style
     "
     style="
-      {%  render 'spacing-style', settings: block.settings %}
-      {%  render 'gap-style', value: block.settings.gap %}
-      --resource-list-column-gap-desktop: {{ block.settings.columns_gap }}px;
-      --resource-list-row-gap-desktop: {{ block.settings.rows_gap }}px;
+      {%  render 'spacing-style', settings: block_settings %}
+      {%  render 'gap-style', value: block_settings.gap %}
+      --resource-list-column-gap-desktop: {{ block_settings.columns_gap }}px;
+      --resource-list-row-gap-desktop: {{ block_settings.rows_gap }}px;
       --resource-list-columns-mobile: repeat(auto-fill, minmax(9.25rem, 1fr));
+      --border-radius: {{ block_settings.border_radius }}px;
     "
   >
     <div class="section-resource-list__content">
@@ -63,18 +69,16 @@
         assign products = recommendations.products
 
         if closest.product == blank
-          if request.design_mode or request.visual_preview_mode
-            # Onboarding mode: Show placeholder products
-            for i in (1..block.settings.max_products)
-              assign products = products | append: ', '
-              assign products = products | split: ','
-            endfor
-          endif
+          # Onboarding mode: Show placeholder products
+          for i in (1..block_settings.max_products)
+            assign products = products | append: ', '
+            assign products = products | split: ','
+          endfor
         elsif recommendations.performed and recommendations.products_count == 0
           # No recommendations found, pull from catalog
-          if block.settings.recommendation_type == 'related'
+          if block_settings.recommendation_type == 'related'
             assign products = collections.all.products | reject: 'id', closest.product.id
-          elsif block.settings.recommendation_type == 'complementary'
+          elsif block_settings.recommendation_type == 'complementary'
             # Do not recommend the All collection as complementary products
             assign products = null
           endif
@@ -83,7 +87,7 @@
         endif
       %}
       {% capture list_items %}
-        {% for product in products limit: block.settings.max_products %}
+        {% for product in products limit: block_settings.max_products %}
           <div class="resource-list__item">
             {% content_for 'block',
               type: '_product-card',
@@ -91,7 +95,7 @@
               closest.product: product
             %}
           </div>
-          {% if block.settings.layout_type == 'carousel' or block.settings.carousel_on_mobile %}
+          {% if block_settings.layout_type == 'carousel' or block_settings.carousel_on_mobile %}
             {% unless forloop.last %}
               <!--@list/split-->
             {% endunless %}
@@ -114,17 +118,17 @@
       <div
         class="
           resource-list
-          {% if block.settings.carousel_on_mobile and block.settings.layout_type != 'carousel' %}
+          {% if block_settings.carousel_on_mobile and block_settings.layout_type != 'carousel' %}
             hidden--mobile
           {% endif %}
           {{ classes }}
         "
-        {% if block.settings.layout_type == 'grid' %}
+        {% if block_settings.layout_type == 'grid' %}
           data-testid="resource-list-grid"
         {% endif %}
         data-has-recommendations="{{ has_recommendations }}"
       >
-        {% case block.settings.layout_type %}
+        {% case block_settings.layout_type %}
           {% when 'grid' %}
             {{ list_items }}
           {% when 'carousel' %}
@@ -132,14 +136,14 @@
               ref: 'resourceListCarousel',
               slides: slides,
               slide_count: recommendations.products.size,
-              settings: block.settings
+              settings: block_settings
             %}
         {% endcase %}
       </div>
 
-      {% if block.settings.carousel_on_mobile and block.settings.layout_type != 'carousel' %}
+      {% if block_settings.carousel_on_mobile and block_settings.layout_type != 'carousel' %}
         {% liquid
-          assign mobile_carousel_gap = block.settings.columns_gap
+          assign mobile_carousel_gap = block_settings.columns_gap
         %}
         <div
           class="
@@ -153,13 +157,13 @@
             ref: 'resourceListCarouselMobile',
             slides: slides,
             slide_count: recommendations.products.size,
-            settings: block.settings
+            settings: block_settings
           %}
         </div>
       {% endif %}
     {%- else -%}
       <div class="resource-list resource-list--grid">
-        {% for i in (1..block.settings.max_products) %}
+        {% for i in (1..block_settings.max_products) %}
           <div
             class="resource-list__item product-recommendations__skeleton-item"
             aria-label="{{ 'accessibility.loading_product_recommendations' | t }}"
@@ -171,23 +175,23 @@
 </product-recommendations>
 
 {% stylesheet %}
+  .block-resource-list {
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--gap);
+    min-width: 0;
+    min-height: 0;
+    container-type: inline-size;
+    container-name: resource-list;
+    border-radius: var(--border-radius, 0);
+  }
+
   .product-recommendations-wrapper {
     width: 100%;
   }
 
   .product-recommendations-wrapper:has(product-recommendations[data-shopify-editor-preview]) {
     width: 100vw;
-  }
-
-  .product-recommendations {
-    display: block;
-  }
-
-  .product-recommendations__skeleton-item {
-    aspect-ratio: 3 / 4;
-    background-color: var(--color-foreground);
-    opacity: var(--skeleton-opacity);
-    border-radius: 4px;
   }
 {% endstylesheet %}
 
@@ -356,10 +360,27 @@
       "default": 12
     },
     {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "inherit_color_scheme",
+      "label": "t:settings.inherit_color_scheme",
+      "default": true
+    },
+    {
       "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:settings.color_scheme",
-      "default": "scheme-1"
+      "default": "scheme-1",
+      "visible_if": "{{ block.settings.inherit_color_scheme == false }}"
     },
     {
       "type": "header",
@@ -384,6 +405,26 @@
       "step": 1,
       "unit": "px",
       "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
     }
   ],
   "presets": [
@@ -391,13 +432,16 @@
       "name": "t:names.product_recommendations",
       "category": "t:categories.product",
       "settings": {
-        "recommendation_type": "related"
+        "recommendation_type": "related",
+        "border_radius": 0,
+        "padding-inline-start": 0,
+        "padding-inline-end": 0
       },
       "blocks": {
         "heading": {
           "type": "text",
           "settings": {
-            "text": "<h4>You may also like</h4>"
+            "text": "t:html_defaults.may_also_like"
           }
         },
         "static-product-card": {
@@ -410,7 +454,7 @@
             "product-card-gallery": {
               "type": "_product-card-gallery",
               "settings": {
-                "image_ratio": "portrait",
+                "image_ratio": "adapt",
                 "border": "none",
                 "border_width": 1,
                 "border_opacity": 100,
@@ -428,7 +472,7 @@
                 "width": "fit-content",
                 "max_width": "normal",
                 "alignment": "left",
-                "type_preset": "rte",
+                "type_preset": "paragraph",
                 "font": "var(--font-body--family)",
                 "font_size": "1rem",
                 "line_height": "normal",
