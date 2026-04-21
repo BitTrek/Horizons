@@ -1,6 +1,5 @@
 (function () {
-  const PROP_IMAGE = '_printify_preview_url';
-  const PROP_ID = '_printify_personalization_id';
+  const PROP_IMAGE = 'Design Preview';
 
   function getProductForm() {
     return document.querySelector('product-form-component form');
@@ -22,11 +21,10 @@
     form.querySelectorAll('input[data-printify]').forEach((el) => el.remove());
   }
 
-  function applyPersonalization(imageUrl, personalizationId) {
+  function applyPersonalization(imageUrl) {
     const form = getProductForm();
     if (!form) return;
     setHiddenInput(form, PROP_IMAGE, imageUrl);
-    setHiddenInput(form, PROP_ID, personalizationId);
   }
 
   function clearPersonalization() {
@@ -41,7 +39,7 @@
     if (!msg || typeof msg !== 'object') return;
 
     if (msg.type === 'PERSONALIZATION_APPLIED' && msg.data) {
-      applyPersonalization(msg.data.imageUrl, msg.data.personalizationId);
+      applyPersonalization(msg.data.imageUrl);
     }
   });
 
