@@ -222,6 +222,22 @@
               },
               "block_order": []
             },
+            "printify_print_on_demand_personalize_button_ALCYd7": {
+              "type": "shopify://apps/printify-print-on-demand/blocks/personalize_button/019a5dbe-775d-7320-afec-36b77e3421a0",
+              "settings": {
+                "use_default_theme_style": true,
+                "button_text": "Add personalized design",
+                "button_text_with_personalization": "Remove saved design",
+                "button_extra_classes": "product-form__buttons button--full-width",
+                "button_extra_classes_with_personalization": "product-form__buttons button--full-width button--secondary",
+                "button_color": "#007bff",
+                "text_color": "#ffffff",
+                "button_padding": "12px 24px",
+                "font_size": "16px",
+                "border_radius": "4px",
+                "modal_title": "Personalize Your Product"
+              }
+            },
             "text_aEtTtq": {
               "type": "text",
               "name": "Product description",
@@ -254,6 +270,7 @@
             "divider_VJhene",
             "variant_picker_R3rGDr",
             "buy_buttons_eYQEYi",
+            "printify_print_on_demand_personalize_button_ALCYd7",
             "text_aEtTtq"
           ]
         }
