@@ -237,6 +237,8 @@
                                 <dd>
                                   {%- if property.last contains '/uploads/' -%}
                                     <a href="{{ property.last }}">{{ property.last | split: '/' | last }}</a>
+                                  {%- elsif property.last contains 'personalize.at' -%}
+                                    <a href="{{ property.last }}" target="_blank" rel="noopener">View Design</a>
                                   {%- else -%}
                                     {{ property.last }}
                                   {%- endif -%}

@@ -196,15 +196,15 @@
               },
               "blocks": {}
             },
-            "custom_liquid_XzbMc3": {
+            "custom_liquid_payments": {
               "type": "custom-liquid",
-              "name": "t:names.custom_liquid",
+              "name": "Payment icons",
               "settings": {
-                "custom_liquid": "<style>\n  .cfw {\n    margin-block: var(--gap-md, 16px) 0;\n    display: flex;\n    flex-direction: column;\n    gap: var(--gap-sm, 8px);\n  }\n\n  .cfw__section {\n    border-radius: var(--style-border-radius-buttons-secondary);\n  }\n\n  .cfw__header {\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    padding: var(--button-padding-block, 12px) var(--button-padding-inline, 20px);\n    background-color: var(--color-primary-button-background);\n    cursor: pointer;\n    user-select: none;\n    gap: 8px;\n    border-radius: var(--style-border-radius-buttons-secondary) var(--style-border-radius-buttons-secondary) 0 0;\n  }\n\n  .cfw__section--collapsed .cfw__header {\n    border-radius: var(--style-border-radius-buttons-secondary);\n  }\n\n  .cfw__title {\n    font-family: var(--font-paragraph--family);\n    font-size: var(--font-paragraph--size);\n    font-weight: var(--font-paragraph--weight);\n    color: var(--color-primary-button-text);\n    margin: 0;\n  }\n\n  .cfw__chevron {\n    color: var(--color-primary-button-text);\n    font-size: 12px;\n    line-height: 1;\n    display: inline-block;\n    transform: rotate(90deg);\n    transition: transform var(--animation-speed, 0.2s) ease;\n  }\n\n  .cfw__section--collapsed .cfw__chevron {\n    transform: rotate(0deg);\n  }\n\n  .cfw__body {\n    padding: var(--button-padding-inline, 20px);\n    display: flex;\n    flex-direction: column;\n    gap: var(--gap-sm, 8px);\n    background-color: var(--color-background);\n    border: 1px solid var(--color-primary-button-background);\n    border-top: none;\n    border-radius: 0 0 var(--style-border-radius-buttons-secondary) var(--style-border-radius-buttons-secondary);\n  }\n\n  .cfw__section--collapsed .cfw__body {\n    display: none;\n  }\n\n  .cfw__input[type=\"file\"] {\n    display: none;\n  }\n\n  .cfw__input[type=\"text\"] {\n    width: 100%;\n    border-radius: var(--style-border-radius-buttons-secondary);\n    padding: var(--input-padding);\n    box-shadow: var(--input-box-shadow);\n    background-color: var(--color-input-background);\n    color: var(--color-input-text);\n    border: none;\n    outline: none;\n    font-family: var(--font-paragraph--family);\n    font-size: var(--font-paragraph--size);\n    transition: box-shadow var(--animation-speed) ease;\n    box-sizing: border-box;\n  }\n\n  .cfw__input[type=\"text\"]:is(:focus, :hover) {\n    box-shadow: var(--input-box-shadow-focus);\n    background-color: var(--color-input-hover-background);\n  }\n\n  .cfw__upload-btn,\n  .cfw__add-btn {\n    width: 100%;\n    display: block;\n    text-align: center;\n    cursor: pointer;\n    font-family: var(--button-font-family-secondary, var(--font-paragraph--family));\n    font-size: var(--font-paragraph--size);\n    font-weight: var(--font-paragraph--weight);\n    text-transform: var(--button-text-case-secondary, none);\n    color: var(--color-secondary-button-text);\n    background-color: var(--color-secondary-button-background);\n    box-shadow: inset 0 0 0 var(--style-border-width-secondary, 1px) var(--color-secondary-button-border);\n    border-radius: var(--style-border-radius-buttons-secondary);\n    padding-block: var(--button-padding-block, 12px);\n    padding-inline: var(--button-padding-inline, 20px);\n    border: none;\n    transition: color var(--animation-speed) ease,\n      box-shadow var(--animation-speed) ease,\n      background-color var(--animation-speed) ease;\n  }\n\n  .cfw__upload-btn:hover,\n  .cfw__add-btn:hover {\n    color: var(--color-secondary-button-hover-text);\n    background-color: var(--color-secondary-button-hover-background);\n    box-shadow: inset 0 0 0 var(--style-border-width-secondary, 1px) var(--color-secondary-button-hover-border);\n  }\n\n  .cfw__preview-wrap {\n    position: relative;\n    display: inline-block;\n    border-radius: var(--style-border-radius-buttons-secondary);\n    overflow: hidden;\n    box-shadow: inset 0 0 0 1px var(--color-primary-button-background);\n  }\n\n  .cfw__preview-img {\n    display: block;\n    max-width: 160px;\n    max-height: 160px;\n    width: auto;\n    height: auto;\n    object-fit: contain;\n  }\n\n  .cfw__remove-btn {\n    position: absolute;\n    top: 6px;\n    right: 6px;\n    background-color: var(--color-primary-button-background);\n    color: var(--color-primary-button-text);\n    border: none;\n    border-radius: 50%;\n    width: 24px;\n    height: 24px;\n    font-size: 14px;\n    line-height: 1;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }\n\n  .cfw__filename {\n    font-family: var(--font-paragraph--family);\n    font-size: calc(var(--font-paragraph--size) * 0.85);\n    color: rgb(var(--color-foreground-rgb) / var(--opacity-70, 0.7));\n    margin-top: 4px;\n    word-break: break-all;\n  }\n</style>\n\n<div class=\"cfw\">\n\n  <div class=\"cfw__section\" id=\"front-section\">\n    <div class=\"cfw__header\" onclick=\"cfwToggle('front')\">\n      <span class=\"cfw__title\">Priekša</span>\n      <span class=\"cfw__chevron\">❯</span>\n    </div>\n    <div class=\"cfw__body\">\n      <input class=\"cfw__input\" type=\"file\" id=\"front-file\" form=\"BuyButtons-ProductForm-{{ section.id }}\" name=\"properties[Priekša - Foto]\" accept=\"image/*\" onchange=\"handleFileUpload(this, 'front')\" />\n      <label for=\"front-file\" class=\"cfw__upload-btn\" id=\"front-upload-btn\">Augšupielādē foto priekšai</label>\n      <div id=\"front-file-display\"></div>\n      <input class=\"cfw__input\" type=\"text\" id=\"front-text\" placeholder=\"Teksts priekšai\" form=\"BuyButtons-ProductForm-{{ section.id }}\" name=\"properties[Priekša - Teksts]\" />\n      <input class=\"cfw__input\" type=\"text\" id=\"front-info\" placeholder=\"Papildus info par novietojumu priekšā\" form=\"BuyButtons-ProductForm-{{ section.id }}\" name=\"properties[Priekša - Papildus info]\" />\n    </div>\n  </div>\n\n  <div class=\"cfw__section cfw__section--collapsed\" id=\"back-section\">\n    <div class=\"cfw__header\" onclick=\"cfwToggle('back')\">\n      <span class=\"cfw__title\">Aizmugure</span>\n      <span class=\"cfw__chevron\">❯</span>\n    </div>\n    <div class=\"cfw__body\">\n      <input class=\"cfw__input\" type=\"file\" id=\"back-file\" form=\"BuyButtons-ProductForm-{{ section.id }}\" name=\"properties[Aizmugure - Foto]\" accept=\"image/*\" onchange=\"handleFileUpload(this, 'back')\" />\n      <label for=\"back-file\" class=\"cfw__upload-btn\" id=\"back-upload-btn\">Augšupielādē foto aizmugurei</label>\n      <div id=\"back-file-display\"></div>\n      <input class=\"cfw__input\" type=\"text\" id=\"back-text\" placeholder=\"Teksts aizmugurei\" form=\"BuyButtons-ProductForm-{{ section.id }}\" name=\"properties[Aizmugure - Teksts]\" />\n      <input class=\"cfw__input\" type=\"text\" id=\"back-info\" placeholder=\"Papildus info par novietojumu aizmugurē\" form=\"BuyButtons-ProductForm-{{ section.id }}\" name=\"properties[Aizmugure - Papildus info]\" />\n    </div>\n  </div>\n\n</div>\n\n<script>\nfunction cfwToggle(s) {\n  const section = document.getElementById(s + '-section');\n  const collapsed = section.classList.toggle('cfw__section--collapsed');\n  if (collapsed) clearFormInputs(s);\n}\n\nfunction clearFormInputs(s) {\n  document.getElementById(s + '-file').value = '';\n  document.getElementById(s + '-text').value = '';\n  document.getElementById(s + '-info').value = '';\n  document.getElementById(s + '-file-display').innerHTML = '';\n  document.getElementById(s + '-upload-btn').style.display = 'block';\n}\n\nfunction handleFileUpload(input, s) {\n  const file = input.files[0];\n  if (!file || !file.type.startsWith('image/')) return;\n\n  let name = file.name;\n  if (name.length > 27) {\n    const ext = name.split('.').pop();\n    name = name.substring(0, 20) + '...' + ext;\n  }\n\n  const reader = new FileReader();\n  reader.onload = function(e) {\n    document.getElementById(s + '-file-display').innerHTML =\n      `<div class=\"cfw__preview-wrap\">\n        <img src=\"${e.target.result}\" class=\"cfw__preview-img\" alt=\"Preview\" />\n        <button type=\"button\" class=\"cfw__remove-btn\" onclick=\"removeFile('${s}')\" aria-label=\"Noņemt\">×</button>\n      </div>\n      <div class=\"cfw__filename\">${name}</div>`;\n    document.getElementById(s + '-upload-btn').style.display = 'none';\n  };\n  reader.readAsDataURL(file);\n}\n\nfunction removeFile(s) {\n  document.getElementById(s + '-file').value = '';\n  document.getElementById(s + '-file-display').innerHTML = '';\n  document.getElementById(s + '-upload-btn').style.display = 'block';\n}\n</script>"
+                "custom_liquid": "<ul style=\"justify-content: left\" class=\"list list-payment\" role=\"list\">{% assign enabled_payment_types = 'apple_pay,google_pay,visa,master,swedbank,seb' | remove: ' ' | split: ',' %}{% for type in enabled_payment_types %}<li class=\"list-payment__item\">{{ type | payment_type_svg_tag: class: 'icon icon--full-color' }}</li>{%- endfor -%}</ul>"
               },
               "blocks": {}
             },
-            "buy_buttons_DXJpej": {
+            "buy_buttons_eYQEYi": {
               "type": "buy-buttons",
               "settings": {
                 "stacking": true,
@@ -264,6 +264,255 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
+            },
+            "text_yaypep": {
+              "type": "text",
+              "settings": {
+                "text": "<p>Kvalitatīvs un rūpīgi atlasīts krekls — pēc mūsu testiem šis ir sevi pierādījis kā ļoti labs T-krekls: mīksts, elpojošs, izturīgs un ar izcilu piegriezumu.</p>",
+                "width": "100%",
+                "max_width": "normal",
+                "alignment": "left",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "font_size": "",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "color": "",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "text_9FaA8H": {
+              "type": "text",
+              "settings": {
+                "text": "<p>Apdrukas metode: DTF, kas nodrošina spilgtus un noturīgus dizainus.</p>",
+                "width": "100%",
+                "max_width": "normal",
+                "alignment": "left",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "font_size": "",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "color": "",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "text_bgAQDQ": {
+              "type": "text",
+              "settings": {
+                "text": "<p>Tehniskā info un sertifikāti pie ražotāja: <a href=\"https://www.sols-europe.com/gb_sols/sols-imperial.html\" target=\"_blank\" rel=\"noopener\">sols-europe.com</a></p>",
+                "width": "100%",
+                "max_width": "normal",
+                "alignment": "left",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "font_size": "",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "color": "",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "accordion_main": {
+              "type": "accordion",
+              "settings": {
+                "icon": "caret",
+                "dividers": true,
+                "type_preset": "h6",
+                "inherit_color_scheme": true,
+                "color_scheme": "scheme-1",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {
+                "row_izmeri": {
+                  "type": "_accordion-row",
+                  "settings": {
+                    "heading": "Izmēri",
+                    "open_by_default": false,
+                    "icon": "ruler",
+                    "width": 20
+                  },
+                  "blocks": {
+                    "text_izmeri": {
+                      "type": "text",
+                      "settings": {
+                        "text": "{{ pages['izmeri-t-krekls'].content }}",
+                        "width": "100%",
+                        "max_width": "normal",
+                        "alignment": "left",
+                        "type_preset": "rte",
+                        "font": "var(--font-body--family)",
+                        "font_size": "",
+                        "line_height": "normal",
+                        "letter_spacing": "normal",
+                        "case": "none",
+                        "wrap": "pretty",
+                        "color": "",
+                        "background": false,
+                        "background_color": "#00000026",
+                        "corner_radius": 0,
+                        "padding-block-start": 0,
+                        "padding-block-end": 0,
+                        "padding-inline-start": 0,
+                        "padding-inline-end": 0
+                      },
+                      "blocks": {}
+                    }
+                  },
+                  "block_order": ["text_izmeri"]
+                },
+                "row_piegade": {
+                  "type": "_accordion-row",
+                  "settings": {
+                    "heading": "Piegāde",
+                    "open_by_default": false,
+                    "icon": "truck",
+                    "width": 20
+                  },
+                  "blocks": {
+                    "text_piegade": {
+                      "type": "text",
+                      "settings": {
+                        "text": "<ul><li>2.73 EUR Latvijā</li><li>11.99 EUR visā Eiropā</li><li>Bezmaksas piegāde pirkumiem virs 49.99 EUR</li></ul>",
+                        "width": "100%",
+                        "max_width": "normal",
+                        "alignment": "left",
+                        "type_preset": "rte",
+                        "font": "var(--font-body--family)",
+                        "font_size": "",
+                        "line_height": "normal",
+                        "letter_spacing": "normal",
+                        "case": "none",
+                        "wrap": "pretty",
+                        "color": "",
+                        "background": false,
+                        "background_color": "#00000026",
+                        "corner_radius": 0,
+                        "padding-block-start": 0,
+                        "padding-block-end": 0,
+                        "padding-inline-start": 0,
+                        "padding-inline-end": 0
+                      },
+                      "blocks": {}
+                    }
+                  },
+                  "block_order": ["text_piegade"]
+                },
+                "row_mazgasana": {
+                  "type": "_accordion-row",
+                  "settings": {
+                    "heading": "Mazgāšanas instrukcijas",
+                    "open_by_default": false,
+                    "icon": "washing",
+                    "width": 20
+                  },
+                  "blocks": {
+                    "text_mazgasana": {
+                      "type": "text",
+                      "settings": {
+                        "text": "<p>Lai vislabāk saglabātu bildi/uzrakstu ieteicams mazgāt zemā temperatūrā (Max 40°C), izgriežot kreklu otrādi. Nežāvēt veļas žāvētājā. Nelietot balinātājus.</p>",
+                        "width": "100%",
+                        "max_width": "normal",
+                        "alignment": "left",
+                        "type_preset": "rte",
+                        "font": "var(--font-body--family)",
+                        "font_size": "",
+                        "line_height": "normal",
+                        "letter_spacing": "normal",
+                        "case": "none",
+                        "wrap": "pretty",
+                        "color": "",
+                        "background": false,
+                        "background_color": "#00000026",
+                        "corner_radius": 0,
+                        "padding-block-start": 0,
+                        "padding-block-end": 0,
+                        "padding-inline-start": 0,
+                        "padding-inline-end": 0
+                      },
+                      "blocks": {}
+                    }
+                  },
+                  "block_order": ["text_mazgasana"]
+                },
+                "row_gpsr": {
+                  "type": "_accordion-row",
+                  "settings": {
+                    "heading": "General Product Safety Regulation (GPSR)",
+                    "open_by_default": false,
+                    "icon": "clipboard",
+                    "width": 20
+                  },
+                  "blocks": {
+                    "text_gpsr": {
+                      "type": "text",
+                      "settings": {
+                        "text": "<p><strong>Vecuma ierobežojumi:</strong> Pieaugušajiem</p><p><strong>ES garantija:</strong> 2 gadi</p><p><strong>Cita atbilstības informācija:</strong> Atbilst uzliesmojamības, svina, kadmija, bisfenolu un ftalātu līmeņa prasībām.</p><p>Saskaņā ar <strong>Vispārējo produktu drošības regulu (GPSR)</strong>, SIA \"ExpressWear\" nodrošina, ka visi piedāvātie patēriņa produkti ir droši un atbilst ES standartiem.</p><p>Jautājumu vai problēmu gadījumā, kas saistīti ar produktu drošību, lūdzu, sazinieties ar mums pa e-pastu: <strong>info@kreklubode.lv</strong> vai rakstiet uz adresi: <strong>Rīga, Zvaigžņu iela 2B - 40, LV-1009.</strong></p>",
+                        "width": "100%",
+                        "max_width": "normal",
+                        "alignment": "left",
+                        "type_preset": "rte",
+                        "font": "var(--font-body--family)",
+                        "font_size": "",
+                        "line_height": "normal",
+                        "letter_spacing": "normal",
+                        "case": "none",
+                        "wrap": "pretty",
+                        "color": "",
+                        "background": false,
+                        "background_color": "#00000026",
+                        "corner_radius": 0,
+                        "padding-block-start": 0,
+                        "padding-block-end": 0,
+                        "padding-inline-start": 0,
+                        "padding-inline-end": 0
+                      },
+                      "blocks": {}
+                    }
+                  },
+                  "block_order": ["text_gpsr"]
+                }
+              },
+              "block_order": [
+                "row_izmeri",
+                "row_piegade",
+                "row_mazgasana",
+                "row_gpsr"
+              ]
             }
           },
           "block_order": [
@@ -271,9 +520,13 @@
             "group_icgrde",
             "divider_VJhene",
             "variant_picker_R3rGDr",
-            "custom_liquid_XzbMc3",
-            "buy_buttons_DXJpej",
-            "text_aEtTtq"
+            "custom_liquid_payments",
+            "buy_buttons_eYQEYi",
+            "text_aEtTtq",
+            "text_yaypep",
+            "text_9FaA8H",
+            "text_bgAQDQ",
+            "accordion_main"
           ]
         }
       },

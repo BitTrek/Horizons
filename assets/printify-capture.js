@@ -1,5 +1,6 @@
 (function () {
-  const PROP_IMAGE = 'Design Preview';
+  const PROP_PREVIEW = 'Design Preview';
+  const PROP_RAW_ID = '_printify_personalization_id';
 
   function getProductForm() {
     return document.querySelector('product-form-component form');
@@ -21,10 +22,25 @@
     form.querySelectorAll('input[data-printify]').forEach((el) => el.remove());
   }
 
-  function applyPersonalization(imageUrl) {
+  // Request max resolution by replacing the size param in the preview URL.
+  // The preview is a rendered composite (product + customer design).
+  // The raw uploaded image requires Printify API server-side access via personalizationId.
+  function maxResUrl(url) {
+    try {
+      const u = new URL(url);
+      u.searchParams.set('size', '4096');
+      u.searchParams.delete('_t');
+      return u.toString();
+    } catch {
+      return url;
+    }
+  }
+
+  function applyPersonalization(imageUrl, personalizationId) {
     const form = getProductForm();
     if (!form) return;
-    setHiddenInput(form, PROP_IMAGE, imageUrl);
+    setHiddenInput(form, PROP_PREVIEW, maxResUrl(imageUrl));
+    setHiddenInput(form, PROP_RAW_ID, personalizationId);
   }
 
   function clearPersonalization() {
@@ -39,12 +55,10 @@
     if (!msg || typeof msg !== 'object') return;
 
     if (msg.type === 'PERSONALIZATION_APPLIED' && msg.data) {
-      applyPersonalization(msg.data.imageUrl);
+      applyPersonalization(msg.data.imageUrl, msg.data.personalizationId);
     }
   });
 
-  // When Printify removes personalization the button loses "button--secondary".
-  // Clear hidden inputs so orphaned data doesn't reach the order.
   function watchPersonalizeButton() {
     const btn = document.querySelector('.personalize-button');
     if (!btn) return;
