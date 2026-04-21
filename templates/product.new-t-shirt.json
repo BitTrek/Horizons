@@ -378,7 +378,7 @@
                     "text_izmeri": {
                       "type": "text",
                       "settings": {
-                        "text": "{{ pages['izmeri-t-krekls'].content }}",
+                        "text": "",
                         "width": "100%",
                         "max_width": "normal",
                         "alignment": "left",
