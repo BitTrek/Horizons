@@ -782,7 +782,7 @@
       },
       "name": "Featured collection",
       "settings": {
-        "collection": "maksla-milet",
+        "collection": "milestiba-ir-maksla",
         "layout_type": "carousel",
         "carousel_on_mobile": false,
         "max_products": 15,
